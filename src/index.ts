@@ -1,118 +1,110 @@
 import { Dict, Intersect, isNullable, valueMap } from './utils'
 
 interface Schema<T = any> extends Schema.Base<T> {
-  type: string
-  key?: string
-  flag?: boolean
-  value?: Schema
-  alt?: Schema
-  sDict?: Dict<string>
-  list?: Schema[]
-  dict?: Dict<Schema>
-  callback?: Function
+  (data: any): T
+  new (data: any): T
 }
 
 namespace Schema {
   export type Type<T extends Schema> = T extends Schema<infer U> ? U : never
 
-  export interface Base<T = any> {
-    desc?: string
-    _default?: T extends {} ? Partial<T> : T
-    _required?: boolean
-    _hidden?: boolean
-    _comment?: string
+  export interface Base<T = any> extends ExtraOptions<T> {
+    type: string
+    key?: string
+    flag?: boolean
+    value?: Schema
+    alt?: Schema
+    sDict?: Dict<string>
+    list?: Schema[]
+    dict?: Dict<Schema>
+    callback?: Function
   }
 
-  interface Chainable<T> extends Schema<T> {}
+  export interface ExtraOptions<T> {
+    desc?: Extra
+    default?: T extends {} ? Partial<T> : T
+    required?: boolean
+    hidden?: boolean
+    comment?: string
+  }
 
-  class Chainable<T> {
-    constructor(schema: Schema<T>) {
-      Object.assign(this, schema)
+  export type Extra<T = any> = string | ExtraOptions<T>
+
+  function create<T>(options: Base, desc: Extra) {
+    const schema = function (data: any) {
+      return resolve(data, schema)[0]
+    } as any as Schema<T>
+    Object.assign(schema, options)
+    if (typeof desc === 'string') {
+      schema.desc = desc
+    } else {
+      Object.assign(schema, desc)
     }
-
-    default(value: T) {
-      this._default = value
-      return this
-    }
-
-    required() {
-      this._required = true
-      return this
-    }
-
-    hidden() {
-      this._hidden = true
-      return this
-    }
-
-    comment(text: string) {
-      this._comment = text
-      return this
-    }
+    return schema
   }
 
-  export function any(desc?: string) {
-    return new Chainable({ type: 'any', desc })
+  export function any(desc?: Extra) {
+    return create<any>({ type: 'any' }, desc)
   }
 
-  export function never(desc?: string) {
-    return new Chainable({ type: 'never', desc })
+  export function never(desc?: Extra) {
+    return create<never>({ type: 'never' }, desc)
   }
 
-  export function string(desc?: string) {
-    return new Chainable<string>({ type: 'string', desc })
+  export function string(desc?: Extra) {
+    return create<string>({ type: 'string' }, desc)
   }
 
-  export function number(desc?: string) {
-    return new Chainable<number>({ type: 'number', desc })
+  export function number(desc?: Extra) {
+    return create<number>({ type: 'number' }, desc)
   }
 
-  export function boolean(desc?: string) {
-    return new Chainable<boolean>({ type: 'boolean', desc })
+  export function boolean(desc?: Extra) {
+    return create<boolean>({ type: 'boolean' }, desc)
   }
 
-  export function array<T>(value: Schema<T>, desc?: string) {
-    return new Chainable<T[]>({ type: 'array', value, desc, _default: [] })
+  export function array<T>(value: Schema<T>, desc?: Extra) {
+    return create<T[]>({ type: 'array', value, default: [] }, desc)
   }
 
-  export function dict<T>(value: Schema<T>, desc?: string) {
-    return new Chainable<Dict<T>>({ type: 'dict', value, desc, _default: {} })
+  export function dict<T>(value: Schema<T>, desc?: Extra) {
+    return create<Dict<T>>({ type: 'dict', value, default: {} }, desc)
   }
 
-  export function object<T extends Dict<Schema>>(dict: T, desc?: string): Chainable<{ [K in keyof T]?: Type<T[K]> }>
-  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: string): Chainable<{ [K in keyof T]?: Type<T[K]> }>
+  export function object<T extends Dict<Schema>>(dict: T, desc?: Extra): Schema<{ [K in keyof T]?: Type<T[K]> }>
+  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: Extra): Schema<{ [K in keyof T]?: Type<T[K]> }>
   export function object<T extends Dict<Schema>>(dict: T, ...args: any[]) {
     const desc = typeof args[args.length - 1] === 'string' ? args.pop() : undefined
-    return new Chainable<{ [K in keyof T]?: Type<T[K]> }>({ type: 'object', dict, desc, flag: args[0], _default: {} })
+    return create({ type: 'object', dict, flag: args[0], default: {} }, desc)
   }
 
-  export function select<T extends string>(sList: T[], desc?: string): Chainable<T>
-  export function select<T extends string>(sDict: Record<T, string>, desc?: string): Chainable<T>
-  export function select(sDict: any, desc?: string) {
+  export function select<T extends string>(sList: T[], desc?: Extra): Schema<T>
+  export function select<T extends string>(sDict: Record<T, string>, desc?: Extra): Schema<T>
+  export function select(sDict: any, desc?: Extra) {
     if (Array.isArray(sDict)) sDict = Object.fromEntries(sDict.map(k => [k, k]))
-    return new Chainable({ type: 'select', sDict, desc })
+    return create({ type: 'select', sDict }, desc)
   }
 
   type Inner<K extends keyof any, T extends Record<K, Schema>> = Intersect<Type<T[K]>>
   type Decide<T extends Dict<Schema>, K extends string> = Inner<string, T> & { [P in K]: keyof T }
 
-  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, desc?: string): Chainable<Decide<T, K>>
-  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, callback: (data: any) => keyof T, desc?: string): Chainable<Decide<T, K>>
+  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, desc?: Extra): Schema<Decide<T, K>>
+  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, callback: (data: any) => keyof T, desc?: Extra): Schema<Decide<T, K>>
   export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, ...args: any[]) {
     const desc = typeof args[args.length - 1] === 'string' ? args.pop() : undefined
-    return new Chainable({ type: 'decide', dict, key, desc, callback: args[0] })
+    return create({ type: 'decide', dict, key, callback: args[0] }, desc)
   }
 
-  export function merge<T extends Schema[]>(list: T, desc?: string) {
-    return new Chainable<Inner<number, T>>({ type: 'merge', list, desc })
+  export function merge<T extends Schema[]>(list: T, desc?: Extra) {
+    return create<Inner<number, T>>({ type: 'merge', list }, desc)
   }
 
-  export function union<T extends Schema[]>(list: T, desc?: string) {
-    return new Chainable<Type<T[number]>>({ type: 'union', list, desc })
+  export function union<T extends Schema[]>(list: T, desc?: Extra) {
+    return create<Type<T[number]>>({ type: 'union', list }, desc)
   }
 
-  export function adapt<S, T>(value: Schema<S>, alt: Schema<T>, callback: (value: T) => S, desc?: string) {
-    return new Chainable<S>({ type: 'adapt', value, alt, callback, desc })
+  export function adapt<S, T>(value: Schema<S>, alt: Schema<T>, callback: (value: T) => S, desc?: Extra) {
+    return create<S>({ type: 'adapt', value, alt, callback }, desc)
   }
 
   function isObject(data: any) {
@@ -122,7 +114,7 @@ namespace Schema {
   function getDefault(schema: Schema) {
     return schema.type === 'adapt'
       ? getDefault(schema.value)
-      : schema._default
+      : schema.default
   }
 
   function property(data: any, key: keyof any, schema?: Schema) {
@@ -141,7 +133,7 @@ namespace Schema {
     if (!schema) return [data]
 
     if (isNullable(data)) {
-      if (schema._required) throw new TypeError(`missing required value`)
+      if (schema.required) throw new TypeError(`missing required value`)
       const fallback = getDefault(schema)
       if (isNullable(fallback)) return [data]
       data = fallback

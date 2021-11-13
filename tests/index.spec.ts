@@ -2,154 +2,153 @@ import { expect } from 'chai'
 import Schema from 'schemastery/src'
 
 describe('Schema API', () => {
-  it('trivial cases', () => {
-    expect(Schema.validate('foo')).to.equal('foo')
-    expect(Schema.validate(123, null)).to.equal(123)
-    expect(() => Schema.validate({}, { type: 'x' })).to.throw()
+  it('any', () => {
+    const config = Schema.any()
+    expect(config(123)).to.equal(123)
+    expect(config(null)).to.equal(null)
   })
 
-  it('any & never', () => {
-    expect(Schema.validate(123, Schema.any())).to.equal(123)
-    expect(Schema.validate(null, Schema.any())).to.equal(null)
-    expect(Schema.validate(null, Schema.never())).to.equal(null)
-    expect(() => Schema.validate(123, Schema.never())).to.throw()
+  it('never', () => {
+    const config = Schema.never()
+    expect(config(null)).to.equal(null)
+    expect(() => config(123)).to.throw()
   })
 
   it('string', () => {
-    const schema = Schema.string().default('bar')
+    const config = Schema.string({ default: 'bar' })
 
-    expect(Schema.validate('foo', schema)).to.equal('foo')
-    expect(Schema.validate('', schema)).to.equal('')
-    expect(Schema.validate(null, schema)).to.equal('bar')
-    expect(() => Schema.validate(123, schema)).to.throw()
+    expect(config('foo')).to.equal('foo')
+    expect(config('')).to.equal('')
+    expect(config(null)).to.equal('bar')
+    expect(() => config(123)).to.throw()
   })
 
   it('number', () => {
-    const schema = Schema.number().default(123)
+    const config = Schema.number({ default: 123 })
 
-    expect(Schema.validate(456, schema)).to.equal(456)
-    expect(Schema.validate(0, schema)).to.equal(0)
-    expect(Schema.validate(null, schema)).to.equal(123)
-    expect(() => Schema.validate('123', schema)).to.throw()
-  })
-
-  it('array', () => {
-    const schema = Schema.array(Schema.string())
-
-    expect(Schema.validate(['456'], schema)).to.deep.equal(['456'])
-    expect(Schema.validate([], schema)).to.deep.equal([])
-    expect(Schema.validate(null, schema)).to.deep.equal([])
-    expect(() => Schema.validate('', schema)).to.throw()
-    expect(() => Schema.validate({}, schema)).to.throw()
-    expect(() => Schema.validate([0], schema)).to.throw()
-  })
-
-  it('dict', () => {
-    const schema = Schema.dict(Schema.number())
-
-    expect(Schema.validate({ a: 1 }, schema)).to.deep.equal({ a: 1 })
-    expect(Schema.validate({}, schema)).to.deep.equal({})
-    expect(Schema.validate(null, schema)).to.deep.equal({})
-    expect(() => Schema.validate(1, schema)).to.throw()
-    expect(() => Schema.validate([], schema)).to.throw()
-    expect(() => Schema.validate({ a: '' }, schema)).to.throw()
+    expect(config(456)).to.equal(456)
+    expect(config(0)).to.equal(0)
+    expect(config(null)).to.equal(123)
+    expect(() => config('123')).to.throw()
   })
 
   it('select 1', () => {
-    const schema = Schema.select(['foo', 'bar'])
+    const config = Schema.select(['foo', 'bar'])
 
-    expect(Schema.validate('bar', schema)).to.equal('bar')
-    expect(() => Schema.validate('baz', schema)).to.throw()
+    expect(config('bar')).to.equal('bar')
+    expect(() => config('baz')).to.throw()
   })
 
   it('select 2', () => {
-    const schema = Schema.select({ 1: 'baz', 2: 'bax' })
+    const config = Schema.select({ 1: 'baz', 2: 'bax' })
 
-    expect(Schema.validate('2', schema)).to.equal('2')
-    expect(() => Schema.validate(2, schema)).to.throw()
+    expect(config('2')).to.equal('2')
+    expect(() => config(2)).to.throw()
+  })
+
+  it('array', () => {
+    const Config = Schema.array(Schema.string())
+
+    expect(new Config(['456'])).to.deep.equal(['456'])
+    expect(new Config([])).to.deep.equal([])
+    expect(new Config(null)).to.deep.equal([])
+    expect(() => new Config('')).to.throw()
+    expect(() => new Config({})).to.throw()
+    expect(() => new Config([0])).to.throw()
+  })
+
+  it('dict', () => {
+    const Config = Schema.dict(Schema.number())
+
+    expect(new Config({ a: 1 })).to.deep.equal({ a: 1 })
+    expect(new Config({})).to.deep.equal({})
+    expect(new Config(null)).to.deep.equal({})
+    expect(() => new Config(1)).to.throw()
+    expect(() => new Config([])).to.throw()
+    expect(() => new Config({ a: '' })).to.throw()
   })
 
   it('object 1', () => {
-    const schema = Schema.object({
-      a: Schema.string().required(),
-      b: Schema.number().default(123),
+    const Config = Schema.object({
+      a: Schema.string({ required: true }),
+      b: Schema.number({ default: 123 }),
     })
 
     const original = { a: 'foo', c: true }
-    expect(Schema.validate(original, schema)).to.deep.equal({ a: 'foo', b: 123 })
-    expect(Schema.validate({ a: 'foo', b: 0 }, schema)).to.deep.equal({ a: 'foo', b: 0 })
-    expect(() => Schema.validate(null, schema)).to.throw()
-    expect(() => Schema.validate({}, schema)).to.throw()
-    expect(() => Schema.validate({ a: 0 }, schema)).to.throw()
-    expect(() => Schema.validate({ a: '', b: '' }, schema)).to.throw()
+    expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123 })
+    expect(new Config({ a: 'foo', b: 0 })).to.deep.equal({ a: 'foo', b: 0 })
+    expect(() => new Config(null)).to.throw()
+    expect(() => new Config({})).to.throw()
+    expect(() => new Config({ a: 0 })).to.throw()
+    expect(() => new Config({ a: '', b: '' })).to.throw()
 
     // we resolve value without modifying the original object
     expect(original).to.deep.equal({ a: 'foo', c: true })
   })
 
   it('object 2', () => {
-    const schema = Schema.object({
+    const Config = Schema.object({
       a: Schema.string(),
       b: Schema.number(),
     }, true)
 
-    expect(Schema.validate(null, schema)).to.deep.equal({})
-    expect(Schema.validate({ c: true }, schema)).to.deep.equal({ c: true })
-    expect(() => Schema.validate([], schema)).to.throw()
-    expect(() => Schema.validate('foo', schema)).to.throw()
-    expect(() => Schema.validate(123, schema)).to.throw()
+    expect(new Config(null)).to.deep.equal({})
+    expect(new Config({ c: true })).to.deep.equal({ c: true })
+    expect(() => new Config([])).to.throw()
+    expect(() => new Config('foo')).to.throw()
+    expect(() => new Config(123)).to.throw()
   })
 
   it('decide 1', () => {
-    const schema = Schema.decide('a', {
+    const config = Schema.decide('a', {
       foo: Schema.object({ b: Schema.number() }),
       bar: Schema.object({ b: Schema.string() }),
     })
 
-    expect(Schema.validate(null, schema)).to.equal(null)
-    expect(Schema.validate({ a: 'foo', b: 123 }, schema)).to.deep.equal({ a: 'foo', b: 123 })
-    expect(Schema.validate({ a: 'bar', b: 'x' }, schema)).to.deep.equal({ a: 'bar', b: 'x' })
-    expect(() => Schema.validate([], schema)).to.throw()
-    expect(() => Schema.validate({ b: 123 }, schema)).to.throw()
-    expect(() => Schema.validate({ b: 'x' }, schema)).to.throw()
+    expect(config(null)).to.equal(null)
+    expect(config({ a: 'foo', b: 123 })).to.deep.equal({ a: 'foo', b: 123 })
+    expect(config({ a: 'bar', b: 'x' })).to.deep.equal({ a: 'bar', b: 'x' })
+    expect(() => config([])).to.throw()
+    expect(() => config({ b: 123 })).to.throw()
+    expect(() => config({ b: 'x' })).to.throw()
   })
 
   it('decide 2', () => {
-    const schema = Schema.decide('a', {
+    const Config = Schema.decide('a', {
       foo: Schema.object({ b: Schema.number() }),
       bar: Schema.object({ b: Schema.string() }),
     }, ({ b }) => typeof b === 'number' ? 'foo' : 'bar')
 
     const original = { b: 123 }
-    expect(Schema.validate(original, schema)).to.deep.equal({ a: 'foo', b: 123 })
-    expect(Schema.validate({ b: 'x' }, schema)).to.deep.equal({ a: 'bar', b: 'x' })
-    expect(() => Schema.validate({ a: 'foo', b: 'x' }, schema)).to.throw()
-    expect(() => Schema.validate({ a: 'bar', b: 123 }, schema)).to.throw()
+    expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123 })
+    expect(new Config({ b: 'x' })).to.deep.equal({ a: 'bar', b: 'x' })
+    expect(() => new Config({ a: 'foo', b: 'x' })).to.throw()
+    expect(() => new Config({ a: 'bar', b: 123 })).to.throw()
 
     // modify original data during adaptation
     expect(original).to.deep.equal({ a: 'foo', b: 123 })
   })
 
   it('adapt with array', () => {
-    const schema = Schema.array(Schema.adapt(
+    const Config = Schema.array(Schema.adapt(
       Schema.string(),
       Schema.number(),
       data => data.toString(),
     ))
 
     const original = [456, 123]
-    expect(Schema.validate(['456'], schema)).to.deep.equal(['456'])
-    expect(Schema.validate(original, schema)).to.deep.equal(['456', '123'])
-    expect(Schema.validate(null, schema)).to.deep.equal([])
-    expect(() => Schema.validate({}, schema)).to.throw()
-    expect(() => Schema.validate([{}], schema)).to.throw()
+    expect(new Config(['456'])).to.deep.equal(['456'])
+    expect(new Config(original)).to.deep.equal(['456', '123'])
+    expect(new Config(null)).to.deep.equal([])
+    expect(() => new Config({})).to.throw()
+    expect(() => new Config([{}])).to.throw()
 
     // modify original data during adaptation
     expect(original).to.deep.equal(['456', '123'])
   })
 
   it('adapt with object', () => {
-    const schema = Schema.object({
+    const Config = Schema.object({
       foo: Schema.adapt(
         Schema.array(Schema.number()),
         Schema.number(),
@@ -158,42 +157,42 @@ describe('Schema API', () => {
     })
 
     const original = { foo: 0 }
-    expect(Schema.validate(null, schema)).to.deep.equal({ foo: [] })
-    expect(Schema.validate({}, schema)).to.deep.equal({ foo: [] })
-    expect(Schema.validate(original, schema)).to.deep.equal({ foo: [0] })
-    expect(Schema.validate({ foo: [1] }, schema)).to.deep.equal({ foo: [1] })
-    expect(() => Schema.validate({ foo: '' }, schema)).to.throw()
-    expect(() => Schema.validate({ foo: [''] }, schema)).to.throw()
+    expect(new Config(null)).to.deep.equal({ foo: [] })
+    expect(new Config({})).to.deep.equal({ foo: [] })
+    expect(new Config(original)).to.deep.equal({ foo: [0] })
+    expect(new Config({ foo: [1] })).to.deep.equal({ foo: [1] })
+    expect(() => new Config({ foo: '' })).to.throw()
+    expect(() => new Config({ foo: [''] })).to.throw()
 
     // modify original data during adaptation
     expect(original).to.deep.equal({ foo: [0] })
   })
 
   it('adapt with merge', () => {
-    const inner = Schema.object({
-      a: Schema.number().required(),
-      d: Schema.number().default(0),
+    const Inner = Schema.object({
+      a: Schema.number({ required: true }),
+      d: Schema.number({ default: 0 }),
     })
 
-    const outer = Schema.merge([
+    const Config = Schema.merge([
       Schema.object({ c: Schema.number() }),
       Schema.adapt(
         Schema.object({
-          b: Schema.array(inner).required(),
+          b: Schema.array(Inner, { required: true }),
         }),
-        inner,
+        Inner,
         data => ({ b: [data] }),
       ),
     ])
 
     const original = { a: 1, c: 3, e: 5 }
-    expect(Schema.validate(original, outer)).to.deep.equal({ b: [{ a: 1, d: 0 }], c: 3 })
-    expect(Schema.validate({ b: [{ a: 2, c: 3 }] }, outer)).to.deep.equal({ b: [{ a: 2, d: 0 }] })
-    expect(() => Schema.validate({}, outer)).to.throw()
-    expect(() => Schema.validate({ a: '' }, outer)).to.throw()
-    expect(() => Schema.validate({ b: {} }, outer)).to.throw()
-    expect(() => Schema.validate({ b: [{ c: 3 }] }, outer)).to.throw()
-    expect(() => Schema.validate({ a: 1, c: 'foo' }, outer)).to.throw()
+    expect(new Config(original)).to.deep.equal({ b: [{ a: 1, d: 0 }], c: 3 })
+    expect(new Config({ b: [{ a: 2, c: 3 }] })).to.deep.equal({ b: [{ a: 2, d: 0 }] })
+    expect(() => new Config({})).to.throw()
+    expect(() => new Config({ a: '' })).to.throw()
+    expect(() => new Config({ b: {} })).to.throw()
+    expect(() => new Config({ b: [{ c: 3 }] })).to.throw()
+    expect(() => new Config({ a: 1, c: 'foo' })).to.throw()
 
     // modify original data during adaptation
     expect(original).to.deep.equal({ b: [{ a: 1 }], c: 3, e: 5 })
