@@ -1,7 +1,7 @@
 {
   "name": "schemastery",
-  "description": "Just another schema validator",
-  "version": "1.0.0-alpha.0",
+  "description": "Yet another schema validator",
+  "version": "1.0.0-alpha.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [

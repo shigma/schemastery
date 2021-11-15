@@ -168,13 +168,13 @@ describe('Schema API', () => {
     expect(original).to.deep.equal({ foo: [0] })
   })
 
-  it('adapt with merge', () => {
+  it('adapt with intersect', () => {
     const Inner = Schema.object({
       a: Schema.number({ required: true }),
       d: Schema.number({ default: 0 }),
     })
 
-    const Config = Schema.merge([
+    const Config = Schema.intersect([
       Schema.object({ c: Schema.number() }),
       Schema.adapt(
         Schema.object({

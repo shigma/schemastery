@@ -8,7 +8,7 @@ interface Schema<T = any> extends Schema.Base<T> {
 namespace Schema {
   export type Type<T extends Schema> = T extends Schema<infer U> ? U : never
 
-  export interface Base<T = any> extends ExtraOptions<T> {
+  export interface Base<T = any> extends DescOptions<T> {
     type: string
     key?: string
     flag?: boolean
@@ -20,17 +20,17 @@ namespace Schema {
     callback?: Function
   }
 
-  export interface ExtraOptions<T> {
-    desc?: Extra
+  export interface DescOptions<T> {
+    desc?: Desc
     default?: T extends {} ? Partial<T> : T
     required?: boolean
     hidden?: boolean
     comment?: string
   }
 
-  export type Extra<T = any> = string | ExtraOptions<T>
+  export type Desc<T = any> = string | DescOptions<T>
 
-  function create<T>(options: Base, desc: Extra) {
+  export function create<T>(options: Base<T>, desc?: Desc<T>) {
     const schema = function (data: any) {
       return resolve(data, schema)[0]
     } as any as Schema<T>
@@ -43,44 +43,44 @@ namespace Schema {
     return schema
   }
 
-  export function any(desc?: Extra) {
+  export function any(desc?: Desc) {
     return create<any>({ type: 'any' }, desc)
   }
 
-  export function never(desc?: Extra) {
+  export function never(desc?: Desc<never>) {
     return create<never>({ type: 'never' }, desc)
   }
 
-  export function string(desc?: Extra) {
+  export function string(desc?: Desc<string>) {
     return create<string>({ type: 'string' }, desc)
   }
 
-  export function number(desc?: Extra) {
+  export function number(desc?: Desc<number>) {
     return create<number>({ type: 'number' }, desc)
   }
 
-  export function boolean(desc?: Extra) {
+  export function boolean(desc?: Desc<boolean>) {
     return create<boolean>({ type: 'boolean' }, desc)
   }
 
-  export function array<T>(value: Schema<T>, desc?: Extra) {
+  export function array<T>(value: Schema<T>, desc?: Desc<T[]>) {
     return create<T[]>({ type: 'array', value, default: [] }, desc)
   }
 
-  export function dict<T>(value: Schema<T>, desc?: Extra) {
+  export function dict<T>(value: Schema<T>, desc?: Desc<Dict<T>>) {
     return create<Dict<T>>({ type: 'dict', value, default: {} }, desc)
   }
 
-  export function object<T extends Dict<Schema>>(dict: T, desc?: Extra): Schema<{ [K in keyof T]?: Type<T[K]> }>
-  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: Extra): Schema<{ [K in keyof T]?: Type<T[K]> }>
+  export function object<T extends Dict<Schema>>(dict: T, desc?: Desc): Schema<{ [K in keyof T]?: Type<T[K]> }>
+  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: Desc): Schema<{ [K in keyof T]?: Type<T[K]> }>
   export function object<T extends Dict<Schema>>(dict: T, ...args: any[]) {
     const desc = typeof args[args.length - 1] === 'string' ? args.pop() : undefined
     return create({ type: 'object', dict, flag: args[0], default: {} }, desc)
   }
 
-  export function select<T extends string>(sList: T[], desc?: Extra): Schema<T>
-  export function select<T extends string>(sDict: Record<T, string>, desc?: Extra): Schema<T>
-  export function select(sDict: any, desc?: Extra) {
+  export function select<T extends string>(sList: T[], desc?: Desc): Schema<T>
+  export function select<T extends string>(sDict: Record<T, string>, desc?: Desc): Schema<T>
+  export function select(sDict: any, desc?: Desc) {
     if (Array.isArray(sDict)) sDict = Object.fromEntries(sDict.map(k => [k, k]))
     return create({ type: 'select', sDict }, desc)
   }
@@ -88,22 +88,22 @@ namespace Schema {
   type Inner<K extends keyof any, T extends Record<K, Schema>> = Intersect<Type<T[K]>>
   type Decide<T extends Dict<Schema>, K extends string> = Inner<string, T> & { [P in K]: keyof T }
 
-  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, desc?: Extra): Schema<Decide<T, K>>
-  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, callback: (data: any) => keyof T, desc?: Extra): Schema<Decide<T, K>>
+  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, desc?: Desc): Schema<Decide<T, K>>
+  export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, callback: (data: any) => keyof T, desc?: Desc): Schema<Decide<T, K>>
   export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, ...args: any[]) {
     const desc = typeof args[args.length - 1] === 'string' ? args.pop() : undefined
     return create({ type: 'decide', dict, key, callback: args[0] }, desc)
   }
 
-  export function merge<T extends Schema[]>(list: T, desc?: Extra) {
-    return create<Inner<number, T>>({ type: 'merge', list }, desc)
+  export function intersect<T extends Schema[]>(list: T, desc?: Desc) {
+    return create<Inner<number, T>>({ type: 'intersect', list }, desc)
   }
 
-  export function union<T extends Schema[]>(list: T, desc?: Extra) {
+  export function union<T extends Schema[]>(list: T, desc?: Desc) {
     return create<Type<T[number]>>({ type: 'union', list }, desc)
   }
 
-  export function adapt<S, T>(value: Schema<S>, alt: Schema<T>, callback: (value: T) => S, desc?: Extra) {
+  export function adapt<S, T>(value: Schema<S>, alt: Schema<T>, callback: (value: T) => S, desc?: Desc) {
     return create<S>({ type: 'adapt', value, alt, callback }, desc)
   }
 
@@ -195,7 +195,7 @@ namespace Schema {
         return [result]
       }
 
-      case 'merge': {
+      case 'intersect': {
         const result = {}
         for (const inner of schema.list) {
           const value = validate(data, inner)
