@@ -16,7 +16,7 @@ Yet another schema validator.
 ```js
 const Schema = require('schemastery')
 
-const validate = Schema.number({ default: 10 })
+const validate = Schema.number().default(10)
 
 validate(0)     // 0
 validate(null)  // 10
@@ -34,7 +34,7 @@ interface Config {
 }
 
 const Config = Schema.object({
-  foo: Schema.select(['red', 'blue'], { default: 'red' }),
+  foo: Schema.select(['red', 'blue']).default('red'),
   bar: Schema.array(Schema.string()),
 })
 
@@ -93,6 +93,6 @@ const schema1 = Schema.object({
   bar: Schema.number(),
 })
 
-// should be the same as schema1
-const schema2 = Schema.create(JSON.parse(JSON.stringify(schema1)))
+// should have the same effect as schema1
+const schema2 = Schema.from(JSON.parse(JSON.stringify(schema1)))
 ```

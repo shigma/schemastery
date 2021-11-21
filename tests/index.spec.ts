@@ -15,7 +15,7 @@ describe('Schema API', () => {
   })
 
   it('string', () => {
-    const config = Schema.string({ default: 'bar' })
+    const config = Schema.string().default('bar')
 
     expect(config('foo')).to.equal('foo')
     expect(config('')).to.equal('')
@@ -24,7 +24,7 @@ describe('Schema API', () => {
   })
 
   it('number', () => {
-    const config = Schema.number({ default: 123 })
+    const config = Schema.number().default(123)
 
     expect(config(456)).to.equal(456)
     expect(config(0)).to.equal(0)
@@ -70,8 +70,8 @@ describe('Schema API', () => {
 
   it('object 1', () => {
     const Config = Schema.object({
-      a: Schema.string({ required: true }),
-      b: Schema.number({ default: 123 }),
+      a: Schema.string().required(),
+      b: Schema.number().default(123),
     })
 
     const original = { a: 'foo', c: true }
@@ -170,15 +170,15 @@ describe('Schema API', () => {
 
   it('adapt with intersect', () => {
     const Inner = Schema.object({
-      a: Schema.number({ required: true }),
-      d: Schema.number({ default: 0 }),
+      a: Schema.number().required(),
+      d: Schema.number().default(0),
     })
 
     const Config = Schema.intersect([
       Schema.object({ c: Schema.number() }),
       Schema.adapt(
         Schema.object({
-          b: Schema.array(Inner, { required: true }),
+          b: Schema.array(Inner).required(),
         }),
         Inner,
         data => ({ b: [data] }),
