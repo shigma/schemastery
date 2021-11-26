@@ -70,6 +70,16 @@ describe('Schema API', () => {
     expect(() => new Config({ a: '' })).to.throw()
   })
 
+  it('tuple', () => {
+    const Config = Schema.tuple([Schema.string(), Schema.number()])
+
+    expect(new Config(null)).to.deep.equal([])
+    expect(new Config(['foo'])).to.deep.equal(['foo'])
+    expect(new Config(['foo', 123])).to.deep.equal(['foo', 123])
+    expect(new Config(['foo', 123, true])).to.deep.equal(['foo', 123, true])
+    expect(() => new Config(['foo', 'bar'])).to.throw()
+  })
+
   it('object 1', () => {
     const Config = Schema.object({
       a: Schema.string().required(),

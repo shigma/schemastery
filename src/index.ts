@@ -15,7 +15,7 @@ interface Schema<T = any> extends Schema.Chainable<T> {
 }
 
 namespace Schema {
-  export type Type<T extends Schema> = T extends Schema<infer U> ? U : never
+  export type TypeOf<T> = T extends Schema<infer U> ? U : never
 
   export interface Base<T = any> {
     type: string
@@ -25,7 +25,7 @@ namespace Schema {
     value?: Schema
     alt?: Schema
     sDict?: Dict<string>
-    list?: Schema[]
+    list?: readonly Schema[]
     dict?: Dict<Schema>
     callback?: Function
     meta?: Meta<T>
@@ -107,8 +107,14 @@ namespace Schema {
     return from<Dict<T>>({ type: 'dict', value }, desc).default({})
   }
 
-  export function object<T extends Dict<Schema>>(dict: T, desc?: string): Schema<{ [K in keyof T]?: Type<T[K]> }>
-  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: string): Schema<{ [K in keyof T]?: Type<T[K]> }>
+  type Tuple<T extends readonly unknown[]> = T extends readonly [infer U, ...infer R] ? [TypeOf<U>, ...Tuple<R>] : []
+
+  export function tuple<T extends readonly Schema[]>(list: T, desc?: string) {
+    return from<Tuple<T>>({ type: 'tuple', list }, desc).default([] as any)
+  }
+
+  export function object<T extends Dict<Schema>>(dict: T, desc?: string): Schema<{ [K in keyof T]?: TypeOf<T[K]> }>
+  export function object<T extends Dict<Schema>>(dict: T, allowUnknown: true, desc?: string): Schema<{ [K in keyof T]?: TypeOf<T[K]> }>
   export function object<T extends Dict<Schema>>(dict: T, ...args: any[]) {
     const desc = typeof args[args.length - 1] === 'string' ? args.pop() : undefined
     return from({ type: 'object', dict, flag: args[0] }, desc).default({})
@@ -121,7 +127,7 @@ namespace Schema {
     return from({ type: 'select', sDict }, desc)
   }
 
-  type Inner<K extends keyof any, T extends Record<K, Schema>> = Intersect<Type<T[K]>>
+  type Inner<K extends keyof any, T extends Record<K, Schema>> = Intersect<TypeOf<T[K]>>
   type Decide<T extends Dict<Schema>, K extends string> = Inner<string, T> & { [P in K]: keyof T }
 
   export function decide<T extends Dict<Schema>, K extends string>(key: K, dict: T, desc?: string): Schema<Decide<T, K>>
@@ -136,7 +142,7 @@ namespace Schema {
   }
 
   export function union<T extends Schema[]>(list: T, desc?: string) {
-    return from<Type<T[number]>>({ type: 'union', list }, desc)
+    return from<TypeOf<T[number]>>({ type: 'union', list }, desc)
   }
 
   export function adapt<S, T>(value: Schema<S>, alt: Schema<T>, callback: (value: T) => S, desc?: string) {
@@ -211,6 +217,11 @@ namespace Schema {
         const value = resolve(data, schema.dict[key])[0]
         value[schema.key] = key
         return [value]
+      }
+
+      case 'tuple': {
+        if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+        return [data.map((_, index) => property(data, index, schema.list[index]))]
       }
 
       case 'object': {

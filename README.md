@@ -45,16 +45,16 @@ const config = new Config()
 
 ## Builtin Types
 
-- [any](#schema-any)
-- [never](#schema-never)
-- [number](#schema-number)
-- [string](#schema-string)
-- [boolean](#schema-boolean)
+- [any](#schemaany)
+- [never](#schemanever)
+- [number](#schemanumber)
+- [string](#schemastring)
+- [boolean](#schemaboolean)
 - select
-- dict
-- array
-- object
-- tuple
+- [array](#schemaarray)
+- [dict](#schemadict)
+- [tuple](#schematuple)
+- [object](#schemaobject)
 - union
 - intersect
 - adapt
@@ -66,9 +66,9 @@ Assert that the value is of any type.
 ```js
 const validate = Schema.any()
 
-validate()        // undefined
-validate(0)       // 0
-validate({})      // {}
+validate()          // undefined
+validate(0)         // 0
+validate({})        // {}
 ```
 
 ### Schema.never()
@@ -78,9 +78,9 @@ Assert that the value is nullable.
 ```js
 const validate = Schema.never()
 
-validate()        // undefined
-validate(0)       // TypeError
-validate({})      // TypeError
+validate()          // undefined
+validate(0)         // TypeError
+validate({})        // TypeError
 ```
 
 ### Schema.number()
@@ -90,10 +90,10 @@ Assert that the value is a number.
 ```js
 const validate = Schema.number()
 
-validate()          // undefined
-validate(1)         // 1
-validate(Number())  // 0
-validate('')        // TypeError
+validate()            // undefined
+validate(1)           // 1
+validate(Number())    // 0
+validate('')          // TypeError
 ```
 
 ### Schema.string()
@@ -103,10 +103,10 @@ Assert that the value is a string.
 ```js
 const validate = Schema.string()
 
-validate()          // undefined
-validate(0)         // TypeError
-validate('foo')     // 'foo'
-validate(String())  // ''
+validate()            // undefined
+validate(0)           // TypeError
+validate('foo')       // 'foo'
+validate(String())    // ''
 ```
 
 ### Schema.boolean()
@@ -116,21 +116,71 @@ Assert that the value is a boolean.
 ```js
 const validate = Schema.boolean()
 
-validate()          // undefined
-validate(0)         // TypeError
-validate(true)      // true
-validate(Boolean()) // false
+validate()            // undefined
+validate(0)           // TypeError
+validate(true)        // true
+validate(Boolean())   // false
 ```
 
 ### Schema.select()
 
-### Schema.dict()
+### Schema.array(subtype)
 
-### Schema.array()
+Assert that the value is an array of `subtype`. The default value will be `[]` if not specified.
 
-### Schema.object()
+```js
+const validate = Schema.array(Schema.number())
 
-### Schema.tuple()
+validate()                  // []
+validate(0)                 // TypeError
+validate([0, 1])            // [0, 1]
+validate([0, '1'])          // TypeError
+```
+
+### Schema.dict(subtype)
+
+Assert that the value is a dictionary of `subtype`. The default value will be `{}` if not specified.
+
+```js
+const validate = Schema.dict(Schema.number())
+
+validate()                  // {}
+validate(0)                 // TypeError
+validate({ a: 0, b: 1 })    // { a: 0, b: 1 }
+validate({ a: 0, b: '1' })  // TypeError
+```
+
+### Schema.tuple(subtypes)
+
+Assert that the value is a tuple whose each element is of corresponding subtype. The default value will be `[]` if not specified.
+
+```js
+const validate = Schema.tuple([
+  Schema.number(),
+  Schema.string(),
+])
+
+validate()                  // []
+validate([0])               // { a: 0 }
+validate([0, 1])            // TypeError
+validate([0, '1'])          // [0, '1']
+```
+
+### Schema.object(subtypes)
+
+Assert that the value is an object whose each property is of corresponding subtype. The default value will be `{}` if not specified.
+
+```js
+const validate = Schema.dict({
+  a: Schema.number(),
+  b: Schema.string(),
+})
+
+validate()                  // {}
+validate({ a: 0 })          // { a: 0 }
+validate({ a: 0, b: 1 })    // TypeError
+validate({ a: 0, b: '1' })  // { a: 0, b: '1' }
+```
 
 ### Schema.union()
 
