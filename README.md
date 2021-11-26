@@ -20,7 +20,7 @@ const validate = Schema.number().default(10)
 
 validate(0)     // 0
 validate(null)  // 10
-validate('')    // Error
+validate('')    // TypeError
 ```
 
 ### use as constructor (TypeScript)
@@ -45,11 +45,11 @@ const config = new Config()
 
 ## Builtin Types
 
-- any
-- never
-- number
-- string
-- boolean
+- [any](#schema-any)
+- [never](#schema-never)
+- [number](#schema-number)
+- [string](#schema-string)
+- [boolean](#schema-boolean)
 - select
 - dict
 - array
@@ -61,15 +61,68 @@ const config = new Config()
 
 ### Schema.any()
 
+Assert that the value is of any type.
+
+```js
+const validate = Schema.any()
+
+validate()        // undefined
+validate(0)       // 0
+validate({})      // {}
+```
+
 ### Schema.never()
+
+Assert that the value is nullable.
+
+```js
+const validate = Schema.never()
+
+validate()        // undefined
+validate(0)       // TypeError
+validate({})      // TypeError
+```
 
 ### Schema.number()
 
+Assert that the value is a number.
+
+```js
+const validate = Schema.number()
+
+validate()          // undefined
+validate(1)         // 1
+validate(Number())  // 0
+validate('')        // TypeError
+```
+
 ### Schema.string()
+
+Assert that the value is a string.
+
+```js
+const validate = Schema.string()
+
+validate()          // undefined
+validate(0)         // TypeError
+validate('foo')     // 'foo'
+validate(String())  // ''
+```
 
 ### Schema.boolean()
 
-### Schema.enum()
+Assert that the value is a boolean.
+
+```js
+const validate = Schema.boolean()
+
+validate()          // undefined
+validate(0)         // TypeError
+validate(true)      // true
+validate(Boolean()) // false
+```
+
+### Schema.select()
 
 ### Schema.dict()
 

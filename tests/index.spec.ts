@@ -18,6 +18,7 @@ describe('Schema API', () => {
     const config = Schema.string().default('bar')
 
     expect(config('foo')).to.equal('foo')
+    expect(config(String('foo'))).to.equal('foo')
     expect(config('')).to.equal('')
     expect(config(null)).to.equal('bar')
     expect(() => config(123)).to.throw()
@@ -27,6 +28,7 @@ describe('Schema API', () => {
     const config = Schema.number().default(123)
 
     expect(config(456)).to.equal(456)
+    expect(config(Number(456))).to.equal(456)
     expect(config(0)).to.equal(0)
     expect(config(null)).to.equal(123)
     expect(() => config('123')).to.throw()
