@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { expect } from 'chai'
 import Schema from 'schemastery/src'
 
@@ -89,7 +91,7 @@ describe('Schema API', () => {
     const Config = Schema.object({
       a: Schema.string().required(),
       b: Schema.number().default(123),
-    })
+    }, 'ignore')
 
     const original = { a: 'foo', c: true }
     expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123 })
@@ -147,13 +149,12 @@ describe('Schema API', () => {
   })
 
   it('adapt with array', () => {
-    const Config = Schema.array(Schema.adapt(
+    const Config = Schema.array(Schema.union([
       Schema.string(),
-      Schema.number(),
-      data => data.toString(),
-    ))
+      Schema.transform(Schema.number(), data => data.toString()),
+    ]))
 
-    const original = [456, 123]
+    const original = ['456', 123]
     expect(new Config(['456'])).to.deep.equal(['456'])
     expect(new Config(original)).to.deep.equal(['456', '123'])
     expect(new Config(null)).to.deep.equal([])
@@ -166,11 +167,10 @@ describe('Schema API', () => {
 
   it('adapt with object', () => {
     const Config = Schema.object({
-      foo: Schema.adapt(
+      foo: Schema.union([
         Schema.array(Schema.number()),
-        Schema.number(),
-        data => [data],
-      ),
+        Schema.transform(Schema.number(), data => [data]),
+      ]).default([]),
     })
 
     const original = { foo: 0 }
@@ -189,22 +189,18 @@ describe('Schema API', () => {
     const Inner = Schema.object({
       a: Schema.number().required(),
       d: Schema.number().default(0),
-    })
+    }, 'ignore')
 
     const Config = Schema.intersect([
-      Schema.object({ c: Schema.number() }),
-      Schema.adapt(
-        Schema.object({
-          b: Schema.array(Inner).required(),
-        }),
-        Inner,
-        data => ({ b: [data] }),
-      ),
+      Schema.object({ c: Schema.number() }, 'ignore'),
+      Schema.union([
+        Schema.object({ b: Schema.number().required() }, 'ignore'),
+        Schema.transform(Inner, data => ({ b: [data] })),
+      ]),
     ])
 
     const original = { a: 1, c: 3, e: 5 }
     expect(new Config(original)).to.deep.equal({ b: [{ a: 1, d: 0 }], c: 3 })
-    expect(new Config({ b: [{ a: 2, c: 3 }] })).to.deep.equal({ b: [{ a: 2, d: 0 }] })
     expect(() => new Config({})).to.throw()
     expect(() => new Config({ a: '' })).to.throw()
     expect(() => new Config({ b: {} })).to.throw()

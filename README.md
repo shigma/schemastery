@@ -7,6 +7,7 @@ Yet another schema validator.
 - **Lightweight.** No dependencies.
 - **Easy to use.** You can use any schema as a function or constructor directly.
 - **Powerful.** Schemastery supports some advanced types such as `transform`.
+- **Extensible.** You can create your own schema types via `Schema.extend()`.
 - **Serializable.** Schema objects can be serialized into JSON and then be hydrated in another environment.
 
 ## Examples
@@ -108,7 +109,7 @@ validate(true)        // true
 validate(Boolean())   // false
 ```
 
-### Schema.array(subtype)
+### Schema.array(value)
 
 Assert that the value is an array of `subtype`. The default value will be `[]` if not specified.
 
@@ -121,7 +122,7 @@ validate([0, 1])            // [0, 1]
 validate([0, '1'])          // TypeError
 ```
 
-### Schema.dict(subtype)
+### Schema.dict(value)
 
 Assert that the value is a dictionary of `subtype`. The default value will be `{}` if not specified.
 
@@ -134,7 +135,7 @@ validate({ a: 0, b: 1 })    // { a: 0, b: 1 }
 validate({ a: 0, b: '1' })  // TypeError
 ```
 
-### Schema.tuple(subtypes)
+### Schema.tuple(list)
 
 Assert that the value is a tuple whose each element is of corresponding subtype. The default value will be `[]` if not specified.
 
@@ -150,7 +151,7 @@ validate([0, 1])            // TypeError
 validate([0, '1'])          // [0, '1']
 ```
 
-### Schema.object(subtypes)
+### Schema.object(dict)
 
 Assert that the value is an object whose each property is of corresponding subtype. The default value will be `{}` if not specified.
 
@@ -166,11 +167,53 @@ validate({ a: 0, b: 1 })    // TypeError
 validate({ a: 0, b: '1' })  // { a: 0, b: '1' }
 ```
 
-### Schema.union()
+### Schema.union(list)
 
-### Schema.intersect()
+Assert that the value is one of the specified types.
 
-### Schema.adapt()
+```js
+const validate = Schema.union([
+  Schema.number(),
+  Schema.string(),
+])
+
+validate()                  // undefined
+validate(0)                 // 0
+validate('1')               // '1'
+validate(true)              // TypeError
+```
+
+### Schema.intersect(list)
+
+Assert that the value should match each specified type.
+
+```js
+const validate = Schema.intersect([
+  Schema.object({ a: Schema.string().required() }),
+  Schema.object({ b: Schema.number().default(0) }),
+])
+
+validate()                  // TypeError
+validate({ a: '' })         // { a: '', b: 0 }
+validate({ a: '', b: 1 })   // { a: '', b: 1 }
+validate({ a: '', b: '2' }) // TypeError
+```
+
+### Schema.transform(value, callback)
+
+Assert that the value is of the specified subtype and then transformed by `callback`.
+
+```js
+const validate = Schema.transform(Schema.number().default(0), n => n + 1)
+
+validaate()                 // 1
+validate('0')               // TypeError
+validate(10)                // 11
+```
+
+## Extensibility
+
+Use `Schema.extend()` to create a new type.
 
 ## Serializability
 
