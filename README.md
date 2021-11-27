@@ -45,20 +45,6 @@ const config = new Config()
 
 ## Builtin Types
 
-- [any](#schemaany)
-- [never](#schemanever)
-- [number](#schemanumber)
-- [string](#schemastring)
-- [boolean](#schemaboolean)
-- select
-- [array](#schemaarray)
-- [dict](#schemadict)
-- [tuple](#schematuple)
-- [object](#schemaobject)
-- union
-- intersect
-- adapt
-
 ### Schema.any()
 
 Assert that the value is of any type.
@@ -122,8 +108,6 @@ validate(true)        // true
 validate(Boolean())   // false
 ```
 
-### Schema.select()
-
 ### Schema.array(subtype)
 
 Assert that the value is an array of `subtype`. The default value will be `[]` if not specified.
@@ -186,7 +170,7 @@ validate({ a: 0, b: '1' })  // { a: 0, b: '1' }
 
 ### Schema.intersect()
 
-### Schema.transform()
+### Schema.adapt()
 
 ## Serializability
 
@@ -197,5 +181,5 @@ const schema1 = Schema.object({
 })
 
 // should have the same effect as schema1
-const schema2 = Schema.from(JSON.parse(JSON.stringify(schema1)))
+const schema2 = new Schema(JSON.parse(JSON.stringify(schema1)))
 ```
