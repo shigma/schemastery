@@ -87,14 +87,14 @@ describe('Schema API', () => {
     expect(() => new Config(['foo', 'bar'])).to.throw()
   })
 
-  it('object 1', () => {
+  it('object', () => {
     const Config = Schema.object({
       a: Schema.string().required(),
       b: Schema.number().default(123),
-    }, 'ignore')
+    })
 
     const original = { a: 'foo', c: true }
-    expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123 })
+    expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123, c: true })
     expect(new Config({ a: 'foo', b: 0 })).to.deep.equal({ a: 'foo', b: 0 })
     expect(() => new Config(null)).to.throw()
     expect(() => new Config({})).to.throw()
@@ -103,19 +103,6 @@ describe('Schema API', () => {
 
     // we resolve value without modifying the original object
     expect(original).to.deep.equal({ a: 'foo', c: true })
-  })
-
-  it('object 2', () => {
-    const Config = Schema.object({
-      a: Schema.string(),
-      b: Schema.number(),
-    }, 'inherit')
-
-    expect(new Config(null)).to.deep.equal({})
-    expect(new Config({ c: true })).to.deep.equal({ c: true })
-    expect(() => new Config([])).to.throw()
-    expect(() => new Config('foo')).to.throw()
-    expect(() => new Config(123)).to.throw()
   })
 
   it('decide 1', () => {
@@ -189,18 +176,18 @@ describe('Schema API', () => {
     const Inner = Schema.object({
       a: Schema.number().required(),
       d: Schema.number().default(0),
-    }, 'ignore')
+    })
 
     const Config = Schema.intersect([
-      Schema.object({ c: Schema.number() }, 'ignore'),
+      Schema.object({ c: Schema.number() }),
       Schema.union([
-        Schema.object({ b: Schema.number().required() }, 'ignore'),
+        Schema.object({ b: Schema.number().required() }),
         Schema.transform(Inner, data => ({ b: [data] })),
       ]),
     ])
 
     const original = { a: 1, c: 3, e: 5 }
-    expect(new Config(original)).to.deep.equal({ b: [{ a: 1, d: 0 }], c: 3 })
+    expect(new Config(original)).to.deep.equal({ b: [{ a: 1, d: 0 }], c: 3, e: 5 })
     expect(() => new Config({})).to.throw()
     expect(() => new Config({ a: '' })).to.throw()
     expect(() => new Config({ b: {} })).to.throw()

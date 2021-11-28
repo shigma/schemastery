@@ -4,6 +4,7 @@ temp
 
 todo.md
 yarn.lock
+coverage/
 node_modules/
 npm-debug.log
 yarn-debug.log
