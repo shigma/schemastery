@@ -70,6 +70,17 @@ validate(0)         // TypeError
 validate({})        // TypeError
 ```
 
+### Schema.const(value)
+
+Assert that the value is equal to the given constant.
+
+```js
+const validate = Schema.const(10)
+
+validate(10)        // 10
+validate(0)         // TypeError
+```
+
 ### Schema.number()
 
 Assert that the value is a number.
@@ -209,6 +220,39 @@ const validate = Schema.transform(Schema.number().default(0), n => n + 1)
 validaate()                 // 1
 validate('0')               // TypeError
 validate(10)                // 11
+```
+
+### Schema.select(values)
+
+Assert that the value is one of the specified values. This is a shortcut for `Schema.union()` and `Schema.const()`.
+
+```js
+const validate = Schema.select(['red', 'blue'])
+
+// is equivalent to
+const validate = Schema.union([
+  Schema.const('red'),
+  Schema.const('blue'),
+])
+
+validate('red')             // 'red'
+validate('blue')            // 'blue'
+validate('green')           // TypeError
+```
+
+You can also use a dictionary whose values serve as description.
+
+```js
+const validate = Schema.select({
+  http: 'HTTP',
+  ws: 'WebSocket',
+})
+
+// is equivalent to
+const validate = Schema.union([
+  Schema.const('http').description('HTTP'),
+  Schema.const('ws').description('WebSocket'),
+])
 ```
 
 ## Extensibility
