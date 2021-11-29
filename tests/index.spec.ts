@@ -3,8 +3,10 @@ import Schema from 'schemastery/src'
 
 describe('Schema API', () => {
   it('unknown', () => {
-    const validate = new Schema({ type: 'unknown' })
-    expect(() => validate(0)).to.throw()
+    const validate1 = new Schema({ type: 'unknown' })
+    expect(() => validate1(0)).to.throw()
+
+    expect(() => Schema.array(Symbol('unknown'))).to.throw()
   })
 
   it('any', () => {
@@ -24,7 +26,6 @@ describe('Schema API', () => {
     const config = Schema.string().default('bar')
 
     expect(config('foo')).to.equal('foo')
-    expect(config(String('foo'))).to.equal('foo')
     expect(config('')).to.equal('')
     expect(config(null)).to.equal('bar')
 
@@ -36,12 +37,33 @@ describe('Schema API', () => {
     const config = Schema.number().default(123)
 
     expect(config(456)).to.equal(456)
-    expect(config(Number(456))).to.equal(456)
     expect(config(0)).to.equal(0)
     expect(config(null)).to.equal(123)
 
     // @ts-expect-error
     expect(() => config('123')).to.throw()
+  })
+
+  it('boolean', () => {
+    const config = Schema.boolean().default(true)
+
+    expect(config(true)).to.equal(true)
+    expect(config(false)).to.equal(false)
+    expect(config(null)).to.equal(true)
+
+    // @ts-expect-error
+    expect(() => config(1)).to.throw()
+  })
+
+  it('is', () => {
+    const config = Schema.is(RegExp)
+
+    expect(config(/1/)).to.deep.equal(/1/)
+
+    // @ts-expect-error
+    expect(() => config(1)).to.throw()
+    // @ts-expect-error
+    expect(() => config('1')).to.throw()
   })
 
   it('array', () => {
@@ -59,11 +81,10 @@ describe('Schema API', () => {
   })
 
   it('dict (basic)', () => {
-    const Config = Schema.dict(Number)
+    const Config = Schema.dict(RegExp)
 
-    expect(new Config({ a: 1 })).to.deep.equal({ a: 1 })
+    expect(new Config({ a: /1/ })).to.deep.equal({ a: /1/ })
     expect(new Config({})).to.deep.equal({})
-    expect(new Config(null)).to.deep.equal({})
 
     // @ts-expect-error
     expect(() => new Config(1)).to.throw()

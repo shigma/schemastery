@@ -46,7 +46,7 @@ const Config = Schema.object({
 const config = new Config()
 ```
 
-## Builtin Types
+## Basic Types
 
 ### Schema.any()
 
@@ -117,6 +117,18 @@ const validate = Schema.boolean()
 validate()            // undefined
 validate(0)           // TypeError
 validate(true)        // true
+```
+
+### Schema.is(constructor)
+
+Assert that the value is an instance of the given constructor.
+
+```js
+const validate = Schema.is(RegExp)
+
+validate()          // undefined
+validate(/foo/)     // /foo/
+validate('foo')     // TypeError
 ```
 
 ### Schema.array(value)
@@ -216,10 +228,24 @@ Assert that the value is of the specified subtype and then transformed by `callb
 ```js
 const validate = Schema.transform(Schema.number().default(0), n => n + 1)
 
-validaate()                 // 1
+validate()                  // 1
 validate('0')               // TypeError
 validate(10)                // 11
 ```
+
+## Instance Methods
+
+### schema.required()
+
+Assert that the value is not nullable.
+
+### schema.default(value)
+
+Set the fallback value when nullable.
+
+### schema.description(text)
+
+Set the description of the schema.
 
 ## Shorthand Syntax
 

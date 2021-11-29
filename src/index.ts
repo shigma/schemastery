@@ -75,13 +75,13 @@ export namespace Schema {
     from<T>(source: T): Schema<From<T>>
     property(data: any, key: keyof any, schema?: Schema): any
     extend(type: string, resolve: Resolve): void
-    is<T>(constructor: Constructor<T>): Schema<T>
     any(): Schema<any>
     never(): Schema<never>
     const<T>(value: T): Schema<T>
     string(): Schema<string>
     number(): Schema<number>
     boolean(): Schema<boolean>
+    is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
     dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
     tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
@@ -176,11 +176,6 @@ Schema.from = function from(source: any) {
   }
 }
 
-Schema.extend('is', (data, { callback }) => {
-  if (data instanceof callback) return [data]
-  throw new TypeError(`expected instance of ${callback.name} but got ${data}`)
-})
-
 Schema.extend('any', (data) => {
   return [data]
 })
@@ -207,6 +202,11 @@ Schema.extend('number', (data) => {
 Schema.extend('boolean', (data) => {
   if (typeof data === 'boolean') return [data]
   throw new TypeError(`expected boolean but got ${data}`)
+})
+
+Schema.extend('is', (data, { callback }) => {
+  if (data instanceof callback) return [data]
+  throw new TypeError(`expected instance of ${callback.name} but got ${data}`)
 })
 
 Schema.extend('array', (data, { inner }) => {
