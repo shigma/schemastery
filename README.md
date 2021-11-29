@@ -131,7 +131,7 @@ validate(/foo/)     // /foo/
 validate('foo')     // TypeError
 ```
 
-### Schema.array(value)
+### Schema.array(inner)
 
 Assert that the value is an array of `subtype`. The default value will be `[]` if not specified.
 
@@ -144,7 +144,7 @@ validate([0, 1])            // [0, 1]
 validate([0, '1'])          // TypeError
 ```
 
-### Schema.dict(value)
+### Schema.dict(inner)
 
 Assert that the value is a dictionary of `subtype`. The default value will be `{}` if not specified.
 
@@ -178,7 +178,7 @@ validate([0, '1'])          // [0, '1']
 Assert that the value is an object whose each property is of corresponding subtype. The default value will be `{}` if not specified.
 
 ```js
-const validate = Schema.dict({
+const validate = Schema.object({
   a: Schema.number(),
   b: Schema.string(),
 })
@@ -221,7 +221,7 @@ validate({ a: '', b: 1 })   // { a: '', b: 1 }
 validate({ a: '', b: '2' }) // TypeError
 ```
 
-### Schema.transform(value, callback)
+### Schema.transform(inner, callback)
 
 Assert that the value is of the specified subtype and then transformed by `callback`.
 
@@ -251,17 +251,25 @@ Set the description of the schema.
 
 Some shorthand syntax is available for inner types.
 
-- `Schema.any()` -> `undefined`
-- `Schema.string()` -> `String`
-- `Schema.number()` -> `Number`
-- `Schema.boolean()` -> `Boolean`
-- `Schema.const(1)` -> `1` (only for primitive types)
-- `Schema.is(Date)` -> `Date`
+- `undefined` -> `Schema.any()`
+- `String` -> `Schema.string()`
+- `Number` -> `Schema.number()`
+- `Boolean` -> `Schema.boolean()`
+- `1` -> `Schema.const(1)` (only for primitive types)
+- `Date` -> `Schema.is(Date)`
 
 ```js
-Schema.array(String) // Schema.array(Schema.string())
-Schema.union([1, 2]) // Schema.union([Schema.const(1), Schema.const(2)])
-Schema.dict(RegExp) // Schema.dict(Schema.is(RegExp))
+Schema.array(String)        // Schema.array(Schema.string())
+Schema.dict(RegExp)         // Schema.dict(Schema.is(RegExp))
+Schema.union([1, 2])        // Schema.union([Schema.const(1), Schema.const(2)])
+```
+
+You can also use `Schema.from()` to get the inferred schema from a shorthand value.
+
+```js
+Schema.from()               // Schema.any()
+Schema.from(Date)           // Schema.is(Date)
+Schema.from('foo')          // Schema.const('foo')
 ```
 
 ## Advanced Examples
