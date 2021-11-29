@@ -1,12 +1,14 @@
 # Schemastery
- 
+
+[![npm](https://img.shields.io/npm/v/schemastery?style=flat-square)](https://www.npmjs.com/package/schemastery)
+
 Yet another schema validator.
 
 ## Advantages
 
-- **Lightweight.** No dependencies.
+- **Lightweight.** Zero dependencies.
 - **Easy to use.** You can use any schema as a function or constructor directly.
-- **Powerful.** Schemastery supports some advanced types such as `transform`.
+- **Powerful.** Schemastery supports some advanced types such as `union`, `intersection` and `transform`.
 - **Extensible.** You can create your own schema types via `Schema.extend()`.
 - **Serializable.** Schema objects can be serialized into JSON and then be hydrated in another environment.
 
@@ -30,17 +32,17 @@ validate('')    // TypeError
 import Schema from 'schemastery'
 
 interface Config {
-  foo?: 'red' | 'blue'
+  foo: Record<string, string>
   bar: string[]
 }
 
 const Config = Schema.object({
-  foo: Schema.select(['red', 'blue']).default('red'),
-  bar: Schema.array(Schema.string()),
+  foo: Schema.dict(Schema.string()).default({}),
+  bar: Schema.array(Schema.string()).default([]),
 })
 
 // config is an instance of Config
-// in this case, that is { foo: red, bar: [] }
+// in this case, that is { foo: {}, bar: [] }
 const config = new Config()
 ```
 
@@ -90,7 +92,6 @@ const validate = Schema.number()
 
 validate()            // undefined
 validate(1)           // 1
-validate(Number())    // 0
 validate('')          // TypeError
 ```
 
@@ -104,7 +105,6 @@ const validate = Schema.string()
 validate()            // undefined
 validate(0)           // TypeError
 validate('foo')       // 'foo'
-validate(String())    // ''
 ```
 
 ### Schema.boolean()
@@ -117,7 +117,6 @@ const validate = Schema.boolean()
 validate()            // undefined
 validate(0)           // TypeError
 validate(true)        // true
-validate(Boolean())   // false
 ```
 
 ### Schema.array(value)
@@ -222,42 +221,60 @@ validate('0')               // TypeError
 validate(10)                // 11
 ```
 
-### Schema.select(values)
+## Advanced Examples
 
-Assert that the value is one of the specified values. This is a shortcut for `Schema.union()` and `Schema.const()`.
+Here are some examples which demonstrate how to define advanced types.
+
+### Enumeration
 
 ```js
-const validate = Schema.select(['red', 'blue'])
-
-// is equivalent to
-const validate = Schema.union([
+const Enum = Schema.union([
   Schema.const('red'),
   Schema.const('blue'),
 ])
 
-validate('red')             // 'red'
-validate('blue')            // 'blue'
-validate('green')           // TypeError
+Enum('red')             // 'red'
+Enum('blue')            // 'blue'
+Enum('green')           // TypeError
 ```
 
-You can also use a dictionary whose values serve as description.
+### ToString
 
 ```js
-const validate = Schema.select({
-  http: 'HTTP',
-  ws: 'WebSocket',
-})
+const ToString = Schema.transform(Schema.any(), String)
 
-// is equivalent to
-const validate = Schema.union([
-  Schema.const('http').description('HTTP'),
-  Schema.const('ws').description('WebSocket'),
-])
+ToString('')            // ''
+ToString(0)             // '0'
+ToString({})            // '{}'
+```
+
+### Listable
+
+```js
+const Listable = Schema.union([
+  Schema.array(Schema.number()),
+  Schema.transform(Schema.number(), n => [n]),
+]).default([])
+
+Listable()              // []
+Listable(0)             // [0]
+Listable([1, 2])        // [1, 2]
+```
+
+### Alias
+
+```js
+const Config = Schema.dict(Schema.number(), Schema.union([
+  Schema.const('foo'),
+  Schema.transform(Schema.const('bar'), () => 'foo'),
+]))
+
+Config({ foo: 1 })      // { foo: 1 }
+Config({ bar: 2 })      // { foo: 2 }
+Config({ bar: '3' })    // TypeError
 ```
 
 ## Extensibility
-
-Use `Schema.extend()` to create a new type.
 
 ## Serializability
 

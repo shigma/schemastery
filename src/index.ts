@@ -1,4 +1,4 @@
-type Dict<T = any> = { [key: string]: T }
+type Dict<T = any, K extends string = string> = { [key in K]?: T }
 type Intersect<U> = (U extends any ? (arg: U) => void : never) extends ((arg: infer I) => void) ? I : never
 
 function isNullable(value: any) {
@@ -7,10 +7,6 @@ function isNullable(value: any) {
 
 function isObject(data: any) {
   return data && typeof data === 'object' && !Array.isArray(data)
-}
-
-function valueMap<T, U>(object: Dict<T>, transform: (value: T, key: string) => U): Dict<U> {
-  return Object.fromEntries(Object.entries(object).map(([key, value]) => [key, transform(value, key)]))
 }
 
 export interface Schema<S = any, T = S> extends Schema.Base<T> {
@@ -34,6 +30,7 @@ export namespace Schema {
 
   export interface Base<T = any> {
     type: string
+    sKey?: Schema
     inner?: Schema
     list?: Schema[]
     dict?: Dict<Schema>
@@ -64,7 +61,7 @@ export namespace Schema {
     number(): Schema<number>
     boolean(): Schema<boolean>
     array<S, T>(inner: Schema<S, T>): Schema<S[], T[]>
-    dict<S, T>(inner: Schema<S, T>): Schema<Dict<S>, Dict<T>>
+    dict<S, T, U extends string, V extends string>(inner: Schema<S, T>, sKey?: Schema<U, V>): Schema<Dict<S, U>, Dict<T, V>>
     tuple<X extends readonly Schema[]>(list: X): Schema<TupleS<X>, TupleT<X>>
     object<X extends Dict<Schema>>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
     union<X extends Schema>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
@@ -77,7 +74,6 @@ export namespace Schema {
     resolve: Resolve
     property(data: any, key: keyof any, schema?: Schema): any
     extend<K extends keyof Types>(type: K, resolve: Resolve, keys?: (keyof Base)[], meta?: Meta): void
-    select<T extends string>(values: T[] | Record<T, string>): Schema<T>
     <T = any>(options: Base<T>): Schema<T>
     new <T = any>(options: Base<T>): Schema<T>
   }
@@ -189,10 +185,23 @@ Schema.extend('array', (data, { inner }) => {
   return [data.map((_, index) => Schema.property(data, index, inner))]
 }, ['inner'])
 
-Schema.extend('dict', (data, { inner }) => {
+Schema.extend('dict', (data, { inner, sKey }, strict) => {
   if (!isObject(data)) throw new TypeError(`expected dict but got ${data}`)
-  return [valueMap(data, (_, key) => Schema.property(data, key, inner))]
-}, ['inner'])
+  const result = {}
+  for (const key in data) {
+    let rKey: string
+    try {
+      rKey = Schema.resolve(key, sKey)[0]
+    } catch (error) {
+      if (strict) continue
+      throw error
+    }
+    result[rKey] = Schema.property(data, key, inner)
+    data[rKey] = data[key]
+    delete data[key]
+  }
+  return [result]
+}, ['inner', 'sKey'])
 
 Schema.extend('tuple', (data, { list }, strict) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
@@ -259,13 +268,5 @@ Schema.extend('transform', (data, { inner, callback }) => {
     return [callback(result), callback(adapted)]
   }
 }, ['inner', 'callback'])
-
-Schema.select = function select(values: string[] | Dict<string>) {
-  if (Array.isArray(values)) values = Object.fromEntries(values.map((value) => [value, value]))
-  const list = Array.isArray(values)
-    ? values.map((value) => Schema.const(value).description(value))
-    : Object.entries(values).map(([key, value]) => Schema.const(key).description(value))
-  return Schema.union(list)
-}
 
 export default Schema

@@ -58,7 +58,7 @@ describe('Schema API', () => {
     expect(() => new Config([0])).to.throw()
   })
 
-  it('dict', () => {
+  it('dict (basic)', () => {
     const Config = Schema.dict(Schema.number())
 
     expect(new Config({ a: 1 })).to.deep.equal({ a: 1 })
@@ -71,6 +71,31 @@ describe('Schema API', () => {
     expect(() => new Config([])).to.throw()
     // @ts-expect-error
     expect(() => new Config({ a: '' })).to.throw()
+  })
+
+  it('dict (key schema)', () => {
+    const validate = Schema.dict(Schema.number(), Schema.union([
+      Schema.const('foo' as const),
+      Schema.transform(Schema.const('bar' as const), () => 'foo' as const),
+    ]))
+
+    expect(validate({ foo: 1 })).to.deep.equal({ foo: 1 })
+    expect(validate({ bar: 2 })).to.deep.equal({ foo: 2 })
+
+    // @ts-expect-error
+    expect(() => validate({ foo: '' })).to.throw()
+    // @ts-expect-error
+    expect(() => validate({ bar: '' })).to.throw()
+    // @ts-expect-error
+    expect(() => validate({ baz: '' })).to.throw()
+
+    const validate2 = Schema.intersect([validate, Schema.object({})])
+    expect(validate2({ bar: 2, baz: '3' })).to.deep.equal({ foo: 2, baz: '3' })
+
+    // @ts-expect-error
+    expect(() => validate2({ foo: '' })).to.throw()
+    // @ts-expect-error
+    expect(() => validate2({ bar: '' })).to.throw()
   })
 
   it('tuple', () => {
@@ -252,5 +277,13 @@ describe('Schema API', () => {
     expect(() => new Config({ b: [{ c: 3 }] })).to.throw()
     // @ts-expect-error
     expect(() => new Config({ a: 1, c: 'foo' })).to.throw()
+  })
+
+  it('serialization', () => {
+    const validate = new Schema(JSON.parse(JSON.stringify(Schema.number())))
+
+    expect(validate(null)).to.equal(null)
+    expect(validate(0)).to.equal(0)
+    expect(() => validate('0')).to.throw()
   })
 })
