@@ -45,7 +45,7 @@ describe('Schema API', () => {
   })
 
   it('array', () => {
-    const Config = Schema.array(Schema.string())
+    const Config = Schema.array(String)
 
     expect(new Config([])).to.deep.equal([])
     expect(new Config(['foo'])).to.deep.equal(['foo'])
@@ -59,7 +59,7 @@ describe('Schema API', () => {
   })
 
   it('dict (basic)', () => {
-    const Config = Schema.dict(Schema.number())
+    const Config = Schema.dict(Number)
 
     expect(new Config({ a: 1 })).to.deep.equal({ a: 1 })
     expect(new Config({})).to.deep.equal({})
@@ -74,9 +74,9 @@ describe('Schema API', () => {
   })
 
   it('dict (key schema)', () => {
-    const validate = Schema.dict(Schema.number(), Schema.union([
-      Schema.const('foo' as const),
-      Schema.transform(Schema.const('bar' as const), () => 'foo' as const),
+    const validate = Schema.dict(Number, Schema.union([
+      'foo' as const,
+      Schema.transform('bar' as const, () => 'foo' as const),
     ]))
 
     expect(validate({ foo: 1 })).to.deep.equal({ foo: 1 })
@@ -138,10 +138,7 @@ describe('Schema API', () => {
   })
 
   it('union (primitive)', () => {
-    const config = Schema.union([
-      Schema.const(1 as const),
-      Schema.const(2 as const),
-    ])
+    const config = Schema.union([1, 2] as const)
 
     expect(config(2)).to.equal(2)
 
@@ -151,8 +148,8 @@ describe('Schema API', () => {
 
   it('union (object)', () => {
     const validate = Schema.union([
-      Schema.object({ a: Schema.const('foo' as const).required(), b: Schema.number() }),
-      Schema.object({ a: Schema.const('bar' as const).required(), b: Schema.string() }),
+      Schema.object({ a: 'foo', b: Number }),
+      Schema.object({ a: 'bar', b: String }),
     ])
 
     expect(validate(null)).to.equal(null)
@@ -165,10 +162,7 @@ describe('Schema API', () => {
   })
 
   it('intersect (primitive)', () => {
-    const validate = Schema.intersect([
-      Schema.string(),
-      Schema.number(),
-    ])
+    const validate = Schema.intersect([String, Number])
 
     expect(validate(null)).to.equal(null)
 
@@ -195,10 +189,10 @@ describe('Schema API', () => {
   it('intersect (nested)', () => {
     const validate = Schema.intersect([
       Schema.intersect([
-        Schema.object({ a: Schema.string() }),
-        Schema.object({ b: Schema.number() }),
+        Schema.object({ a: String }),
+        Schema.object({ b: Number }),
       ]),
-      Schema.object({ c: Schema.boolean() }),
+      Schema.object({ c: Boolean }),
     ])
 
     expect(validate(null)).to.equal(null)
@@ -212,8 +206,8 @@ describe('Schema API', () => {
 
   it('adapt with array', () => {
     const Config = Schema.array(Schema.union([
-      Schema.string(),
-      Schema.transform(Schema.number(), data => data.toString()),
+      String,
+      Schema.transform(Number, data => data.toString()),
     ]))
 
     const original = ['456', 123]
@@ -230,8 +224,8 @@ describe('Schema API', () => {
   it('adapt with object', () => {
     const Config = Schema.object({
       foo: Schema.union([
-        Schema.array(Schema.number()),
-        Schema.transform(Schema.number(), data => [data]),
+        Schema.array(Number),
+        Schema.transform(Number, data => [data]),
       ]).default([]),
     })
 

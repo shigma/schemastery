@@ -8,7 +8,7 @@ Yet another schema validator.
 
 - **Lightweight.** Zero dependencies.
 - **Easy to use.** You can use any schema as a function or constructor directly.
-- **Powerful.** Schemastery supports some advanced types such as `union`, `intersection` and `transform`.
+- **Powerful.** Schemastery supports some advanced types such as `union`, `intersect` and `transform`.
 - **Extensible.** You can create your own schema types via `Schema.extend()`.
 - **Serializable.** Schema objects can be serialized into JSON and then be hydrated in another environment.
 
@@ -221,6 +221,23 @@ validate('0')               // TypeError
 validate(10)                // 11
 ```
 
+## Shorthand Syntax
+
+Some shorthand syntax is available for inner types.
+
+- `Schema.any()` -> `undefined`
+- `Schema.string()` -> `String`
+- `Schema.number()` -> `Number`
+- `Schema.boolean()` -> `Boolean`
+- `Schema.const(1)` -> `1` (only for primitive types)
+- `Schema.is(Date)` -> `Date`
+
+```js
+Schema.array(String) // Schema.array(Schema.string())
+Schema.union([1, 2]) // Schema.union([Schema.const(1), Schema.const(2)])
+Schema.dict(RegExp) // Schema.dict(Schema.is(RegExp))
+```
+
 ## Advanced Examples
 
 Here are some examples which demonstrate how to define advanced types.
@@ -228,24 +245,21 @@ Here are some examples which demonstrate how to define advanced types.
 ### Enumeration
 
 ```js
-const Enum = Schema.union([
-  Schema.const('red'),
-  Schema.const('blue'),
-])
+const Enum = Schema.union(['red', 'blue'])
 
-Enum('red')             // 'red'
-Enum('blue')            // 'blue'
-Enum('green')           // TypeError
+Enum('red')                 // 'red'
+Enum('blue')                // 'blue'
+Enum('green')               // TypeError
 ```
 
 ### ToString
 
 ```js
-const ToString = Schema.transform(Schema.any(), String)
+const ToString = Schema.transform(Schema.any(), v => String(v))
 
-ToString('')            // ''
-ToString(0)             // '0'
-ToString({})            // '{}'
+ToString('')                // ''
+ToString(0)                 // '0'
+ToString({})                // '{}'
 ```
 
 ### Listable
@@ -256,22 +270,22 @@ const Listable = Schema.union([
   Schema.transform(Schema.number(), n => [n]),
 ]).default([])
 
-Listable()              // []
-Listable(0)             // [0]
-Listable([1, 2])        // [1, 2]
+Listable()                  // []
+Listable(0)                 // [0]
+Listable([1, 2])            // [1, 2]
 ```
 
 ### Alias
 
 ```js
 const Config = Schema.dict(Schema.number(), Schema.union([
-  Schema.const('foo'),
-  Schema.transform(Schema.const('bar'), () => 'foo'),
+  'foo',
+  Schema.transform('bar', () => 'foo'),
 ]))
 
-Config({ foo: 1 })      // { foo: 1 }
-Config({ bar: 2 })      // { foo: 2 }
-Config({ bar: '3' })    // TypeError
+Config({ foo: 1 })          // { foo: 1 }
+Config({ bar: 2 })          // { foo: 2 }
+Config({ bar: '3' })        // TypeError
 ```
 
 ## Extensibility

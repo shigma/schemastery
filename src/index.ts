@@ -14,6 +14,7 @@ export interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data?: null): T
   new (data: S): T
   new (data?: null): T
+  [kSchema]: true
   toJSON(): Schema.Base<T>
   required(): Schema<S, T>
   hidden(): Schema<S, T>
@@ -24,8 +25,20 @@ export interface Schema<S = any, T = S> extends Schema.Base<T> {
 }
 
 export namespace Schema {
-  export type TypeS<X> = X extends Schema<infer S, unknown> ? S : never
-  export type TypeT<X> = ReturnType<Extract<X, Schema>> // X extends Schema<unknown, infer T> ? T : never
+  export type From<T> =
+    | T extends string | number | boolean ? Schema<T>
+    : T extends Schema ? T
+    : T extends typeof String ? Schema<string>
+    : T extends typeof Number ? Schema<number>
+    : T extends typeof Boolean ? Schema<boolean>
+    : T extends Constructor<infer S> ? Schema<S>
+    : never
+
+  type _TypeS<X> = X extends Schema<infer S, unknown> ? S : never
+  type _TypeT<X> = ReturnType<Extract<X, Schema>>
+
+  export type TypeS<X> = _TypeS<From<X>>
+  export type TypeT<X> = _TypeT<From<X>>
   export type Resolve = (data: any, schema?: Schema, strict?: boolean) => [any, any?]
 
   export interface Base<T = any> {
@@ -48,36 +61,38 @@ export namespace Schema {
     comment?: string
   }
 
-  type TupleS<X extends readonly unknown[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
-  type TupleT<X extends readonly unknown[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
-  type ObjectS<X extends Dict<Schema>> = { [K in keyof X]?: TypeS<X[K]> } & Dict
-  type ObjectT<X extends Dict<Schema>> = { [K in keyof X]?: TypeT<X[K]> } & Dict
+  type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
+  type TupleT<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
+  type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> } & Dict
+  type ObjectT<X extends Dict> = { [K in keyof X]?: TypeT<X[K]> } & Dict
+  type Constructor<T = any> = new (...args: any[]) => T
 
-  export interface Types {
+  export interface Static {
+    <T = any>(options: Base<T>): Schema<T>
+    new <T = any>(options: Base<T>): Schema<T>
+    prototype: Schema
+    resolve: Resolve
+    from<T>(source: T): Schema<From<T>>
+    property(data: any, key: keyof any, schema?: Schema): any
+    extend(type: string, resolve: Resolve): void
+    is<T>(constructor: Constructor<T>): Schema<T>
     any(): Schema<any>
     never(): Schema<never>
     const<T>(value: T): Schema<T>
     string(): Schema<string>
     number(): Schema<number>
     boolean(): Schema<boolean>
-    array<S, T>(inner: Schema<S, T>): Schema<S[], T[]>
-    dict<S, T, U extends string, V extends string>(inner: Schema<S, T>, sKey?: Schema<U, V>): Schema<Dict<S, U>, Dict<T, V>>
-    tuple<X extends readonly Schema[]>(list: X): Schema<TupleS<X>, TupleT<X>>
-    object<X extends Dict<Schema>>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
-    union<X extends Schema>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
-    intersect<X extends Schema>(list: readonly X[]): Schema<Intersect<TypeS<X>>, Intersect<TypeT<X>>>
-    transform<S, T>(inner: Schema<S>, callback: (value: S) => T): Schema<S, T>
-  }
-
-  export interface Static extends Types {
-    prototype: Schema
-    resolve: Resolve
-    property(data: any, key: keyof any, schema?: Schema): any
-    extend<K extends keyof Types>(type: K, resolve: Resolve, keys?: (keyof Base)[], meta?: Meta): void
-    <T = any>(options: Base<T>): Schema<T>
-    new <T = any>(options: Base<T>): Schema<T>
+    array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
+    dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
+    tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
+    object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
+    union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
+    intersect<X>(list: readonly X[]): Schema<Intersect<TypeS<X>>, Intersect<TypeT<X>>>
+    transform<X, T>(inner: X, callback: (value: TypeS<X>) => T): Schema<TypeS<X>, T>
   }
 }
+
+const kSchema = Symbol('schemastery')
 
 export const Schema = function (options: Schema.Base) {
   const schema = function (data: any) {
@@ -90,6 +105,8 @@ export const Schema = function (options: Schema.Base) {
 } as Schema.Static
 
 Schema.prototype = Object.create(Function.prototype)
+
+Schema.prototype[kSchema] = true
 
 Schema.prototype.toJSON = function toJSON() {
   return { ...this }
@@ -115,20 +132,8 @@ for (const key of ['default', 'comment', 'description']) {
 
 const resolvers: Dict<Schema.Resolve> = {}
 
-Schema.extend = function extend(type: string, resolve, keys, meta) {
+Schema.extend = function extend(type: string, resolve) {
   resolvers[type] = resolve
-  if (!keys) return
-
-  Object.assign(Schema, {
-    [type](...args: any[]) {
-      const schema = new Schema({ type })
-      keys.forEach((key, index) => {
-        schema[key] = args[index] as never
-      })
-      Object.assign(schema.meta, meta)
-      return schema
-    },
-  })
 }
 
 Schema.resolve = function resolve(data, schema, hint) {
@@ -152,38 +157,62 @@ Schema.property = function property(data, key, schema) {
   return value
 }
 
+Schema.from = function from(source: any) {
+  if (isNullable(source)) {
+    return Schema.any()
+  } else if (['string', 'number', 'boolean'].includes(typeof source)) {
+    return Schema.const(source).required()
+  } else if (source[kSchema]) {
+    return source
+  } else if (typeof source === 'function') {
+    switch (source) {
+      case String: return Schema.string()
+      case Number: return Schema.number()
+      case Boolean: return Schema.boolean()
+      default: return Schema.is(source)
+    }
+  } else {
+    throw new TypeError(`cannot infer schema from ${source}`)
+  }
+}
+
+Schema.extend('is', (data, { callback }) => {
+  if (data instanceof callback) return [data]
+  throw new TypeError(`expected instance of ${callback.name} but got ${data}`)
+})
+
 Schema.extend('any', (data) => {
   return [data]
-}, [])
+})
 
 Schema.extend('never', (data) => {
   throw new TypeError(`expected nullable but got ${data}`)
-}, [])
+})
 
 Schema.extend('const', (data, { value }) => {
   if (data === value) return [value]
   throw new TypeError(`expected ${value} but got ${data}`)
-}, ['value'])
+})
 
 Schema.extend('string', (data) => {
   if (typeof data === 'string') return [data]
   throw new TypeError(`expected string but got ${data}`)
-}, [])
+})
 
 Schema.extend('number', (data) => {
   if (typeof data === 'number') return [data]
   throw new TypeError(`expected number but got ${data}`)
-}, [])
+})
 
 Schema.extend('boolean', (data) => {
   if (typeof data === 'boolean') return [data]
   throw new TypeError(`expected boolean but got ${data}`)
-}, [])
+})
 
 Schema.extend('array', (data, { inner }) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
   return [data.map((_, index) => Schema.property(data, index, inner))]
-}, ['inner'])
+})
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
   if (!isObject(data)) throw new TypeError(`expected dict but got ${data}`)
@@ -201,7 +230,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
     delete data[key]
   }
   return [result]
-}, ['inner', 'sKey'])
+})
 
 Schema.extend('tuple', (data, { list }, strict) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
@@ -209,7 +238,7 @@ Schema.extend('tuple', (data, { list }, strict) => {
   if (strict) return [result]
   result.push(...data.slice(list.length))
   return [result]
-}, ['list'])
+})
 
 function merge(result: any, data: any) {
   for (const key in data) {
@@ -229,7 +258,7 @@ Schema.extend('object', (data, { dict }, strict) => {
   }
   if (!strict) merge(result, data)
   return [result]
-}, ['dict'])
+})
 
 Schema.extend('union', (data, { list }) => {
   const messages: string[] = []
@@ -241,7 +270,7 @@ Schema.extend('union', (data, { list }) => {
     }
   }
   throw new TypeError(`expected union but got ${JSON.stringify(data)}`)
-}, ['list'])
+})
 
 Schema.extend('intersect', (data, { list }) => {
   const result = {}
@@ -251,7 +280,7 @@ Schema.extend('intersect', (data, { list }) => {
   }
   if (isObject(data)) merge(result, data)
   return [result]
-}, ['list'])
+})
 
 Schema.extend('transform', (data, { inner, callback }) => {
   const [result, adapted = data] = Schema.resolve(data, inner, true)
@@ -267,6 +296,39 @@ Schema.extend('transform', (data, { inner, callback }) => {
   } else {
     return [callback(result), callback(adapted)]
   }
-}, ['inner', 'callback'])
+})
+
+function defineMethod(name: string, keys?: (keyof Schema.Base)[]) {
+  Object.assign(Schema, {
+    [name](...args: any[]) {
+      const schema = new Schema({ type: name })
+      keys.forEach((key, index) => {
+        switch (key) {
+          case 'sKey': schema.sKey = Schema.from(args[index]); break
+          case 'inner': schema.inner = Schema.from(args[index]); break
+          case 'list': schema.list = args[index].map(Schema.from); break
+          case 'dict': schema.dict = Object.fromEntries(Object.entries(args[index]).map(([key, value]) => [key, Schema.from(value)])); break
+          default: schema[key] = args[index]
+        }
+      })
+      return schema
+    },
+  })
+}
+
+defineMethod('is', ['callback'])
+defineMethod('any', [])
+defineMethod('never', [])
+defineMethod('const', ['value'])
+defineMethod('string', [])
+defineMethod('number', [])
+defineMethod('boolean', [])
+defineMethod('array', ['inner'])
+defineMethod('dict', ['inner', 'sKey'])
+defineMethod('tuple', ['list'])
+defineMethod('object', ['dict'])
+defineMethod('union', ['list'])
+defineMethod('intersect', ['list'])
+defineMethod('transform', ['inner', 'callback'])
 
 export default Schema
