@@ -73,7 +73,6 @@ export namespace Schema {
     prototype: Schema
     resolve: Resolve
     from<T>(source: T): Schema<From<T>>
-    property(data: any, key: keyof any, schema?: Schema): any
     extend(type: string, resolve: Resolve): void
     any(): Schema<any>
     never(): Schema<never>
@@ -151,12 +150,6 @@ Schema.resolve = function resolve(data, schema, hint) {
   throw new TypeError(`unsupported type "${schema.type}"`)
 }
 
-Schema.property = function property(data, key, schema) {
-  const [value, adapted] = Schema.resolve(data[key], schema)
-  if (!isNullable(adapted)) data[key] = adapted
-  return value
-}
-
 Schema.from = function from(source: any) {
   if (isNullable(source)) {
     return Schema.any()
@@ -209,9 +202,15 @@ Schema.extend('is', (data, { callback }) => {
   throw new TypeError(`expected instance of ${callback.name} but got ${data}`)
 })
 
+function property(data: any, key: keyof any, schema?: Schema) {
+  const [value, adapted] = Schema.resolve(data[key], schema)
+  if (!isNullable(adapted)) data[key] = adapted
+  return value
+}
+
 Schema.extend('array', (data, { inner }) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  return [data.map((_, index) => Schema.property(data, index, inner))]
+  return [data.map((_, index) => property(data, index, inner))]
 })
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
@@ -225,7 +224,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
       if (strict) continue
       throw error
     }
-    result[rKey] = Schema.property(data, key, inner)
+    result[rKey] = property(data, key, inner)
     data[rKey] = data[key]
     delete data[key]
   }
@@ -234,7 +233,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
 
 Schema.extend('tuple', (data, { list }, strict) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  const result = list.map((inner, index) => Schema.property(data, index, inner))
+  const result = list.map((inner, index) => property(data, index, inner))
   if (strict) return [result]
   result.push(...data.slice(list.length))
   return [result]
@@ -251,7 +250,7 @@ Schema.extend('object', (data, { dict }, strict) => {
   if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result = {}
   for (const key in dict) {
-    const value = Schema.property(data, key, dict[key])
+    const value = property(data, key, dict[key])
     if (!isNullable(value) || key in data) {
       result[key] = value
     }

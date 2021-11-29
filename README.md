@@ -4,7 +4,7 @@
 
 Yet another schema validator.
 
-## Advantages
+## Features
 
 - **Lightweight.** Zero dependencies.
 - **Easy to use.** You can use any schema as a function or constructor directly.
@@ -12,7 +12,7 @@ Yet another schema validator.
 - **Extensible.** You can create your own schema types via `Schema.extend()`.
 - **Serializable.** Schema objects can be serialized into JSON and then be hydrated in another environment.
 
-## Examples
+## Basic Examples
 
 ### use as validator (JavaScript)
 
@@ -46,7 +46,7 @@ const Config = Schema.object({
 const config = new Config()
 ```
 
-## Basic Types
+## General Types
 
 ### Schema.any()
 
@@ -55,9 +55,9 @@ Assert that the value is of any type.
 ```js
 const validate = Schema.any()
 
-validate()          // undefined
-validate(0)         // 0
-validate({})        // {}
+validate()            // undefined
+validate(0)           // 0
+validate({})          // {}
 ```
 
 ### Schema.never()
@@ -67,9 +67,9 @@ Assert that the value is nullable.
 ```js
 const validate = Schema.never()
 
-validate()          // undefined
-validate(0)         // TypeError
-validate({})        // TypeError
+validate()            // undefined
+validate(0)           // TypeError
+validate({})          // TypeError
 ```
 
 ### Schema.const(value)
@@ -79,8 +79,8 @@ Assert that the value is equal to the given constant.
 ```js
 const validate = Schema.const(10)
 
-validate(10)        // 10
-validate(0)         // TypeError
+validate(10)          // 10
+validate(0)           // TypeError
 ```
 
 ### Schema.number()
@@ -126,9 +126,9 @@ Assert that the value is an instance of the given constructor.
 ```js
 const validate = Schema.is(RegExp)
 
-validate()          // undefined
-validate(/foo/)     // /foo/
-validate('foo')     // TypeError
+validate()            // undefined
+validate(/foo/)       // /foo/
+validate('foo')       // TypeError
 ```
 
 ### Schema.array(inner)
@@ -300,8 +300,8 @@ ToString({})                // '{}'
 
 ```js
 const Listable = Schema.union([
-  Schema.array(Schema.number()),
-  Schema.transform(Schema.number(), n => [n]),
+  Schema.array(Number),
+  Schema.transform(Number, n => [n]),
 ]).default([])
 
 Listable()                  // []
@@ -312,7 +312,7 @@ Listable([1, 2])            // [1, 2]
 ### Alias
 
 ```js
-const Config = Schema.dict(Schema.number(), Schema.union([
+const Config = Schema.dict(Number, Schema.union([
   'foo',
   Schema.transform('bar', () => 'foo'),
 ]))
