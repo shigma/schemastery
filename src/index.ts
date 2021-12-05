@@ -50,6 +50,7 @@ export namespace Schema {
     callback?: Function
     value?: T
     meta?: Meta<T>
+    toString(inline?: boolean): string
   }
 
   export interface Meta<T = any> {
@@ -199,7 +200,7 @@ Schema.extend('boolean', (data) => {
 
 Schema.extend('is', (data, { callback }) => {
   if (data instanceof callback) return [data]
-  throw new TypeError(`expected instance of ${callback.name} but got ${data}`)
+  throw new TypeError(`expected ${callback.name} but got ${data}`)
 })
 
 function property(data: any, key: keyof any, schema?: Schema) {
@@ -214,7 +215,7 @@ Schema.extend('array', (data, { inner }) => {
 })
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
-  if (!isObject(data)) throw new TypeError(`expected dict but got ${data}`)
+  if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result = {}
   for (const key in data) {
     let rKey: string
@@ -297,10 +298,13 @@ Schema.extend('transform', (data, { inner, callback }) => {
   }
 })
 
-function defineMethod(name: string, keys?: (keyof Schema.Base)[]) {
+type Formatter = (schema: Schema, inline?: boolean) => string
+
+function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatter) {
   Object.assign(Schema, {
     [name](...args: any[]) {
       const schema = new Schema({ type: name })
+      schema.toString = format.bind(null, schema)
       keys.forEach((key, index) => {
         switch (key) {
           case 'sKey': schema.sKey = Schema.from(args[index]); break
@@ -315,19 +319,31 @@ function defineMethod(name: string, keys?: (keyof Schema.Base)[]) {
   })
 }
 
-defineMethod('is', ['callback'])
-defineMethod('any', [])
-defineMethod('never', [])
-defineMethod('const', ['value'])
-defineMethod('string', [])
-defineMethod('number', [])
-defineMethod('boolean', [])
-defineMethod('array', ['inner'])
-defineMethod('dict', ['inner', 'sKey'])
-defineMethod('tuple', ['list'])
-defineMethod('object', ['dict'])
-defineMethod('union', ['list'])
-defineMethod('intersect', ['list'])
-defineMethod('transform', ['inner', 'callback'])
+defineMethod('is', ['callback'], ({ callback }) => callback.name)
+defineMethod('any', [], () => 'any')
+defineMethod('never', [], () => 'never')
+defineMethod('const', ['value'], ({ value }) => typeof value === 'string' ? JSON.stringify(value) : value)
+defineMethod('string', [], () => 'string')
+defineMethod('number', [], () => 'number')
+defineMethod('boolean', [], () => 'boolean')
+defineMethod('array', ['inner'], ({ inner }) => `${inner.toString(true)}[]`)
+defineMethod('dict', ['inner', 'sKey'], ({ inner, sKey }) => `{ [key: ${sKey.toString()}]: ${inner.toString()} }`)
+defineMethod('tuple', ['list'], ({ list }) => `[${list.map(({ toString }) => toString()).join(', ')}]`)
+
+defineMethod('object', ['dict'], ({ dict }) => {
+  if (Object.keys(dict).length === 0) return '{}'
+  return `{ ${Object.entries(dict).map(([key, { toString }]) => `${key}: ${toString()}`).join(', ')} }`
+})
+
+defineMethod('union', ['list'], ({ list }, inline) => {
+  const result = list.map(({ toString: format }) => format()).join(' | ')
+  return inline ? `(${result})` : result
+})
+
+defineMethod('intersect', ['list'], ({ list }) => {
+  return `${list.map(({ toString }) => toString(true)).join(' & ')}`
+})
+
+defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner.toString(isInner))
 
 export default Schema

@@ -11,12 +11,16 @@ describe('Schema API', () => {
 
   it('any', () => {
     const config = Schema.any()
+    expect(config.toString()).to.equal('any')
+
     expect(config(123)).to.equal(123)
     expect(config(null)).to.equal(null)
   })
 
   it('never', () => {
     const config = Schema.never()
+    expect(config.toString()).to.equal('never')
+
     expect(config(null)).to.equal(null)
     // @ts-expect-error
     expect(() => config(123)).to.throw()
@@ -24,6 +28,7 @@ describe('Schema API', () => {
 
   it('string', () => {
     const config = Schema.string().default('bar')
+    expect(config.toString()).to.equal('string')
 
     expect(config('foo')).to.equal('foo')
     expect(config('')).to.equal('')
@@ -35,6 +40,7 @@ describe('Schema API', () => {
 
   it('number', () => {
     const config = Schema.number().default(123)
+    expect(config.toString()).to.equal('number')
 
     expect(config(456)).to.equal(456)
     expect(config(0)).to.equal(0)
@@ -46,6 +52,7 @@ describe('Schema API', () => {
 
   it('boolean', () => {
     const config = Schema.boolean().default(true)
+    expect(config.toString()).to.equal('boolean')
 
     expect(config(true)).to.equal(true)
     expect(config(false)).to.equal(false)
@@ -57,6 +64,7 @@ describe('Schema API', () => {
 
   it('is', () => {
     const config = Schema.is(RegExp)
+    expect(config.toString()).to.equal('RegExp')
 
     expect(config(/1/)).to.deep.equal(/1/)
 
@@ -68,6 +76,7 @@ describe('Schema API', () => {
 
   it('array', () => {
     const Config = Schema.array(String)
+    expect(Config.toString()).to.equal('string[]')
 
     expect(new Config([])).to.deep.equal([])
     expect(new Config(['foo'])).to.deep.equal(['foo'])
@@ -82,6 +91,7 @@ describe('Schema API', () => {
 
   it('dict (basic)', () => {
     const Config = Schema.dict(RegExp)
+    expect(Config.toString()).to.equal('{ [key: any]: RegExp }')
 
     expect(new Config({ a: /1/ })).to.deep.equal({ a: /1/ })
     expect(new Config({})).to.deep.equal({})
@@ -99,6 +109,7 @@ describe('Schema API', () => {
       'foo' as const,
       Schema.transform('bar' as const, () => 'foo' as const),
     ]))
+    expect(validate.toString()).to.equal('{ [key: "foo" | "bar"]: number }')
 
     expect(validate({ foo: 1 })).to.deep.equal({ foo: 1 })
     expect(validate({ bar: 2 })).to.deep.equal({ foo: 2 })
@@ -125,6 +136,7 @@ describe('Schema API', () => {
       Schema.number().default(123),
       Schema.boolean(),
     ] as const)
+    expect(Config.toString()).to.equal('[string, number, boolean]')
 
     expect(new Config(['foo'])).to.deep.equal(['foo', 123, undefined])
     expect(new Config(['foo', 0])).to.deep.equal(['foo', 0, undefined])
@@ -142,6 +154,7 @@ describe('Schema API', () => {
       a: Schema.string().required(),
       b: Schema.number().default(123),
     })
+    expect(Config.toString()).to.equal('{ a: string, b: number }')
 
     const original = { a: 'foo', c: true }
     expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123, c: true })
@@ -160,6 +173,7 @@ describe('Schema API', () => {
 
   it('union (primitive)', () => {
     const config = Schema.union([1, 2] as const)
+    expect(config.toString()).to.equal('1 | 2')
 
     expect(config(2)).to.equal(2)
 
@@ -172,6 +186,7 @@ describe('Schema API', () => {
       Schema.object({ a: 'foo', b: Number }),
       Schema.object({ a: 'bar', b: String }),
     ])
+    expect(validate.toString()).to.equal('{ a: "foo", b: number } | { a: "bar", b: string }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({ a: 'foo', b: 123 })).to.deep.equal({ a: 'foo', b: 123 })
@@ -184,6 +199,7 @@ describe('Schema API', () => {
 
   it('intersect (primitive)', () => {
     const validate = Schema.intersect([String, Number])
+    expect(validate.toString()).to.equal('string & number')
 
     expect(validate(null)).to.equal(null)
 
@@ -198,6 +214,7 @@ describe('Schema API', () => {
       Schema.object({ a: Schema.string().default('foo') }),
       Schema.object({ b: Schema.number().required() }),
     ])
+    expect(validate.toString()).to.equal('{ a: string } & { b: number }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({ b: 1, c: true })).to.deep.equal({ a: 'foo', b: 1, c: true })
@@ -215,6 +232,7 @@ describe('Schema API', () => {
       ]),
       Schema.object({ c: Boolean }),
     ])
+    expect(validate.toString()).to.equal('{ a: string } & { b: number } & { c: boolean }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({})).to.deep.equal({})
@@ -230,6 +248,7 @@ describe('Schema API', () => {
       String,
       Schema.transform(Number, data => data.toString()),
     ]))
+    expect(Config.toString()).to.equal('(string | number)[]')
 
     const original = ['456', 123]
     expect(new Config(original)).to.deep.equal(['456', '123'])
@@ -249,6 +268,7 @@ describe('Schema API', () => {
         Schema.transform(Number, data => [data]),
       ]).default([]),
     })
+    expect(Config.toString()).to.equal('{ foo: number[] | number }')
 
     // modify original data during adaptation
     const original = { foo: 0 }
@@ -269,6 +289,7 @@ describe('Schema API', () => {
       a: Schema.number().required(),
       d: Schema.number().default(0),
     })
+    expect(Inner.toString()).to.equal('{ a: number, d: number }')
 
     const Config = Schema.intersect([
       Schema.object({ c: Schema.number() }),
@@ -277,6 +298,7 @@ describe('Schema API', () => {
         Schema.transform(Inner, data => ({ b: [data] })),
       ]),
     ])
+    expect(Config.toString()).to.equal('{ c: number } & ({ b: number } | { a: number, d: number })')
 
     // modify original data during adaptation
     const original = { a: 1, c: 3, e: 5 }
