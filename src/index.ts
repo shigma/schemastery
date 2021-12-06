@@ -9,6 +9,29 @@ function isObject(data: any) {
   return data && typeof data === 'object' && !Array.isArray(data)
 }
 
+export class SchemaError extends TypeError {
+  readonly name = 'SchemaError'
+
+  static current: Schema = null
+
+  constructor(message: string, error?: SchemaError) {
+    super(message)
+    this.init(error)
+  }
+
+  private init(error?: SchemaError) {
+    if (!SchemaError.current) return
+    let cap: RegExpExecArray
+    const lines = this.stack.split('\n')
+    if (cap = /^ {4}at .+ (\(.+\))$/.exec(lines[1])) {
+      lines[1] = `    at Schema<${SchemaError.current}> ${cap[1]}`
+    } else {
+      lines[1] = `    at Schema<${SchemaError.current}> (${lines[1].slice(7)})`
+    }
+    this.stack = lines.join('\n')
+  }
+}
+
 export interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data: S): T
   (data?: null): T
@@ -138,17 +161,30 @@ Schema.extend = function extend(type: string, resolve) {
 
 Schema.resolve = function resolve(data, schema, hint) {
   if (!schema) return [data]
+  const previous = SchemaError.current
 
-  if (isNullable(data)) {
-    if (schema.meta.required) throw new TypeError(`missing required value`)
-    const fallback = schema.meta.default
-    if (isNullable(fallback)) return [data] as [any]
-    data = fallback
+  try {
+    SchemaError.current = schema
+
+    if (isNullable(data)) {
+      if (schema.meta.required) throw new SchemaError(`missing required value`)
+      const fallback = schema.meta.default
+      if (isNullable(fallback)) return [data] as [any]
+      data = fallback
+    }
+  
+    const callback = resolvers[schema.type]
+    if (!callback) throw new SchemaError(`unsupported type "${schema.type}"`)
+
+    return callback(data, schema, hint)
+  } catch (error) {
+    if (error instanceof SchemaError) {
+      error = new SchemaError(error.message, error)
+    }
+    throw error
+  } finally {
+    SchemaError.current = previous
   }
-
-  const callback = resolvers[schema.type]
-  if (callback) return callback(data, schema, hint)
-  throw new TypeError(`unsupported type "${schema.type}"`)
 }
 
 Schema.from = function from(source: any) {
@@ -166,7 +202,7 @@ Schema.from = function from(source: any) {
       default: return Schema.is(source)
     }
   } else {
-    throw new TypeError(`cannot infer schema from ${source}`)
+    throw new SchemaError(`cannot infer schema from ${source}`)
   }
 }
 
@@ -175,32 +211,32 @@ Schema.extend('any', (data) => {
 })
 
 Schema.extend('never', (data) => {
-  throw new TypeError(`expected nullable but got ${data}`)
+  throw new SchemaError(`expected nullable but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('const', (data, { value }) => {
   if (data === value) return [value]
-  throw new TypeError(`expected ${value} but got ${data}`)
+  throw new SchemaError(`expected ${value} but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('string', (data) => {
   if (typeof data === 'string') return [data]
-  throw new TypeError(`expected string but got ${data}`)
+  throw new SchemaError(`expected string but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('number', (data) => {
   if (typeof data === 'number') return [data]
-  throw new TypeError(`expected number but got ${data}`)
+  throw new SchemaError(`expected number but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('boolean', (data) => {
   if (typeof data === 'boolean') return [data]
-  throw new TypeError(`expected boolean but got ${data}`)
+  throw new SchemaError(`expected boolean but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('is', (data, { callback }) => {
   if (data instanceof callback) return [data]
-  throw new TypeError(`expected ${callback.name} but got ${data}`)
+  throw new SchemaError(`expected ${callback.name} but got ${data}`)
 })
 
 function property(data: any, key: keyof any, schema?: Schema) {
@@ -210,12 +246,12 @@ function property(data: any, key: keyof any, schema?: Schema) {
 }
 
 Schema.extend('array', (data, { inner }) => {
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new SchemaError(`expected array but got ${JSON.stringify(data)}`)
   return [data.map((_, index) => property(data, index, inner))]
 })
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
-  if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isObject(data)) throw new SchemaError(`expected object but got ${JSON.stringify(data)}`)
   const result = {}
   for (const key in data) {
     let rKey: string
@@ -233,7 +269,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
 })
 
 Schema.extend('tuple', (data, { list }, strict) => {
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new SchemaError(`expected array but got ${JSON.stringify(data)}`)
   const result = list.map((inner, index) => property(data, index, inner))
   if (strict) return [result]
   result.push(...data.slice(list.length))
@@ -248,7 +284,7 @@ function merge(result: any, data: any) {
 }
 
 Schema.extend('object', (data, { dict }, strict) => {
-  if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isObject(data)) throw new SchemaError(`expected object but got ${JSON.stringify(data)}`)
   const result = {}
   for (const key in dict) {
     const value = property(data, key, dict[key])
@@ -269,7 +305,8 @@ Schema.extend('union', (data, { list }) => {
       messages.push(error.message)
     }
   }
-  throw new TypeError(`expected union but got ${JSON.stringify(data)}`)
+  const error = new SchemaError(`expected union but got ${JSON.stringify(data)}`)
+  throw error
 })
 
 Schema.extend('intersect', (data, { list }) => {
