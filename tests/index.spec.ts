@@ -154,7 +154,7 @@ describe('Schema API', () => {
       a: Schema.string().required(),
       b: Schema.number().default(123),
     })
-    expect(Config.toString()).to.equal('{ a: string, b: number }')
+    expect(Config.toString()).to.equal('{ a: string, b?: number }')
 
     const original = { a: 'foo', c: true }
     expect(new Config(original)).to.deep.equal({ a: 'foo', b: 123, c: true })
@@ -186,7 +186,7 @@ describe('Schema API', () => {
       Schema.object({ a: 'foo', b: Number }),
       Schema.object({ a: 'bar', b: String }),
     ])
-    expect(validate.toString()).to.equal('{ a: "foo", b: number } | { a: "bar", b: string }')
+    expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", b?: string }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({ a: 'foo', b: 123 })).to.deep.equal({ a: 'foo', b: 123 })
@@ -214,7 +214,7 @@ describe('Schema API', () => {
       Schema.object({ a: Schema.string().default('foo') }),
       Schema.object({ b: Schema.number().required() }),
     ])
-    expect(validate.toString()).to.equal('{ a: string } & { b: number }')
+    expect(validate.toString()).to.equal('{ a?: string } & { b: number }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({ b: 1, c: true })).to.deep.equal({ a: 'foo', b: 1, c: true })
@@ -232,7 +232,7 @@ describe('Schema API', () => {
       ]),
       Schema.object({ c: Boolean }),
     ])
-    expect(validate.toString()).to.equal('{ a: string } & { b: number } & { c: boolean }')
+    expect(validate.toString()).to.equal('{ a?: string } & { b?: number } & { c?: boolean }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({})).to.deep.equal({})
@@ -268,7 +268,7 @@ describe('Schema API', () => {
         Schema.transform(Number, data => [data]),
       ]).default([]),
     })
-    expect(Config.toString()).to.equal('{ foo: number[] | number }')
+    expect(Config.toString()).to.equal('{ foo?: number[] | number }')
 
     // modify original data during adaptation
     const original = { foo: 0 }
@@ -289,7 +289,7 @@ describe('Schema API', () => {
       a: Schema.number().required(),
       d: Schema.number().default(0),
     })
-    expect(Inner.toString()).to.equal('{ a: number, d: number }')
+    expect(Inner.toString()).to.equal('{ a: number, d?: number }')
 
     const Config = Schema.intersect([
       Schema.object({ c: Schema.number() }),
@@ -298,7 +298,7 @@ describe('Schema API', () => {
         Schema.transform(Inner, data => ({ b: [data] })),
       ]),
     ])
-    expect(Config.toString()).to.equal('{ c: number } & ({ b: number } | { a: number, d: number })')
+    expect(Config.toString()).to.equal('{ c?: number } & ({ b: number } | { a: number, d?: number })')
 
     // modify original data during adaptation
     const original = { a: 1, c: 3, e: 5 }

@@ -328,11 +328,13 @@ defineMethod('number', [], () => 'number')
 defineMethod('boolean', [], () => 'boolean')
 defineMethod('array', ['inner'], ({ inner }) => `${inner.toString(true)}[]`)
 defineMethod('dict', ['inner', 'sKey'], ({ inner, sKey }) => `{ [key: ${sKey.toString()}]: ${inner.toString()} }`)
-defineMethod('tuple', ['list'], ({ list }) => `[${list.map(({ toString }) => toString()).join(', ')}]`)
+defineMethod('tuple', ['list'], ({ list }) => `[${list.map((inner) => inner.toString()).join(', ')}]`)
 
 defineMethod('object', ['dict'], ({ dict }) => {
   if (Object.keys(dict).length === 0) return '{}'
-  return `{ ${Object.entries(dict).map(([key, { toString }]) => `${key}: ${toString()}`).join(', ')} }`
+  return `{ ${Object.entries(dict).map(([key, inner]) => {
+    return `${key}${inner.meta.required ? '' : '?'}: ${inner.toString()}`
+  }).join(', ')} }`
 })
 
 defineMethod('union', ['list'], ({ list }, inline) => {
@@ -341,7 +343,7 @@ defineMethod('union', ['list'], ({ list }, inline) => {
 })
 
 defineMethod('intersect', ['list'], ({ list }) => {
-  return `${list.map(({ toString }) => toString(true)).join(' & ')}`
+  return `${list.map((inner) => inner.toString(true)).join(' & ')}`
 })
 
 defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner.toString(isInner))
