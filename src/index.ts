@@ -260,7 +260,7 @@ Schema.extend('object', (data, { dict }, strict) => {
   return [result]
 })
 
-Schema.extend('union', (data, { list }) => {
+Schema.extend('union', (data, { list, toString }) => {
   const messages: string[] = []
   for (const inner of list) {
     try {
@@ -269,7 +269,7 @@ Schema.extend('union', (data, { list }) => {
       messages.push(error.message)
     }
   }
-  throw new TypeError(`expected union but got ${JSON.stringify(data)}`)
+  throw new TypeError(`expected ${toString} but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('intersect', (data, { list }) => {

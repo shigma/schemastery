@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/schemastery?style=flat-square)](https://www.npmjs.com/package/schemastery)
 
-Yet another schema validator.
+Type Driven Schema Validator.
 
 ## Features
 
@@ -133,7 +133,7 @@ validate('foo')       // TypeError
 
 ### Schema.array(inner)
 
-Assert that the value is an array of `subtype`. The default value will be `[]` if not specified.
+Assert that the value is an array of `inner`.
 
 ```js
 const validate = Schema.array(Schema.number())
@@ -146,7 +146,7 @@ validate([0, '1'])          // TypeError
 
 ### Schema.dict(inner)
 
-Assert that the value is a dictionary of `subtype`. The default value will be `{}` if not specified.
+Assert that the value is a dictionary of `inner`.
 
 ```js
 const validate = Schema.dict(Schema.number())
@@ -159,7 +159,7 @@ validate({ a: 0, b: '1' })  // TypeError
 
 ### Schema.tuple(list)
 
-Assert that the value is a tuple whose each element is of corresponding subtype. The default value will be `[]` if not specified.
+Assert that the value is a tuple whose each element is of corresponding subtype.
 
 ```js
 const validate = Schema.tuple([
@@ -175,7 +175,7 @@ validate([0, '1'])          // [0, '1']
 
 ### Schema.object(dict)
 
-Assert that the value is an object whose each property is of corresponding subtype. The default value will be `{}` if not specified.
+Assert that the value is an object whose each property is of corresponding subtype.
 
 ```js
 const validate = Schema.object({
