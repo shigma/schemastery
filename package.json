@@ -1,7 +1,7 @@
 {
   "name": "schemastery",
   "description": "type driven schema validator",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "index.js",
   "typings": "lib/index.d.ts",
   "files": [

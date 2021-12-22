@@ -314,6 +314,11 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
           default: schema[key] = args[index]
         }
       })
+      if (name === 'object' || name === 'dict') {
+        schema.meta.default = {}
+      } else if (name === 'array' || name === 'tuple') {
+        schema.meta.default = []
+      }
       return schema
     },
   })
