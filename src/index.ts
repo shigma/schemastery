@@ -269,7 +269,7 @@ Schema.extend('union', (data, { list, toString }) => {
       messages.push(error.message)
     }
   }
-  throw new TypeError(`expected ${toString} but got ${JSON.stringify(data)}`)
+  throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
 })
 
 Schema.extend('intersect', (data, { list }) => {
