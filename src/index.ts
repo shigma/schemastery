@@ -19,6 +19,7 @@ export interface Schema<S = any, T = S> extends Schema.Base<T> {
   required(): Schema<S, T>
   hidden(): Schema<S, T>
   adaptive(): Schema<S, T>
+  role(text: string): Schema<S, T>
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
@@ -58,6 +59,7 @@ export namespace Schema {
     required?: boolean
     hidden?: boolean
     adaptive?: boolean
+    role?: string
     description?: string
     comment?: string
   }
@@ -121,7 +123,7 @@ for (const key of ['required', 'hidden', 'adaptive']) {
   })
 }
 
-for (const key of ['default', 'comment', 'description']) {
+for (const key of ['default', 'role', 'comment', 'description']) {
   Object.assign(Schema.prototype, {
     [key](value: any) {
       this.meta[key] = value
