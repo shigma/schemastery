@@ -289,16 +289,16 @@ describe('Schema API', () => {
       a: Schema.number().required(),
       d: Schema.number().default(0),
     })
-    expect(Inner.toString()).to.equal('{ a: number, d?: number }')
 
     const Config = Schema.intersect([
-      Schema.object({ c: Schema.number() }),
+      Schema.intersect([
+        Schema.object({ c: Schema.number() }),
+      ]),
       Schema.union([
-        Schema.object({ b: Schema.number().required() }),
+        Schema.object({ b: Schema.array(Inner).required() }),
         Schema.transform(Inner, data => ({ b: [data] })),
       ]),
     ])
-    expect(Config.toString()).to.equal('{ c?: number } & ({ b: number } | { a: number, d?: number })')
 
     // modify original data during adaptation
     const original = { a: 1, c: 3, e: 5 }
@@ -310,7 +310,6 @@ describe('Schema API', () => {
     expect(() => new Config({ a: '' })).to.throw()
     // @ts-expect-error
     expect(() => new Config({ b: {} })).to.throw()
-    // @ts-expect-error
     expect(() => new Config({ b: [{ c: 3 }] })).to.throw()
     // @ts-expect-error
     expect(() => new Config({ a: 1, c: 'foo' })).to.throw()

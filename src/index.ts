@@ -138,7 +138,7 @@ Schema.extend = function extend(type: string, resolve) {
   resolvers[type] = resolve
 }
 
-Schema.resolve = function resolve(data, schema, hint) {
+Schema.resolve = function resolve(data, schema, strict) {
   if (!schema) return [data]
 
   if (isNullable(data)) {
@@ -149,7 +149,7 @@ Schema.resolve = function resolve(data, schema, hint) {
   }
 
   const callback = resolvers[schema.type]
-  if (callback) return callback(data, schema, hint)
+  if (callback) return callback(data, schema, strict)
   throw new TypeError(`unsupported type "${schema.type}"`)
 }
 
@@ -274,13 +274,13 @@ Schema.extend('union', (data, { list, toString }) => {
   throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
 })
 
-Schema.extend('intersect', (data, { list }) => {
+Schema.extend('intersect', (data, { list }, strict) => {
   const result = {}
   for (const inner of list) {
     const value = Schema.resolve(data, inner, true)[0]
     Object.assign(result, value)
   }
-  if (isObject(data)) merge(result, data)
+  if (!strict && isObject(data)) merge(result, data)
   return [result]
 })
 
