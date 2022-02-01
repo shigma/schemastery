@@ -9,7 +9,7 @@ function isObject(data: any) {
   return data && typeof data === 'object' && !Array.isArray(data)
 }
 
-export interface Schema<S = any, T = S> extends Schema.Base<T> {
+interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data: S): T
   (data?: null): T
   new (data: S): T
@@ -25,7 +25,7 @@ export interface Schema<S = any, T = S> extends Schema.Base<T> {
   description(text: string): Schema<S, T>
 }
 
-export namespace Schema {
+namespace Schema {
   export type From<T> =
     | T extends string | number | boolean ? Schema<T>
     : T extends Schema ? T
@@ -96,7 +96,7 @@ export namespace Schema {
 
 const kSchema = Symbol('schemastery')
 
-export const Schema = function (options: Schema.Base) {
+const Schema = function (options: Schema.Base) {
   const schema = function (data: any) {
     return Schema.resolve(data, schema)[0]
   } as Schema
@@ -355,4 +355,4 @@ defineMethod('intersect', ['list'], ({ list }) => {
 
 defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner.toString(isInner))
 
-export default Schema
+export = Schema
