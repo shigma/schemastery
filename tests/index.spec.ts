@@ -62,6 +62,17 @@ describe('Schema API', () => {
     expect(() => config(1)).to.throw()
   })
 
+  it('function', () => {
+    const config = Schema.function()
+    expect(config.toString()).to.equal('function')
+
+    expect(config(() => {})).to.be.a('function')
+    expect(config(null)).to.equal(null)
+
+    // @ts-expect-error
+    expect(() => config(1)).to.throw()
+  })
+
   it('is', () => {
     const config = Schema.is(RegExp)
     expect(config.toString()).to.equal('RegExp')

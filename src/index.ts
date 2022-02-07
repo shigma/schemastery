@@ -83,6 +83,7 @@ namespace Schema {
     string(): Schema<string>
     number(): Schema<number>
     boolean(): Schema<boolean>
+    function(): Schema<(...args: any) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
     dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
@@ -198,6 +199,11 @@ Schema.extend('number', (data) => {
 Schema.extend('boolean', (data) => {
   if (typeof data === 'boolean') return [data]
   throw new TypeError(`expected boolean but got ${data}`)
+})
+
+Schema.extend('function', (data) => {
+  if (typeof data === 'function') return [data]
+  throw new TypeError(`expected function but got ${data}`)
 })
 
 Schema.extend('is', (data, { callback }) => {
@@ -333,6 +339,7 @@ defineMethod('const', ['value'], ({ value }) => typeof value === 'string' ? JSON
 defineMethod('string', [], () => 'string')
 defineMethod('number', [], () => 'number')
 defineMethod('boolean', [], () => 'boolean')
+defineMethod('function', [], () => 'function')
 defineMethod('array', ['inner'], ({ inner }) => `${inner.toString(true)}[]`)
 defineMethod('dict', ['inner', 'sKey'], ({ inner, sKey }) => `{ [key: ${sKey.toString()}]: ${inner.toString()} }`)
 defineMethod('tuple', ['list'], ({ list }) => `[${list.map((inner) => inner.toString()).join(', ')}]`)
