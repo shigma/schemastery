@@ -39,15 +39,16 @@ describe('Schema API', () => {
   })
 
   it('number', () => {
-    const config = Schema.number().default(123)
+    const config = Schema.number().min(1).step(2).default(123)
     expect(config.toString()).to.equal('number')
 
-    expect(config(456)).to.equal(456)
-    expect(config(0)).to.equal(0)
+    expect(config(345)).to.equal(345)
     expect(config(null)).to.equal(123)
 
     // @ts-expect-error
     expect(() => config('123')).to.throw()
+    expect(() => config(-1)).to.throw()
+    expect(() => config(456)).to.throw()
   })
 
   it('boolean', () => {

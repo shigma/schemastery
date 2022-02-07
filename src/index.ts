@@ -20,9 +20,13 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   hidden(): Schema<S, T>
   adaptive(): Schema<S, T>
   role(text: string): Schema<S, T>
+  link(link: string): Schema<S, T>
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
+  max(value: number): Schema<S, T>
+  min(value: number): Schema<S, T>
+  step(value: number): Schema<S, T>
 }
 
 namespace Schema {
@@ -60,8 +64,12 @@ namespace Schema {
     hidden?: boolean
     adaptive?: boolean
     role?: string
+    link?: string
     description?: string
     comment?: string
+    max?: number
+    min?: number
+    step?: number
   }
 
   type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
@@ -124,7 +132,7 @@ for (const key of ['required', 'hidden', 'adaptive']) {
   })
 }
 
-for (const key of ['default', 'role', 'comment', 'description']) {
+for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](value: any) {
       this.meta[key] = value
@@ -191,9 +199,15 @@ Schema.extend('string', (data) => {
   throw new TypeError(`expected string but got ${data}`)
 })
 
-Schema.extend('number', (data) => {
-  if (typeof data === 'number') return [data]
-  throw new TypeError(`expected number but got ${data}`)
+Schema.extend('number', (data, { meta }) => {
+  const { max = Infinity, min = -Infinity, step } = meta
+  if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
+  if (data > max) throw new TypeError(`expected number <= ${max} but got ${data}`)
+  if (data < min) throw new TypeError(`expected number >= ${min} but got ${data}`)
+  if (step && (data - (meta.min ?? 0)) % step !== 0) {
+    throw new TypeError(`expected number multiple of ${step} but got ${data}`)
+  }
+  return [data]
 })
 
 Schema.extend('boolean', (data) => {
