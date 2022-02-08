@@ -36,6 +36,7 @@ namespace Schema {
     : T extends typeof String ? Schema<string>
     : T extends typeof Number ? Schema<number>
     : T extends typeof Boolean ? Schema<boolean>
+    : T extends typeof Function ? Schema<Function>
     : T extends Constructor<infer S> ? Schema<S>
     : never
 
@@ -90,8 +91,10 @@ namespace Schema {
     const<T>(value: T): Schema<T>
     string(): Schema<string>
     number(): Schema<number>
+    natural(): Schema<number>
+    percent(): Schema<number>
     boolean(): Schema<boolean>
-    function(): Schema<(...args: any) => any>
+    function(): Schema<Function>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
     dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
@@ -174,11 +177,20 @@ Schema.from = function from(source: any) {
       case String: return Schema.string()
       case Number: return Schema.number()
       case Boolean: return Schema.boolean()
+      case Function: return Schema.function()
       default: return Schema.is(source)
     }
   } else {
     throw new TypeError(`cannot infer schema from ${source}`)
   }
+}
+
+Schema.natural = function natural() {
+  return Schema.number().step(1).min(0)
+}
+
+Schema.percent = function percent() {
+  return Schema.number().step(0.01).min(0).max(1).role('slider')
 }
 
 Schema.extend('any', (data) => {
@@ -204,7 +216,7 @@ Schema.extend('number', (data, { meta }) => {
   if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
   if (data > max) throw new TypeError(`expected number <= ${max} but got ${data}`)
   if (data < min) throw new TypeError(`expected number >= ${min} but got ${data}`)
-  if (step && (data - (meta.min ?? 0)) % step !== 0) {
+  if (step && Math.abs(data - (meta.min ?? 0)) % step >= Number.EPSILON) {
     throw new TypeError(`expected number multiple of ${step} but got ${data}`)
   }
   return [data]
@@ -340,6 +352,9 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
         schema.meta.default = {}
       } else if (name === 'array' || name === 'tuple') {
         schema.meta.default = []
+      } else if (name === 'union') {
+        const child = schema.list.find(item => !isNullable(item.meta.default))
+        if (child) schema.meta.default = child.meta.default
       }
       return schema
     },
