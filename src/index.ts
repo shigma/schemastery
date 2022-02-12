@@ -36,7 +36,7 @@ namespace Schema {
     : T extends typeof String ? Schema<string>
     : T extends typeof Number ? Schema<number>
     : T extends typeof Boolean ? Schema<boolean>
-    : T extends typeof Function ? Schema<Function>
+    : T extends typeof Function ? Schema<Function, () => any>
     : T extends Constructor<infer S> ? Schema<S>
     : never
 
@@ -94,7 +94,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
-    function(): Schema<Function>
+    function(): Schema<Function, () => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
     dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
