@@ -16,6 +16,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   new (data?: null): T
   [kSchema]: true
   toJSON(): Schema.Base<T>
+  toBSON(): Schema.Base<T>
   required(): Schema<S, T>
   hidden(): Schema<S, T>
   adaptive(): Schema<S, T>
@@ -123,6 +124,10 @@ Schema.prototype = Object.create(Function.prototype)
 Schema.prototype[kSchema] = true
 
 Schema.prototype.toJSON = function toJSON() {
+  return { ...this }
+}
+
+Schema.prototype.toBSON = function toBSON() {
   return { ...this }
 }
 
@@ -391,4 +396,4 @@ defineMethod('intersect', ['list'], ({ list }) => {
 
 defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner.toString(isInner))
 
-export = Schema
+export default Schema
