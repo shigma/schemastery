@@ -1,12 +1,21 @@
-type Dict<T = any, K extends string = string> = { [key in K]?: T }
-type Intersect<U> = (U extends any ? (arg: U) => void : never) extends ((arg: infer I) => void) ? I : never
+export type Dict<T = any, K extends string = string> = { [key in K]?: T }
+export type Intersect<U> = (U extends any ? (arg: U) => void : never) extends ((arg: infer I) => void) ? I : never
 
-function isNullable(value: any) {
+export function isNullable(value: any) {
   return value === null || value === undefined
 }
 
-function isObject(data: any) {
+export function isPlainObject(data: any) {
   return data && typeof data === 'object' && !Array.isArray(data)
+}
+
+export function clone<T>(source: T): T
+export function clone(source: any) {
+  if (!source || typeof source !== 'object') return source
+  if (Array.isArray(source)) return source.map(clone)
+  if (source instanceof Date) return new Date(source.valueOf())
+  if (source instanceof RegExp) return new RegExp(source.source, source.flags)
+  return Object.fromEntries(Object.entries(source).map(([key, value]) => [key, clone(value)]))
 }
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
@@ -162,7 +171,7 @@ Schema.resolve = function resolve(data, schema, strict) {
     if (schema.meta.required) throw new TypeError(`missing required value`)
     const fallback = schema.meta.default
     if (isNullable(fallback)) return [data] as [any]
-    data = fallback
+    data = clone(fallback)
   }
 
   const callback = resolvers[schema.type]
@@ -254,7 +263,7 @@ Schema.extend('array', (data, { inner }) => {
 })
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
-  if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result = {}
   for (const key in data) {
     let rKey: string
@@ -287,7 +296,7 @@ function merge(result: any, data: any) {
 }
 
 Schema.extend('object', (data, { dict }, strict) => {
-  if (!isObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result = {}
   for (const key in dict) {
     const value = property(data, key, dict[key])
@@ -317,13 +326,13 @@ Schema.extend('intersect', (data, { list }, strict) => {
     const value = Schema.resolve(data, inner, true)[0]
     Object.assign(result, value)
   }
-  if (!strict && isObject(data)) merge(result, data)
+  if (!strict && isPlainObject(data)) merge(result, data)
   return [result]
 })
 
 Schema.extend('transform', (data, { inner, callback }) => {
   const [result, adapted = data] = Schema.resolve(data, inner, true)
-  if (isObject(data)) {
+  if (isPlainObject(data)) {
     const temp = {}
     for (const key in result) {
       if (!(key in data)) continue
