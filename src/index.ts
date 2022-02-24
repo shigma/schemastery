@@ -141,8 +141,9 @@ Schema.prototype.toBSON = function toBSON() {
 for (const key of ['required', 'hidden']) {
   Object.assign(Schema.prototype, {
     [key](value = true) {
-      this.meta[key] = value
-      return this
+      const schema = Schema(this)
+      schema.meta = { ...schema.meta, [key]: value }
+      return schema
     },
   })
 }
@@ -150,8 +151,9 @@ for (const key of ['required', 'hidden']) {
 for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](value: any) {
-      this.meta[key] = value
-      return this
+      const schema = Schema(this)
+      schema.meta = { ...schema.meta, [key]: value }
+      return schema
     },
   })
 }
