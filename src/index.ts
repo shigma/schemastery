@@ -168,7 +168,7 @@ Schema.resolve = function resolve(data, schema, strict) {
   if (isNullable(data)) {
     if (schema.meta.required) throw new TypeError(`missing required value`)
     const fallback = schema.meta.default
-    if (isNullable(fallback)) return [data] as [any]
+    if (isNullable(fallback)) return [data]
     data = clone(fallback)
   }
 
@@ -364,9 +364,6 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
         schema.meta.default = {}
       } else if (name === 'array' || name === 'tuple') {
         schema.meta.default = []
-      } else if (name === 'union') {
-        const child = schema.list.find(item => !isNullable(item.meta.default))
-        if (child) schema.meta.default = child.meta.default
       }
       return schema
     },

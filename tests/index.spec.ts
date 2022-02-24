@@ -187,6 +187,7 @@ describe('Schema API', () => {
     const config = Schema.union([1, 2] as const)
     expect(config.toString()).to.equal('1 | 2')
 
+    expect(config(null)).to.equal(null)
     expect(config(2)).to.equal(2)
 
     // @ts-expect-error
