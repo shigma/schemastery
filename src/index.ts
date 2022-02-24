@@ -105,7 +105,7 @@ namespace Schema {
     function(): Schema<Function, () => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
-    dict<X, Y extends string | Schema<any, string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
+    dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
     tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
     object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
     union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
@@ -353,7 +353,7 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
       schema.toString = format.bind(null, schema)
       keys.forEach((key, index) => {
         switch (key) {
-          case 'sKey': schema.sKey = Schema.from(args[index]); break
+          case 'sKey': schema.sKey = args[index] ?? Schema.string(); break
           case 'inner': schema.inner = Schema.from(args[index]); break
           case 'list': schema.list = args[index].map(Schema.from); break
           case 'dict': schema.dict = Object.fromEntries(Object.entries(args[index]).map(([key, value]) => [key, Schema.from(value)])); break

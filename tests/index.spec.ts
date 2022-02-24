@@ -103,7 +103,7 @@ describe('Schema API', () => {
 
   it('dict (basic)', () => {
     const Config = Schema.dict(RegExp)
-    expect(Config.toString()).to.equal('{ [key: any]: RegExp }')
+    expect(Config.toString()).to.equal('{ [key: string]: RegExp }')
 
     expect(new Config({ a: /1/ })).to.deep.equal({ a: /1/ })
     expect(new Config({})).to.deep.equal({})
