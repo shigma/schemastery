@@ -26,9 +26,8 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   [kSchema]: true
   toJSON(): Schema.Base<T>
   toBSON(): Schema.Base<T>
-  required(): Schema<S, T>
-  hidden(): Schema<S, T>
-  adaptive(): Schema<S, T>
+  required(value?: boolean): Schema<S, T>
+  hidden(value?: boolean): Schema<S, T>
   role(text: string): Schema<S, T>
   link(link: string): Schema<S, T>
   default(value: T): Schema<S, T>
@@ -73,7 +72,6 @@ namespace Schema {
     default?: T extends {} ? Partial<T> : T
     required?: boolean
     hidden?: boolean
-    adaptive?: boolean
     role?: string
     link?: string
     description?: string
@@ -140,10 +138,10 @@ Schema.prototype.toBSON = function toBSON() {
   return { ...this }
 }
 
-for (const key of ['required', 'hidden', 'adaptive']) {
+for (const key of ['required', 'hidden']) {
   Object.assign(Schema.prototype, {
-    [key]() {
-      this.meta[key] = true
+    [key](value = true) {
+      this.meta[key] = value
       return this
     },
   })
