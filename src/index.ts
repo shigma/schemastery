@@ -188,11 +188,11 @@ Schema.from = function from(source: any) {
     return source
   } else if (typeof source === 'function') {
     switch (source) {
-      case String: return Schema.string()
-      case Number: return Schema.number()
-      case Boolean: return Schema.boolean()
-      case Function: return Schema.function()
-      default: return Schema.is(source)
+      case String: return Schema.string().required()
+      case Number: return Schema.number().required()
+      case Boolean: return Schema.boolean().required()
+      case Function: return Schema.function().required()
+      default: return Schema.is(source).required()
     }
   } else {
     throw new TypeError(`cannot infer schema from ${source}`)

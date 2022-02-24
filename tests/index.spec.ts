@@ -195,8 +195,8 @@ describe('Schema API', () => {
 
   it('union (object)', () => {
     const validate = Schema.union([
-      Schema.object({ a: 'foo', b: Number }),
-      Schema.object({ a: 'bar', b: String }),
+      Schema.object({ a: 'foo', b: Schema.number() }),
+      Schema.object({ a: 'bar', b: Schema.string() }),
     ])
     expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", b?: string }')
 
@@ -239,10 +239,10 @@ describe('Schema API', () => {
   it('intersect (nested)', () => {
     const validate = Schema.intersect([
       Schema.intersect([
-        Schema.object({ a: String }),
-        Schema.object({ b: Number }),
+        Schema.object({ a: Schema.string() }),
+        Schema.object({ b: Schema.number() }),
       ]),
-      Schema.object({ c: Boolean }),
+      Schema.object({ c: Schema.boolean() }),
     ])
     expect(validate.toString()).to.equal('{ a?: string } & { b?: number } & { c?: boolean }')
 
