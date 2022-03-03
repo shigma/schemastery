@@ -328,8 +328,24 @@ describe('Schema API', () => {
     expect(() => new Config({ a: 1, c: 'foo' })).to.throw()
   })
 
-  it('serialization', () => {
-    const validate = new Schema(JSON.parse(JSON.stringify(Schema.number())))
+  it('recursive adaptive structure', () => {
+    const original = Schema.object({ id: Number })
+    const validate = Schema.union([
+      original,
+      Schema.transform(Number, (id) => ({ id, children: [] })),
+    ]).required()
+    original.set('children', Schema.array(validate))
+
+    expect(validate(1)).to.deep.equal({ id: 1, children: [] })
+    expect(validate({ id: 1 })).to.deep.equal({ id: 1, children: [] })
+    expect(validate({ id: 1, children: [2] })).to.deep.equal({ id: 1, children: [{ id: 2, children: [] }] })
+    expect(() => validate(null)).to.throw()
+    expect(() => validate({ id: 1, children: {} })).to.throw()
+  })
+
+  it('serialization (basic)', () => {
+    const Number = Schema.number()
+    const validate = new Schema(JSON.parse(JSON.stringify(Number)))
 
     expect(validate(null)).to.equal(null)
     expect(validate(0)).to.equal(0)

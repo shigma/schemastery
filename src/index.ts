@@ -9,13 +9,17 @@ export function isPlainObject(data: any) {
   return data && typeof data === 'object' && !Array.isArray(data)
 }
 
+export function valueMap<T, U>(object: Dict<T>, transform: (value: T, key: string) => U): Dict<U> {
+  return Object.fromEntries(Object.entries(object).map(([key, value]) => [key, transform(value, key)]))
+}
+
 export function clone<T>(source: T): T
 export function clone(source: any) {
   if (!source || typeof source !== 'object') return source
   if (Array.isArray(source)) return source.map(clone)
   if (source instanceof Date) return new Date(source.valueOf())
   if (source instanceof RegExp) return new RegExp(source.source, source.flags)
-  return Object.fromEntries(Object.entries(source).map(([key, value]) => [key, clone(value)]))
+  return valueMap(source, clone)
 }
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
@@ -36,6 +40,8 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
   step(value: number): Schema<S, T>
+  set(key: string, value: Schema): Schema<S, T>
+  push(value: Schema): Schema<S, T>
 }
 
 namespace Schema {
@@ -131,11 +137,16 @@ Schema.prototype = Object.create(Function.prototype)
 Schema.prototype[kSchema] = true
 
 Schema.prototype.toJSON = function toJSON() {
-  return { ...this }
 }
 
-Schema.prototype.toBSON = function toBSON() {
-  return { ...this }
+Schema.prototype.set = function set(key, value) {
+  this.dict[key] = value
+  return this
+}
+
+Schema.prototype.push = function push(value) {
+  this.list.push(value)
+  return this
 }
 
 for (const key of ['required', 'hidden']) {
@@ -353,12 +364,12 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
     [name](...args: any[]) {
       const schema = new Schema({ type: name })
       schema.toString = format.bind(null, schema)
-      keys.forEach((key, index) => {
+      keys.forEach((key: string, index) => {
         switch (key) {
           case 'sKey': schema.sKey = args[index] ?? Schema.string(); break
           case 'inner': schema.inner = Schema.from(args[index]); break
           case 'list': schema.list = args[index].map(Schema.from); break
-          case 'dict': schema.dict = Object.fromEntries(Object.entries(args[index]).map(([key, value]) => [key, Schema.from(value)])); break
+          case 'dict': schema.dict = valueMap(args[index], Schema.from); break
           default: schema[key] = args[index]
         }
       })
