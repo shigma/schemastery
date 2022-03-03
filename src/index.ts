@@ -316,7 +316,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
     }
     result[rKey] = property(data, key, inner)
     data[rKey] = data[key]
-    delete data[key]
+    if (key !== rKey) delete data[key]
   }
   return [result]
 })
