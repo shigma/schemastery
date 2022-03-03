@@ -29,7 +29,6 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   new (data?: null): T
   [kSchema]: true
   toJSON(): Schema.Base<T>
-  toBSON(): Schema.Base<T>
   required(value?: boolean): Schema<S, T>
   hidden(value?: boolean): Schema<S, T>
   role(text: string): Schema<S, T>
@@ -63,7 +62,8 @@ namespace Schema {
   export type Resolve = (data: any, schema?: Schema, strict?: boolean) => [any, any?]
 
   export interface Base<T = any> {
-    type: string
+    uid?: number
+    type?: string
     sKey?: Schema
     inner?: Schema
     list?: Schema[]
@@ -71,6 +71,7 @@ namespace Schema {
     callback?: Function
     value?: T
     meta?: Meta<T>
+    refs?: Dict<Schema>
     toString(inline?: boolean): string
   }
 
@@ -120,14 +121,31 @@ namespace Schema {
   }
 }
 
+let index = 0
+
 const kSchema = Symbol('schemastery')
 
 const Schema = function (options: Schema.Base) {
   const schema = function (data: any) {
     return Schema.resolve(data, schema)[0]
   } as Schema
-  Object.setPrototypeOf(schema, Schema.prototype)
+
+  if (options.refs) {
+    const refs = valueMap(options.refs, options => new Schema(options))
+    const getRef = (uid: any) => refs[uid]
+    for (const key in refs) {
+      const options = refs[key]
+      options.sKey = getRef(options.sKey)
+      options.inner = getRef(options.inner)
+      options.list = options.list && options.list.map(getRef)
+      options.dict = options.dict && valueMap(options.dict, getRef)
+    }
+    return refs[options.uid]
+  }
+
   Object.assign(schema, options)
+  Object.defineProperty(schema, 'uid', { value: index++ })
+  Object.setPrototypeOf(schema, Schema.prototype)
   schema.meta ||= {}
   return schema
 } as Schema.Static
@@ -136,7 +154,19 @@ Schema.prototype = Object.create(Function.prototype)
 
 Schema.prototype[kSchema] = true
 
+let refs: Dict<Schema>
+
 Schema.prototype.toJSON = function toJSON() {
+  if (refs) {
+    refs[this.uid] ??= JSON.parse(JSON.stringify({ ...this }))
+    return this.uid
+  }
+
+  refs = { [this.uid]: { ...this } }
+  refs[this.uid] = JSON.parse(JSON.stringify({ ...this }))
+  const result = { uid: this.uid, refs }
+  refs = null
+  return result
 }
 
 Schema.prototype.set = function set(key, value) {
