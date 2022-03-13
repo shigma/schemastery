@@ -50,7 +50,7 @@ namespace Schema {
     : T extends typeof String ? Schema<string>
     : T extends typeof Number ? Schema<number>
     : T extends typeof Boolean ? Schema<boolean>
-    : T extends typeof Function ? Schema<Function, () => any>
+    : T extends typeof Function ? Schema<Function, (...args: any[]) => any>
     : T extends Constructor<infer S> ? Schema<S>
     : never
 
@@ -109,7 +109,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
-    function(): Schema<Function, () => any>
+    function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
     dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
@@ -271,8 +271,11 @@ Schema.extend('number', (data, { meta }) => {
   if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
   if (data > max) throw new TypeError(`expected number <= ${max} but got ${data}`)
   if (data < min) throw new TypeError(`expected number >= ${min} but got ${data}`)
-  if (step && Math.abs(data - (meta.min ?? 0)) % step >= Number.EPSILON) {
-    throw new TypeError(`expected number multiple of ${step} but got ${data}`)
+  if (step) {
+    const quotient = Math.abs(data - (meta.min ?? 0)) % step
+    if (quotient >= Number.EPSILON && quotient < step - Number.EPSILON) {
+      throw new TypeError(`expected number multiple of ${step} but got ${data}`)
+    }
   }
   return [data]
 })
