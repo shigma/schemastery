@@ -301,8 +301,12 @@ function property(data: any, key: keyof any, schema?: Schema) {
   return value
 }
 
-Schema.extend('array', (data, { inner }) => {
+Schema.extend('array', (data, { inner, meta }) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  const { max = Infinity, min = -Infinity } = meta
+  const length = data.length
+  if (length > max) throw new TypeError(`expected array length <= ${max} but got ${length}`)
+  if (length < min) throw new TypeError(`expected array length >= ${min} but got ${length}`)
   return [data.map((_, index) => property(data, index, inner))]
 })
 
