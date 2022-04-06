@@ -42,9 +42,7 @@ describe('Schema API', () => {
     const config = Schema.string().min(5).max(6)
     expect(config('dress')).to.equal('dress')
 
-    // @ts-expect-error
     expect(() => config('sock')).to.throw()
-    // @ts-expect-error
     expect(() => config('uniform')).to.throw()
   })
 
@@ -116,9 +114,7 @@ describe('Schema API', () => {
 
     expect(new Config(['dress', 'skirt'])).to.deep.equal(['dress', 'skirt'])
 
-    // @ts-expect-error
     expect(() => new Config(['dress'])).to.throw()
-    // @ts-expect-error
     expect(() => new Config(['dress', 'skirt', 'socks', 'swimming suit'])).to.throw()
   })
 
