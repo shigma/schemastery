@@ -270,7 +270,7 @@ function checkWithinRange(data: number, meta: Schema.Meta<any>, description: str
 
 Schema.extend('string', (data, { meta }) => {
   if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
-  checkWithinRange((data as string).length, meta, 'string length')
+  checkWithinRange(data.length, meta, 'string length')
   return [data]
 })
 
@@ -309,7 +309,7 @@ function property(data: any, key: keyof any, schema?: Schema) {
 
 Schema.extend('array', (data, { inner, meta }) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  checkWithinRange((data as any[]).length, meta, 'array length')
+  checkWithinRange(data.length, meta, 'array length')
   return [data.map((_, index) => property(data, index, inner))]
 })
 
