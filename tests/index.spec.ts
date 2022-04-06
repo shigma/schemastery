@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import Schema from 'schemastery/src'
+import Schema from '../src'
 
 describe('Schema API', () => {
   it('unknown', () => {
@@ -36,6 +36,16 @@ describe('Schema API', () => {
 
     // @ts-expect-error
     expect(() => config(123)).to.throw()
+  })
+
+  it('string (length)', () => {
+    const config = Schema.string().min(5).max(6)
+    expect(config('dress')).to.equal('dress')
+
+    // @ts-expect-error
+    expect(() => config('sock')).to.throw()
+    // @ts-expect-error
+    expect(() => config('uniform')).to.throw()
   })
 
   it('number', () => {
@@ -99,6 +109,17 @@ describe('Schema API', () => {
     expect(() => new Config({})).to.throw()
     // @ts-expect-error
     expect(() => new Config([0])).to.throw()
+  })
+
+  it('array (length)', () => {
+    const Config = Schema.array(String).min(2).max(3)
+
+    expect(new Config(['dress', 'skirt'])).to.deep.equal(['dress', 'skirt'])
+
+    // @ts-expect-error
+    expect(() => new Config(['dress'])).to.throw()
+    // @ts-expect-error
+    expect(() => new Config(['dress', 'skirt', 'socks', 'swimming suit'])).to.throw()
   })
 
   it('dict (basic)', () => {
