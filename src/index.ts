@@ -275,7 +275,6 @@ Schema.extend('string', (data, { meta }) => {
 })
 
 Schema.extend('number', (data, { meta }) => {
-  if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
   checkWithinRange(data, meta, 'number')
   const { step } = meta
   if (step) {
