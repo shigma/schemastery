@@ -38,6 +38,14 @@ describe('Schema API', () => {
     expect(() => config(123)).to.throw()
   })
 
+  it('string (length)', () => {
+    const config = Schema.string().min(5).max(6)
+    expect(config('dress')).to.equal('dress')
+
+    expect(() => config('sock')).to.throw()
+    expect(() => config('uniform')).to.throw()
+  })
+
   it('number', () => {
     const config = Schema.number().min(1).step(2).default(123)
     expect(config.toString()).to.equal('number')
@@ -99,6 +107,15 @@ describe('Schema API', () => {
     expect(() => new Config({})).to.throw()
     // @ts-expect-error
     expect(() => new Config([0])).to.throw()
+  })
+
+  it('array (length)', () => {
+    const Config = Schema.array(String).min(2).max(3)
+
+    expect(new Config(['dress', 'skirt'])).to.deep.equal(['dress', 'skirt'])
+
+    expect(() => new Config(['dress'])).to.throw()
+    expect(() => new Config(['dress', 'skirt', 'socks', 'swimming suit'])).to.throw()
   })
 
   it('dict (basic)', () => {

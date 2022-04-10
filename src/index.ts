@@ -261,16 +261,22 @@ Schema.extend('const', (data, { value }) => {
   throw new TypeError(`expected ${value} but got ${data}`)
 })
 
-Schema.extend('string', (data) => {
-  if (typeof data === 'string') return [data]
-  throw new TypeError(`expected string but got ${data}`)
+function checkWithinRange(data: number, meta: Schema.Meta<any>, description: string) {
+  const { max = Infinity, min = -Infinity } = meta
+  if (data > max) throw new TypeError(`expected ${description} <= ${max} but got ${data}`)
+  if (data < min) throw new TypeError(`expected ${description} >= ${min} but got ${data}`)
+}
+
+Schema.extend('string', (data, { meta }) => {
+  if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
+  checkWithinRange(data.length, meta, 'string length')
+  return [data]
 })
 
 Schema.extend('number', (data, { meta }) => {
-  const { max = Infinity, min = -Infinity, step } = meta
   if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
-  if (data > max) throw new TypeError(`expected number <= ${max} but got ${data}`)
-  if (data < min) throw new TypeError(`expected number >= ${min} but got ${data}`)
+  checkWithinRange(data, meta, 'number')
+  const { step } = meta
   if (step) {
     const quotient = Math.abs(data - (meta.min ?? 0)) % step
     if (quotient >= Number.EPSILON && quotient < step - Number.EPSILON) {
@@ -301,8 +307,9 @@ function property(data: any, key: keyof any, schema?: Schema) {
   return value
 }
 
-Schema.extend('array', (data, { inner }) => {
+Schema.extend('array', (data, { inner, meta }) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  checkWithinRange(data.length, meta, 'array length')
   return [data.map((_, index) => property(data, index, inner))]
 })
 
