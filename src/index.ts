@@ -99,7 +99,7 @@ namespace Schema {
     new <T = any>(options: Base<T>): Schema<T>
     prototype: Schema
     resolve: Resolve
-    from<T>(source: T): Schema<From<T>>
+    from<T = any>(source?: T): Schema<From<T>>
     extend(type: string, resolve: Resolve): void
     any(): Schema<any>
     never(): Schema<never>
