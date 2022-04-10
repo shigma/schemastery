@@ -262,7 +262,6 @@ Schema.extend('const', (data, { value }) => {
 })
 
 function checkWithinRange(data: number, meta: Schema.Meta<any>, description: string) {
-  if (typeof data !== 'number') throw new TypeError(`expected ${description} but got ${data}`)
   const { max = Infinity, min = -Infinity } = meta
   if (data > max) throw new TypeError(`expected ${description} <= ${max} but got ${data}`)
   if (data < min) throw new TypeError(`expected ${description} >= ${min} but got ${data}`)
@@ -275,6 +274,7 @@ Schema.extend('string', (data, { meta }) => {
 })
 
 Schema.extend('number', (data, { meta }) => {
+  if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
   checkWithinRange(data, meta, 'number')
   const { step } = meta
   if (step) {
