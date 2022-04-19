@@ -1,12 +1,13 @@
 # Schemastery
 
+[![Codecov](https://img.shields.io/codecov/c/github/cosmotype/schemastery?style=flat-square)](https://codecov.io/gh/cosmotype/schemastery)
 [![npm](https://img.shields.io/npm/v/schemastery?style=flat-square)](https://www.npmjs.com/package/schemastery)
 
 Type Driven Schema Validator.
 
 ## Features
 
-- **Lightweight.** Zero dependencies.
+- **Lightweight.** Much smaller than other validation libraries.
 - **Easy to use.** You can use any schema as a function or constructor directly.
 - **Powerful.** Schemastery supports some advanced types such as `union`, `intersect` and `transform`.
 - **Extensible.** You can create your own schema types via `Schema.extend()`.

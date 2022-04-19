@@ -1,4 +1,4 @@
-import { clone, Dict, Intersect, isNullable, isPlainObject, valueMap } from 'tikloot'
+import { clone, Dict, Intersect, isNullable, isPlainObject, valueMap } from 'cosmokit'
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data: S): T
