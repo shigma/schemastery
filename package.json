@@ -1,9 +1,8 @@
 {
   "name": "schemastery",
   "description": "type driven schema validator",
-  "version": "3.2.0",
-  "main": "index.js",
-  "module": "lib/browser.js",
+  "version": "3.3.0",
+  "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib",
@@ -11,12 +10,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shigma/schemastery.git"
+    "url": "git+https://github.com/cosmotype/schemastery.git"
   },
   "bugs": {
-    "url": "https://github.com/shigma/schemastery/issues"
+    "url": "https://github.com/cosmotype/schemastery/issues"
   },
-  "homepage": "https://github.com/shigma/schemastery",
+  "homepage": "https://github.com/cosmotype/schemastery",
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
   "scripts": {
@@ -34,5 +33,8 @@
     "mocha": "^9.2.2",
     "rimraf": "^3.0.2",
     "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "tikloot": "^1.0.2"
   }
 }
