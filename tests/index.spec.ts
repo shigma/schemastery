@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import Schema from 'schemastery/src'
+import Schema from '../src'
 
 describe('Schema API', () => {
   it('unknown', () => {

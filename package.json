@@ -5,8 +5,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
-    "lib",
-    "index.js"
+    "lib"
   ],
   "repository": {
     "type": "git",
@@ -20,12 +19,15 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc -b",
-    "test": "mocha",
-    "test:text": "rimraf coverage && c8 -r text test",
-    "test:json": "rimraf coverage && c8 -r json test",
-    "test:html": "rimraf coverage && c8 -r html test"
+    "test": "mocha -r esbuild-register tests/*.spec.ts",
+    "test:text": "rimraf coverage && c8 -r text yarn test",
+    "test:json": "rimraf coverage && c8 -r json yarn test",
+    "test:html": "rimraf coverage && c8 -r html yarn test"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^17.0.23",
     "c8": "^7.11.0",
     "chai": "^4.3.6",
     "esbuild": "^0.14.31",
