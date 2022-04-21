@@ -69,7 +69,7 @@ namespace Schema {
   type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
   type TupleT<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
   type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> } & Dict
-  type ObjectT<X extends Dict> = { [K in keyof X]?: TypeT<X[K]> } & Dict
+  type ObjectT<X extends Dict> = { [K in keyof X]: TypeT<X[K]> } & Dict
   type Constructor<T = any> = new (...args: any[]) => T
 
   export interface Static {
