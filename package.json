@@ -1,8 +1,9 @@
 {
   "name": "schemastery",
   "description": "Type driven schema validator",
-  "version": "3.3.2",
-  "main": "lib/index.js",
+  "version": "3.3.3",
+  "main": "lib/node.js",
+  "module": "lib/browser.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib"
@@ -37,6 +38,6 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
-    "cosmokit": "^1.1.1"
+    "cosmokit": "^1.1.2"
   }
 }
