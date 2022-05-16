@@ -1,0 +1,37 @@
+{
+  "name": "schemastery",
+  "description": "Type driven schema validator",
+  "version": "3.3.3",
+  "main": "lib/node.js",
+  "module": "lib/browser.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shigma/schemastery.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/shigma/schemastery/issues"
+  },
+  "homepage": "https://github.com/shigma/schemastery",
+  "author": "Shigma <shigma10826@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^17.0.31",
+    "c8": "^7.11.2",
+    "chai": "^4.3.6",
+    "esbuild": "^0.14.38",
+    "esbuild-register": "^3.3.2",
+    "mocha": "^9.2.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "cosmokit": "^1.1.2"
+  }
+}
