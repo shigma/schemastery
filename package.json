@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "build": "yakumo tsc",
-    "test": "yakumo mocha",
+    "test": "yakumo mocha core",
     "test:text": "rimraf coverage && c8 -r text yarn test",
     "test:json": "rimraf coverage && c8 -r json yarn test",
     "test:html": "rimraf coverage && c8 -r html yarn test"

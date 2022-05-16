@@ -87,7 +87,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
-    bitset<K extends string>(dict: Dict<number, K>): Schema<readonly K[], number>
+    bitset<K extends string>(dict: Dict<number, K>): Schema<number | readonly K[], number>
     function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
@@ -271,6 +271,7 @@ Schema.extend('boolean', (data) => {
 })
 
 Schema.extend('bitset', (data, { dict }) => {
+  if (typeof data === 'number') return [data]
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
   let result = 0
   for (const value of data) {
@@ -278,7 +279,7 @@ Schema.extend('bitset', (data, { dict }) => {
     if (!(value in dict)) throw new TypeError(`unknown value ${value}`)
     result |= dict[value]
   }
-  return [result]
+  return [result, result]
 })
 
 Schema.extend('function', (data) => {
