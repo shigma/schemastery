@@ -45,7 +45,7 @@ namespace Schema {
     sKey?: Schema
     inner?: Schema
     list?: Schema[]
-    dict?: Dict<Schema>
+    dict?: Dict<any>
     callback?: Function
     value?: T
     meta?: Meta<T>
@@ -87,6 +87,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
+    bitset<K extends string>(dict: Dict<number, K>): Schema<readonly K[], number>
     function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
@@ -269,6 +270,17 @@ Schema.extend('boolean', (data) => {
   throw new TypeError(`expected boolean but got ${data}`)
 })
 
+Schema.extend('bitset', (data, { dict }) => {
+  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  let result = 0
+  for (const value of data) {
+    if (typeof value !== 'string') throw new TypeError(`expected string but got ${value}`)
+    if (!(value in dict)) throw new TypeError(`unknown value ${value}`)
+    result |= dict[value]
+  }
+  return [result]
+})
+
 Schema.extend('function', (data) => {
   if (typeof data === 'function') return [data]
   throw new TypeError(`expected function but got ${data}`)
@@ -393,7 +405,7 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
       })
       if (name === 'object' || name === 'dict') {
         schema.meta.default = {}
-      } else if (name === 'array' || name === 'tuple') {
+      } else if (name === 'array' || name === 'tuple' || name === 'bitset') {
         schema.meta.default = []
       }
       return schema
@@ -408,6 +420,7 @@ defineMethod('const', ['value'], ({ value }) => typeof value === 'string' ? JSON
 defineMethod('string', [], () => 'string')
 defineMethod('number', [], () => 'number')
 defineMethod('boolean', [], () => 'boolean')
+defineMethod('bitset', ['dict'], () => 'bitset')
 defineMethod('function', [], () => 'function')
 defineMethod('array', ['inner'], ({ inner }) => `${inner.toString(true)}[]`)
 defineMethod('dict', ['inner', 'sKey'], ({ inner, sKey }) => `{ [key: ${sKey.toString()}]: ${inner.toString()} }`)
