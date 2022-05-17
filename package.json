@@ -1,10 +1,23 @@
 {
-  "name": "@root/schemastery",
-  "version": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "packages/*"
+  "name": "schemastery",
+  "description": "Type driven schema validator",
+  "version": "3.4.0",
+  "main": "lib/node.js",
+  "module": "lib/browser.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shigma/schemastery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shigma/schemastery/issues"
+  },
+  "homepage": "https://github.com/shigma/schemastery",
+  "author": "Shigma <shigma10826@gmail.com>",
+  "license": "MIT",
   "scripts": {
     "build": "yakumo tsc",
     "test": "yakumo mocha core",
