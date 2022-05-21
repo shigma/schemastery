@@ -1,10 +1,8 @@
 import { clone, Dict, Intersect, isNullable, isPlainObject, valueMap } from 'cosmokit'
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
-  (data: S): T
-  (data?: null): T
-  new (data: S): T
-  new (data?: null): T
+  (data?: S): T
+  new (data?: S): T
   [kSchema]: true
   toJSON(): Schema.Base<T>
   required(value?: boolean): Schema<S, T>

@@ -1,7 +1,7 @@
 {
   "name": "schemastery",
   "description": "Type driven schema validator",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "main": "lib/node.js",
   "module": "lib/browser.js",
   "typings": "lib/index.d.ts",
@@ -19,8 +19,8 @@
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "yakumo tsc",
-    "test": "yakumo mocha core",
+    "build": "tsc -b",
+    "test": "mocha -r esbuild-register tests/*.spec.ts",
     "test:text": "rimraf coverage && c8 -r text yarn test",
     "test:json": "rimraf coverage && c8 -r json yarn test",
     "test:html": "rimraf coverage && c8 -r html yarn test"
@@ -34,18 +34,6 @@
     "esbuild-register": "^3.3.2",
     "mocha": "^9.2.2",
     "rimraf": "^3.0.2",
-    "typescript": "^4.6.4",
-    "yakumo": "^0.2.4",
-    "yakumo-esbuild": "^0.2.1",
-    "yakumo-mocha": "^0.2.4",
-    "yakumo-publish": "^0.2.2",
-    "yakumo-tsc": "^0.2.1",
-    "yakumo-upgrade": "^0.2.2",
-    "yakumo-version": "^0.2.3"
-  },
-  "yakumo": {
-    "require": [
-      "esbuild-register"
-    ]
+    "typescript": "^4.6.4"
   }
 }

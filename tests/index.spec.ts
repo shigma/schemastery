@@ -21,6 +21,7 @@ describe('Schema API', () => {
     const config = Schema.never()
     expect(config.toString()).to.equal('never')
 
+    // @ts-expect-error (null is not assignable to never)
     expect(config(null)).to.equal(null)
     // @ts-expect-error
     expect(() => config(123)).to.throw()

@@ -6,8 +6,8 @@ describe('Intersect', () => {
     const validate = Schema.intersect([String, Number])
     expect(validate.toString()).to.equal('string & number')
 
+    // @ts-expect-error (null is not assignable to never)
     expect(validate(null)).to.equal(null)
-
     // @ts-expect-error
     expect(() => validate('foo')).to.throw()
     // @ts-expect-error
