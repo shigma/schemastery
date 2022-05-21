@@ -43,7 +43,8 @@ namespace Schema {
     sKey?: Schema
     inner?: Schema
     list?: Schema[]
-    dict?: Dict<any>
+    dict?: Dict<Schema>
+    bits?: Dict<number>
     callback?: Function
     value?: T
     meta?: Meta<T>
@@ -85,7 +86,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
-    bitset<K extends string>(dict: Dict<number, K>): Schema<number | readonly K[], number>
+    bitset<K extends string>(bits: Dict<number, K>): Schema<number | readonly K[], number>
     function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
@@ -268,14 +269,14 @@ Schema.extend('boolean', (data) => {
   throw new TypeError(`expected boolean but got ${data}`)
 })
 
-Schema.extend('bitset', (data, { dict }) => {
+Schema.extend('bitset', (data, { bits }) => {
   if (typeof data === 'number') return [data]
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
   let result = 0
   for (const value of data) {
     if (typeof value !== 'string') throw new TypeError(`expected string but got ${value}`)
-    if (!(value in dict)) throw new TypeError(`unknown value ${value}`)
-    result |= dict[value]
+    if (!(value in bits)) throw new TypeError(`unknown value ${value}`)
+    result |= bits[value]
   }
   return [result, result]
 })
@@ -399,13 +400,23 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
           case 'inner': schema.inner = Schema.from(args[index]); break
           case 'list': schema.list = args[index].map(Schema.from); break
           case 'dict': schema.dict = valueMap(args[index], Schema.from); break
+          case 'bits': {
+            schema.bits = {}
+            for (const key in args[index]) {
+              if (typeof args[index][key] !== 'number') continue
+              schema.bits[key] = args[index][key]
+            }
+            break
+          }
           default: schema[key] = args[index]
         }
       })
       if (name === 'object' || name === 'dict') {
         schema.meta.default = {}
-      } else if (name === 'array' || name === 'tuple' || name === 'bitset') {
+      } else if (name === 'array' || name === 'tuple') {
         schema.meta.default = []
+      } else if (name === 'bitset') {
+        schema.meta.default = 0
       }
       return schema
     },
@@ -419,7 +430,7 @@ defineMethod('const', ['value'], ({ value }) => typeof value === 'string' ? JSON
 defineMethod('string', [], () => 'string')
 defineMethod('number', [], () => 'number')
 defineMethod('boolean', [], () => 'boolean')
-defineMethod('bitset', ['dict'], () => 'bitset')
+defineMethod('bitset', ['bits'], () => 'bitset')
 defineMethod('function', [], () => 'function')
 defineMethod('array', ['inner'], ({ inner }) => `${inner.toString(true)}[]`)
 defineMethod('dict', ['inner', 'sKey'], ({ inner, sKey }) => `{ [key: ${sKey.toString()}]: ${inner.toString()} }`)
