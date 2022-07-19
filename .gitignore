@@ -1,6 +1,7 @@
 lib
 dist
-temp
+.temp
+.cache
 
 tsconfig.temp.json
 
