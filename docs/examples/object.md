@@ -1,5 +1,0 @@
----
-layout: example
----
-
-# Object
