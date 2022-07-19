@@ -2,6 +2,8 @@ lib
 dist
 temp
 
+tsconfig.temp.json
+
 todo.md
 yarn.lock
 coverage/

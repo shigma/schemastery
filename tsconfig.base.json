@@ -1,7 +1,5 @@
 {
   "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src",
     "target": "es2019",
     "module": "commonjs",
     "declaration": true,
@@ -13,7 +11,4 @@
     "moduleResolution": "node",
     "strictBindCallApply": true,
   },
-  "include": [
-    "src",
-  ],
 }

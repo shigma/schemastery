@@ -1,31 +1,24 @@
 {
-  "name": "schemastery",
-  "description": "Type driven schema validator",
-  "version": "3.4.3",
-  "main": "lib/index.cjs",
-  "module": "lib/index.mjs",
-  "typings": "lib/index.d.ts",
-  "files": [
-    "lib"
+  "name": "@root/schemastery",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "yarn@1.22.19",
+  "workspaces": [
+    "docs",
+    "packages/*"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shigma/schemastery.git"
-  },
-  "bugs": {
-    "url": "https://github.com/shigma/schemastery/issues"
-  },
-  "homepage": "https://github.com/shigma/schemastery",
-  "author": "Shigma <shigma10826@gmail.com>",
-  "license": "MIT",
   "scripts": {
-    "compile:cjs": "esbuild src/index.ts --outfile=lib/index.cjs --bundle --sourcemap --platform=node --external:cosmokit --target=es2019",
-    "compile:esm": "esbuild src/index.ts --outfile=lib/index.mjs --bundle --sourcemap --platform=neutral --external:cosmokit --target=esnext",
-    "build": "yarn compile:cjs && yarn compile:esm && tsc -b",
-    "test": "mocha -r esbuild-register tests/*.spec.ts",
-    "test:text": "rimraf coverage && c8 -r text yarn test",
-    "test:json": "rimraf coverage && c8 -r json yarn test",
-    "test:html": "rimraf coverage && c8 -r html yarn test"
+    "build:js": "yakumo esbuild core",
+    "build:dts": "yakumo tsc core",
+    "build": "yarn build:js && yarn build:dts",
+    "dtsc": "yakumo tsc",
+    "bump": "yakumo version",
+    "dep": "yakumo upgrade",
+    "pub": "yakumo publish",
+    "test": "yakumo mocha",
+    "test:json": "shx rm -rf coverage && c8 -r json yarn test",
+    "test:html": "shx rm -rf coverage && c8 -r html yarn test",
+    "test:text": "shx rm -rf coverage && c8 -r text yarn test"
   },
   "devDependencies": {
     "@types/chai": "^4.3.1",
@@ -36,10 +29,19 @@
     "esbuild": "^0.14.48",
     "esbuild-register": "^3.3.3",
     "mocha": "^9.2.2",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.7.2"
+    "shx": "^0.3.4",
+    "typescript": "^4.7.2",
+    "yakumo": "^0.2.8",
+    "yakumo-esbuild": "^0.2.3",
+    "yakumo-mocha": "^0.2.5",
+    "yakumo-publish": "^0.2.5",
+    "yakumo-tsc": "^0.2.5",
+    "yakumo-upgrade": "^0.2.3",
+    "yakumo-version": "^0.2.5"
   },
-  "dependencies": {
-    "cosmokit": "^1.2.1"
+  "yakumo": {
+    "require": [
+      "esbuild-register"
+    ]
   }
 }
