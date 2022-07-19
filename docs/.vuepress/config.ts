@@ -18,6 +18,8 @@ export default {
         '/examples/union-select.md',
         '/examples/union-arbitrary.md',
         '/examples/union-tagged.md',
+        '/examples/intersect.md',
+        '/examples/transform.md',
       ],
     }],
   }),
