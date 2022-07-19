@@ -12,6 +12,9 @@ export default {
       text: 'Examples',
       children: [
         '/examples/number.md',
+        '/examples/string.md',
+        '/examples/boolean.md',
+        '/examples/bitset.md',
         '/examples/object.md',
       ],
     }],
