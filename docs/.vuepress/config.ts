@@ -16,6 +16,9 @@ export default {
 
   bundler: viteBundler({
     viteOptions: {
+      resolve: {
+        dedupe: ['vue'],
+      },
       server: {
         fs: {
           strict: false,
