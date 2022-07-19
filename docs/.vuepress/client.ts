@@ -27,6 +27,7 @@ import 'element-plus/es/components/scrollbar/style/css'
 import 'element-plus/es/components/select/style/css'
 import 'element-plus/es/components/slider/style/css'
 import 'element-plus/es/components/switch/style/css'
+import './index.scss'
 
 export default defineClientConfig({
   enhance({ app, router, siteData }) {

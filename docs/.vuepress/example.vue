@@ -3,7 +3,7 @@
     <template #page v-if="frontmatter.layout === 'example'">
       <div class="example-layout">
         <div class="left">
-          <div class="top">
+          <div class="top theme-default-content">
             <content></content>
           </div>
           <div class="bottom">
@@ -11,7 +11,6 @@
           </div>
         </div>
         <div class="right">
-          <h1>{{ page.title }}</h1>
           <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
         </div>
       </div>
@@ -44,11 +43,11 @@ watch(() => initial.value, () => {
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
 .example-layout {
   position: relative;
-  padding-top: var(--navbar-height);
+  // padding-top: var(--navbar-height);
   padding-left: var(--sidebar-width);
   height: 100vh;
   box-sizing: border-box;
@@ -63,6 +62,8 @@ watch(() => initial.value, () => {
     border-right: 1px solid var(--c-border);
     display: flex;
     flex-direction: column;
+    max-width: 50%;
+    background-color: var(--code-bg-color);
     transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
 
     > * {
@@ -73,6 +74,13 @@ watch(() => initial.value, () => {
       box-sizing: border-box;
       border-bottom: 1px solid var(--c-border);
       transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
+      padding: 0 2rem;
+    }
+  }
+
+  .right {
+    .k-form {
+      padding: 2rem 2rem;
     }
   }
 }
