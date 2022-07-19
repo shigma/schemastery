@@ -15,6 +15,8 @@ export default {
         '/examples/string.md',
         '/examples/boolean.md',
         '/examples/bitset.md',
+        '/examples/array.md',
+        '/examples/dict.md',
         '/examples/union-select.md',
         '/examples/union-arbitrary.md',
         '/examples/union-tagged.md',
