@@ -1,5 +1,6 @@
 import { defineClientConfig } from '@vuepress/client'
 import form from 'schemastery-vue'
+import Schema from 'schemastery'
 import {
   ElButton,
   ElCheckbox,
@@ -28,6 +29,14 @@ import 'element-plus/es/components/select/style/css'
 import 'element-plus/es/components/slider/style/css'
 import 'element-plus/es/components/switch/style/css'
 import './index.scss'
+
+declare global {
+  interface Window {
+    Schema: typeof Schema
+  }
+}
+
+self.Schema = Schema
 
 export default defineClientConfig({
   enhance({ app, router, siteData }) {

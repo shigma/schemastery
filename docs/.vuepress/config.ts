@@ -24,6 +24,9 @@ export default {
         '/examples/transform.md',
       ],
     }],
+    themePlugins: {
+      git: false,
+    },
   }),
 
   markdown: {

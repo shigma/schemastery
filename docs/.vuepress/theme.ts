@@ -7,6 +7,6 @@ export default (options: DefaultThemeOptions): Theme => ({
   extends: defaultTheme(options),
 
   layouts: {
-    example: require.resolve('./example.vue'),
+    example: require.resolve('./example.ts'),
   },
 })

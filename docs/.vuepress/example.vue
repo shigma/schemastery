@@ -1,38 +1,28 @@
 <template>
-  <parent-layout>
-    <template #page v-if="frontmatter.layout === 'example'">
-      <div class="example-layout">
-        <div class="left">
-          <div class="top theme-default-content">
-            <content></content>
-          </div>
-          <div class="bottom">
-            {{ config }}
-          </div>
-        </div>
-        <div class="right">
-          <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
-        </div>
+  <div class="example-layout">
+    <div class="left">
+      <div class="top theme-default-content">
+        <content></content>
       </div>
-    </template>
-  </parent-layout>
+      <div class="bottom">
+        {{ config }}
+      </div>
+    </div>
+    <div class="right">
+      <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 
-import Schema from 'schemastery'
-import Page from '@theme/Page.vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { clone } from 'schemastery-vue'
-import { usePageData, usePageFrontmatter } from '@vuepress/client'
-import ParentLayout from '@vuepress/theme-default/lib/client/layouts/Layout.vue'
+import { usePageFrontmatter } from '@vuepress/client'
 
-const page = usePageData()
 const frontmatter = usePageFrontmatter()
 
-self.Schema = Schema
-
-const schema = eval(frontmatter.value.code)
+const schema = computed(() => eval(frontmatter.value.code))
 
 const initial = ref(null)
 const config = ref(null)
