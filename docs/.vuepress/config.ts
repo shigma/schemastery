@@ -1,10 +1,12 @@
-import { viteBundler } from 'vuepress'
+import { viteBundler, defineUserConfig } from 'vuepress'
 import { shikiPlugin } from '@vuepress/plugin-shiki'
+import { resolve } from 'path'
 import theme from './theme'
 
-export default {
+export default defineUserConfig({
   title: 'Schemastery',
   base: '/schemastery/',
+  dest: resolve(__dirname, 'dist/schemastery'),
 
   theme: theme({
     navbar: false,
@@ -63,4 +65,4 @@ export default {
       },
     },
   }),
-}
+})

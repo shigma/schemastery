@@ -16,27 +16,22 @@ import {
   ElSwitch,
 } from 'element-plus'
 
-import 'element-plus/es/components/button/style/css'
-import 'element-plus/es/components/checkbox/style/css'
-import 'element-plus/es/components/dropdown/style/css'
-import 'element-plus/es/components/dropdown-item/style/css'
-import 'element-plus/es/components/dropdown-menu/style/css'
-import 'element-plus/es/components/input/style/css'
-import 'element-plus/es/components/input-number/style/css'
-import 'element-plus/es/components/radio/style/css'
-import 'element-plus/es/components/scrollbar/style/css'
-import 'element-plus/es/components/select/style/css'
-import 'element-plus/es/components/slider/style/css'
-import 'element-plus/es/components/switch/style/css'
+// import 'element-plus/es/components/button/style/css'
+// import 'element-plus/es/components/checkbox/style/css'
+// import 'element-plus/es/components/dropdown/style/css'
+// import 'element-plus/es/components/dropdown-item/style/css'
+// import 'element-plus/es/components/dropdown-menu/style/css'
+// import 'element-plus/es/components/input/style/css'
+// import 'element-plus/es/components/input-number/style/css'
+// import 'element-plus/es/components/radio/style/css'
+// import 'element-plus/es/components/scrollbar/style/css'
+// import 'element-plus/es/components/select/style/css'
+// import 'element-plus/es/components/slider/style/css'
+// import 'element-plus/es/components/switch/style/css'
+import 'element-plus/dist/index.css'
 import './index.scss'
 
-declare global {
-  interface Window {
-    Schema: typeof Schema
-  }
-}
-
-self.Schema = Schema
+globalThis.Schema = Schema
 
 export default defineClientConfig({
   enhance({ app, router, siteData }) {

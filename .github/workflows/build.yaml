@@ -32,3 +32,26 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
           name: codecov
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v1
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - name: Install
+        run: yarn
+      - name: Build
+        run: yarn build:docs
+      - name: Deploy
+        if: ${{ github.repository == 'shigma/schemastery' && github.ref == 'refs/heads/master' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .vuepress/dist/schemastery
+          publish_branch: pages
+          force_orphan: true
