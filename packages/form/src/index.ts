@@ -3,6 +3,7 @@ import Form from './form.vue'
 import Markdown from './markdown.vue'
 import Schema from './schema.vue'
 
+export * from './icons'
 export * from './utils'
 
 export default function (app: App) {

@@ -2,7 +2,7 @@
   <div class="schema-item">
     <div class="actions" v-if="!disabled">
       <el-dropdown placement="bottom-start" @command="$emit('command', $event)">
-        <k-icon name="cog"></k-icon>
+        <icon-cog></icon-cog>
         <template #dropdown>
           <el-dropdown-menu>
             <slot name="menu"></slot>
@@ -23,6 +23,8 @@
 </template>
 
 <script lang="ts" setup>
+
+import { IconCog } from './icons'
 
 defineProps<{
   disabled?: boolean

@@ -13,10 +13,11 @@
   <el-input v-else v-model="value" :disabled="disabled"
     :style="{ width: schema.meta.role === 'url' ? '18rem' : '12rem' }" :type="type">
     <template #suffix v-if="schema.meta.role === 'url'">
-      <k-icon name="external" @click="onClickExternal(value)"></k-icon>
+      <icon-external @click="onClickExternal(value)"></icon-external>
     </template>
     <template #suffix v-else-if="schema.meta.role === 'secret'">
-      <k-icon :name="showPass ? 'eye' : 'eye-slash'" @click="showPass = !showPass"></k-icon>
+      <icon-eye v-if="showPass" @click="showPass = !showPass"></icon-eye>
+      <icon-eye-slash v-else @click="showPass = !showPass"></icon-eye-slash>
     </template>
   </el-input>
 </template>
@@ -24,6 +25,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType, ref } from 'vue'
+import { IconExternal, IconEye, IconEyeSlash } from './icons'
 import Schema from 'schemastery'
 
 const emit = defineEmits(['update:modelValue'])
