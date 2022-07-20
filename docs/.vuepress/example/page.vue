@@ -1,14 +1,14 @@
 <template>
-  <div class="example-layout">
-    <div class="left">
-      <div class="top theme-default-content">
+  <div class="example-container">
+    <div class="left-container">
+      <div class="top-container theme-default-content">
         <content></content>
       </div>
-      <div class="bottom">
+      <div class="bottom-container">
         {{ config }}
       </div>
     </div>
-    <div class="right">
+    <div class="right-container">
       <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
     </div>
   </div>
@@ -35,7 +35,7 @@ watch(() => initial.value, () => {
 
 <style lang="scss">
 
-.example-layout {
+.example-container {
   position: relative;
   // padding-top: var(--navbar-height);
   padding-left: var(--sidebar-width);
@@ -47,7 +47,7 @@ watch(() => initial.value, () => {
     flex: 1;
   }
 
-  .left {
+  > .left-container {
     box-sizing: border-box;
     border-right: 1px solid var(--c-border);
     display: flex;
@@ -60,7 +60,7 @@ watch(() => initial.value, () => {
       flex: 1;
     }
 
-    .top {
+    > .top-container {
       box-sizing: border-box;
       border-bottom: 1px solid var(--c-border);
       transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
@@ -68,7 +68,7 @@ watch(() => initial.value, () => {
     }
   }
 
-  .right {
+  .right-container {
     .k-form {
       padding: 2rem 2rem;
     }
