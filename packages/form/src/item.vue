@@ -39,11 +39,11 @@ defineEmits(['command'])
 .schema-item {
   position: relative;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--el-border-color);
   transition: var(--color-transition);
 
   &:first-child, :not(.schema-item):not(.k-schema-group) + & {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--el-border-color);
   }
 
   & + h2 {
@@ -105,15 +105,15 @@ defineEmits(['command'])
   }
 
   &.changed .actions {
-    border-right-color: var(--primary);
+    border-right-color: var(--el-color-primary);
   }
 
   &.required .actions {
-    border-right-color: var(--error);
+    border-right-color: var(--el-color-error);
   }
 
   &.invalid .actions {
-    border-right-color: var(--warning);
+    border-right-color: var(--el-color-warning);
   }
 }
 

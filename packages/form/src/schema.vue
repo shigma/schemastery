@@ -251,7 +251,7 @@ function handleCommand(action: string) {
 .k-schema-group {
   position: relative;
   padding-left: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--el-border-color);
 
   &:empty {
     border-bottom: none;

@@ -1,14 +1,12 @@
 <template>
   <parent-layout>
     <template #page v-if="page.frontmatter.layout === 'example'">
-      <keep-alive>
-        <example-page :key="page.key"></example-page>
-      </keep-alive>
+      <example-page :key="page.key"></example-page>
     </template>
     <template #sidebar-bottom>
-      <ul class="bottom">
-        <li class="sidebar-item sidebar-heading">
-          Appearance <toggle-color-mode-button></toggle-color-mode-button>
+      <ul class="sidebar-bottom">
+        <li class="sidebar-item sidebar-heading appearance">
+          Appearance<toggle-color-mode-button></toggle-color-mode-button>
         </li>
       </ul>
     </template>
@@ -26,3 +24,22 @@ import ExamplePage from './page.vue'
 const page = usePageData()
 
 </script>
+
+<style lang="scss" scoped>
+
+.sidebar-bottom {
+  margin-top: auto;
+  margin-bottom: 1rem;
+}
+
+.appearance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  button {
+    margin: 0;
+  }
+}
+
+</style>

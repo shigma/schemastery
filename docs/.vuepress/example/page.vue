@@ -69,6 +69,10 @@ watch(() => initial.value, () => {
   }
 
   .right-container {
+    h2, h3 {
+      border-bottom: none;
+    }
+
     .k-form {
       padding: 2rem 2rem;
     }
