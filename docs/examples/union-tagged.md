@@ -9,7 +9,7 @@ code: |
     Schema.union([
       Schema.object({
         type: Schema.const('foo').required(),
-        value: Schema.number().description('请输入一个数值。'),
+        value: Schema.number().default(114514).description('请输入一个数值。'),
       }).description('特殊配置 1'),
       Schema.object({
         type: Schema.const('bar').required(),
@@ -32,7 +32,7 @@ export default Schema.intersect([
   Schema.union([
     Schema.object({
       type: Schema.const('foo').required(),
-      value: Schema.number(),
+      value: Schema.number().default(114514),
     }).description('特殊配置 1'),
     Schema.object({
       type: Schema.const('bar').required(),

@@ -1,16 +1,23 @@
 <template>
   <div class="example-container">
     <div class="left-container">
-      <div class="top-container theme-default-content">
-        <content></content>
-      </div>
-      <div class="bottom-container">
-        {{ config }}
-      </div>
+      <section class="theme-default-content">
+        <main>
+          <content></content>
+        </main>
+      </section>
+      <section>
+        <header>Input</header>
+        <main>{{ config ?? 'null' }}</main>
+      </section>
+      <section>
+        <header>Output</header>
+        <main>{{ output ?? 'null' }}</main>
+      </section>
     </div>
-    <div class="right-container">
+    <section class="right-container">
       <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -27,8 +34,10 @@ const schema = computed(() => eval(frontmatter.value.code))
 const initial = ref(null)
 const config = ref(null)
 
-watch(() => initial.value, () => {
-  config.value = clone(initial.value)
+const output = computed(() => {
+  try {
+    return schema.value(config.value)
+  } catch (e) {}
 })
 
 </script>
@@ -56,15 +65,27 @@ watch(() => initial.value, () => {
     background-color: var(--code-bg-color);
     transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
 
-    > * {
-      flex: 1;
+    .theme-default-content h1 {
+      font-size: 1.75rem;
+      margin-top: 1rem;
+
+      + p {
+        margin-top: 1rem;
+      }
     }
 
-    > .top-container {
+    section {
+      flex: 1;
       box-sizing: border-box;
-      border-bottom: 1px solid var(--c-border);
       transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
-      padding: 0 2rem;
+
+      main {
+        padding: 1rem 2rem;
+      }
+    }
+
+    section + section {
+      border-top: 1px solid var(--c-border);
     }
   }
 
@@ -76,6 +97,16 @@ watch(() => initial.value, () => {
     .k-form {
       padding: 2rem 2rem;
     }
+  }
+
+  section header {
+    height: 3rem;
+    border-bottom: 1px solid var(--c-border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 1.125rem;
   }
 }
 

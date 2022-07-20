@@ -67,6 +67,9 @@
   --brand-darker: #454ce1;
   --brand-dimm: rgba(44, 46, 82, 0.08);
   --color-transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+
+  --sidebar-width: 240px;
+  --sidebar-width-mobile: 240px;
 }
 
 :root {
@@ -178,6 +181,10 @@ aside.sidebar {
     font-size: 16px;
     color: var(--c-text-1);
   }
+}
+
+div[class*=language-] {
+  background-color: transparent;
 }
 
 div[class*=language-]::before {
