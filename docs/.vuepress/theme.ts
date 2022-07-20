@@ -9,4 +9,8 @@ export default (options: DefaultThemeOptions): Theme => ({
   layouts: {
     Layout: require.resolve('./layout.vue'),
   },
+
+  alias: {
+    '@theme/Sidebar.vue': require.resolve('./sidebar.vue'),
+  },
 })

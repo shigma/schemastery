@@ -2,9 +2,11 @@
   <div class="example-container">
     <div class="left-container">
       <section class="theme-default-content">
-        <main>
-          <content></content>
-        </main>
+        <el-scrollbar>
+          <main>
+            <content></content>
+          </main>
+        </el-scrollbar>
       </section>
       <section>
         <header>Input</header>
@@ -16,7 +18,9 @@
       </section>
     </div>
     <section class="right-container">
-      <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
+      <el-scrollbar>
+        <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
+      </el-scrollbar>
     </section>
   </div>
 </template>
@@ -64,17 +68,8 @@ const output = computed(() => {
     background-color: var(--code-bg-color);
     transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
 
-    .theme-default-content h1 {
-      font-size: 1.75rem;
-      margin-top: 1rem;
-
-      + p {
-        margin-top: 1rem;
-      }
-    }
-
     section {
-      flex: 1;
+      flex: 1 1 auto;
       box-sizing: border-box;
       transition: transform var(--t-transform), background-color var(--t-color), border-color var(--t-color);
 
@@ -83,8 +78,17 @@ const output = computed(() => {
       }
     }
 
-    section + section {
-      border-top: 1px solid var(--c-border);
+    .theme-default-content {
+      overflow-y: auto;
+
+      h1 {
+        font-size: 1.75rem !important;
+        margin-top: 1rem;
+
+        + p {
+          margin-top: 1rem;
+        }
+      }
     }
   }
 
@@ -100,6 +104,7 @@ const output = computed(() => {
 
   section header {
     height: 3rem;
+    border-top: 1px solid var(--c-border);
     border-bottom: 1px solid var(--c-border);
     padding: 0 2rem;
     display: flex;

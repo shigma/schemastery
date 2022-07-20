@@ -168,6 +168,10 @@ aside.sidebar {
   display: flex;
   flex-direction: column;
 
+  .sidebar-items {
+    padding-bottom: 0;
+  }
+
   .sidebar-items > li {
     margin-bottom: 1rem;
   }
