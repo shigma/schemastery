@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.object({
     text: Schema.string().description('一段普通的文本。'),

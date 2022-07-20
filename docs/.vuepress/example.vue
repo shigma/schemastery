@@ -46,7 +46,6 @@ const output = computed(() => {
 
 .example-container {
   position: relative;
-  // padding-top: var(--navbar-height);
   padding-left: var(--sidebar-width);
   height: 100vh;
   box-sizing: border-box;

@@ -8,7 +8,10 @@ export default {
 
   theme: theme({
     navbar: false,
-    sidebar: ['/', {
+    sidebar: [{
+      text: 'Introduction',
+      link: '/',
+    }, {
       text: 'Basic Types',
       children: [
         '/examples/number.md',
@@ -36,6 +39,7 @@ export default {
   }),
 
   markdown: {
+    headers: false,
     code: {
       lineNumbers: false,
     },

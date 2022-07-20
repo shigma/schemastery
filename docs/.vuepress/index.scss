@@ -255,3 +255,14 @@ div[class*=language-]::before {
 html.dark .el-switch {
   --el-switch-off-color: #72767d;
 }
+
+.theme-container.no-navbar .theme-default-content h1 {
+  margin-top: 3rem;
+}
+
+a > img + span {
+  margin-left: 0.5rem;
+  > .external-link-icon {
+    display: none;
+  }
+}

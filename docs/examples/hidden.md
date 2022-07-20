@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.object({
     foo: Schema.string().description('这是一个可见属性。'),

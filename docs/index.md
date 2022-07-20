@@ -1,3 +1,1 @@
-# Introduction
-
-
+../packages/core/README.md

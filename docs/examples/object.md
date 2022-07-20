@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.object({
     foo: Schema.string().required().description('这是一个必需属性。'),

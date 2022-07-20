@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.object({
     foo: Schema.number().description('一个普通的数值。'),

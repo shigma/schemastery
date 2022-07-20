@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.intersect([
     Schema.object({

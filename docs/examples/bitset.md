@@ -1,5 +1,5 @@
 ---
-layout: example
+example: true
 code: |
   Schema.object({
     intents: Schema
