@@ -9,7 +9,7 @@ export default {
   theme: theme({
     navbar: false,
     sidebar: ['/', {
-      text: 'Examples',
+      text: 'Basic Types',
       children: [
         '/examples/number.md',
         '/examples/string.md',
@@ -18,6 +18,11 @@ export default {
         '/examples/array.md',
         '/examples/dict.md',
         '/examples/object.md',
+      ],
+    }, {
+      text: 'Advanced Types',
+      children: [
+        '/examples/hidden.md',
         '/examples/intersect.md',
         '/examples/union-select.md',
         '/examples/union-arbitrary.md',

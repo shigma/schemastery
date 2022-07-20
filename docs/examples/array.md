@@ -8,7 +8,7 @@ code: |
 
 # Array
 
-Array 类型描述了一个数组，其中的元素满足给定的类型。
+Array 类型描述了一个数组，其中的元素满足给定的类型。例子里的 `Number` 是 `Schema.number()` 的简写。
 
 ```ts
 export default Schema.object({
