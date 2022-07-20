@@ -16,6 +16,7 @@
   "license": "MIT",
   "peerDependencies": {
     "element-plus": "^2",
+    "marked": "^4",
     "vue": "^3"
   },
   "dependencies": {

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "schemastery": ["packages/schemastery/src"],
+      "schemastery": ["packages/core/src"],
     },
   },
   "files": [],
