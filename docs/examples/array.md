@@ -2,7 +2,7 @@
 layout: example
 code: |
   Schema.object({
-    values: Schema.array(Number),
+    values: Schema.array(Number).description('这是一个数组，点击右侧的按钮添加元素。'),
   })
 ---
 

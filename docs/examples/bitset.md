@@ -2,7 +2,9 @@
 layout: example
 code: |
   Schema.object({
-    intents: Schema.bitset({ FOO: 1, BAR: 2, QUX: 4 }).default(5),
+    intents: Schema
+      .bitset({ FOO: 1, BAR: 2, QUX: 4 }).default(5)
+      .description('选择要启用的功能。'),
   })
 ---
 

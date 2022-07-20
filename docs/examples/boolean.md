@@ -2,7 +2,7 @@
 layout: example
 code: |
   Schema.object({
-    enable: Schema.boolean(),
+    enable: Schema.boolean().description('这是一个开关。'),
   })
 ---
 

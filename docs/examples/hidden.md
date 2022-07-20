@@ -2,7 +2,7 @@
 layout: example
 code: |
   Schema.object({
-    foo: Schema.string(),
+    foo: Schema.string().description('这是一个可见属性。'),
     bar: Schema.number().hidden(),
   })
 ---
