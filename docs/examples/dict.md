@@ -2,7 +2,7 @@
 layout: example
 code: |
   Schema.object({
-    values: Schema.dict(Schema.boolean()),
+    values: Schema.dict(Boolean),
   })
 ---
 
@@ -12,6 +12,6 @@ Dict 类型描述了一个对象，其中的键是任意字符串，而值是给
 
 ```ts
 export default Schema.object({
-  values: Schema.dict(Schema.boolean()),
+  values: Schema.dict(Boolean),
 })
 ```

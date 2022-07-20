@@ -9,11 +9,11 @@ code: |
     Schema.union([
       Schema.object({
         type: Schema.const('foo').required(),
-        other: Schema.number(),
+        foo: Schema.number(),
       }),
       Schema.object({
         type: Schema.const('bar').required(),
-        other: Schema.boolean(),
+        bar: Schema.boolean(),
       }),
     ]),
   ])
@@ -30,11 +30,11 @@ export default Schema.intersect([
   Schema.union([
     Schema.object({
       type: Schema.const('foo').required(),
-      other: Schema.number(),
+      foo: Schema.number(),
     }),
     Schema.object({
       type: Schema.const('bar').required(),
-      other: Schema.boolean(),
+      bar: Schema.boolean(),
     }),
   ]),
 ])
