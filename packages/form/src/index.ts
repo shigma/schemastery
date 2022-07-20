@@ -1,5 +1,5 @@
 import { App } from 'vue'
-import Form from './form.vue'
+import Form from './schema-form.vue'
 import Markdown from './markdown.vue'
 import Schema from './schema.vue'
 

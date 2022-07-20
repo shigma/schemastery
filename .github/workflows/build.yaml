@@ -45,7 +45,9 @@ jobs:
           node-version: 16
       - name: Install
         run: yarn
-      - name: Build
+      - name: Build source
+        run: yarn build
+      - name: Build docs
         run: yarn build:docs
       - name: Deploy
         if: ${{ github.repository == 'shigma/schemastery' && github.ref == 'refs/heads/master' }}

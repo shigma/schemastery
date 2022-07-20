@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import Schema from '../src'
+import Schema from 'schemastery'
 
 describe('Tuple', () => {
   it('basic support', () => {
