@@ -9,7 +9,7 @@ code: |
 
 # Hidden
 
-通过 `.hidden()` 声明一个隐藏属性。隐藏属性不可以在表单中配置，但是可以通过 API 传入。
+可以通过 `.hidden()` 声明一个隐藏属性。隐藏属性不会显示在表单中，但是仍然会参与类型检查。
 
 ```ts
 export default Schema.object({
