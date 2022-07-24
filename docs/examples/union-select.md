@@ -3,7 +3,7 @@ example: true
 code: |
   Schema.object({
     choice: Schema.union(['foo', 'bar', 'qux']).description('从三个值中选择一个。'),
-  })
+  }).description('配置项')
 ---
 
 # Union (Select)

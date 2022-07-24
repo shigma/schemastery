@@ -2,7 +2,7 @@
   <template v-if="!schema || schema.meta.hidden"/>
 
   <template v-else-if="schema.type === 'object'">
-    <h2 v-if="schema.meta.description">{{ schema.meta.description }}</h2>
+    <h2 class="k-schema-header" v-if="schema.meta.description">{{ schema.meta.description }}</h2>
     <k-schema v-for="(item, key) in schema.dict" :key="key"
       v-model="config[key]"
       :schema="item"
@@ -100,7 +100,7 @@
 
     <!-- top level array / dict -->
     <template v-else>
-      <h2>
+      <h2 class="k-schema-header">
         {{ schema.meta.description || '配置列表' }}
         <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
       </h2>
@@ -247,6 +247,15 @@ function handleCommand(action: string) {
 </script>
 
 <style lang="scss">
+
+.k-schema-header {
+  font-size: 1.25rem;
+
+  .el-button {
+    float: right;
+    transform: translateY(-3px);
+  }
+}
 
 .k-schema-group {
   position: relative;

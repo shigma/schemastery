@@ -4,7 +4,7 @@ code: |
   Schema.object({
     foo: Schema.string().description('这是一个可见属性。'),
     bar: Schema.number().hidden(),
-  })
+  }).description('配置项')
 ---
 
 # Hidden

@@ -13,7 +13,7 @@ code: |
         bar: Schema.number(),
       }).description('object'),
     ]),
-  })
+  }).description('配置项')
 ---
 
 # Union (Arbitrary)

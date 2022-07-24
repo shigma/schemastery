@@ -6,7 +6,7 @@ code: |
       Schema.array(String),
       Schema.transform(String, value => [value]),
     ]).default([]),
-  })
+  }).description('配置项')
 ---
 
 # Transform

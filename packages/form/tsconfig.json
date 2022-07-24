@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base",
   "compilerOptions": {
     "rootDir": "src",
+    "jsx": "preserve",
   },
   "include": [
     "src",

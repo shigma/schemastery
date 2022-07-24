@@ -3,7 +3,7 @@ example: true
 code: |
   Schema.object({
     values: Schema.dict(Boolean).description('这是一个字典，点击右侧的按钮添加属性。'),
-  })
+  }).description('配置项')
 ---
 
 # Dict

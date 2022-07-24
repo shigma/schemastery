@@ -5,7 +5,7 @@ code: |
     Schema.object({
       shared: Schema.string().description('公用的配置项。'),
       type: Schema.union(['foo', 'bar']).required().description('选择一个类型。'),
-    }),
+    }).description('基础配置'),
     Schema.union([
       Schema.object({
         type: Schema.const('foo').required(),
@@ -28,7 +28,7 @@ export default Schema.intersect([
   Schema.object({
     shared: Schema.string(),
     type: Schema.union(['foo', 'bar']).required(),
-  }),
+  }).description('基础配置'),
   Schema.union([
     Schema.object({
       type: Schema.const('foo').required(),

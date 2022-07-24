@@ -3,7 +3,7 @@ example: true
 code: |
   Schema.object({
     enable: Schema.boolean().description('这是一个开关。'),
-  })
+  }).description('配置项')
 ---
 
 # Boolean

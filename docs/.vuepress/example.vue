@@ -19,7 +19,9 @@
     </div>
     <section class="right-container">
       <el-scrollbar>
-        <k-form :schema="schema" :initial="initial" v-model="config"></k-form>
+        <form>
+          <k-schema :schema="schema" :initial="initial" v-model="config"></k-schema>
+        </form>
       </el-scrollbar>
     </section>
   </div>
@@ -82,8 +84,8 @@ const output = computed(() => {
       overflow-y: auto;
 
       h1 {
-        font-size: 1.75rem !important;
-        margin-top: 1rem;
+        font-size: 1.75rem;
+        margin-top: 1rem !important;
 
         + p {
           margin-top: 1rem;
@@ -97,7 +99,7 @@ const output = computed(() => {
       border-bottom: none;
     }
 
-    .k-form {
+    form {
       padding: 2rem 2rem;
     }
   }

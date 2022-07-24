@@ -5,11 +5,11 @@ code: |
     Schema.object({
       foo: Schema.number(),
       bar: Schema.string(),
-    }),
+    }).description('配置项 1'),
     Schema.object({
       baz: Schema.string(),
       qux: Schema.boolean(),
-    }),
+    }).description('配置项 2'),
   ])
 ---
 
@@ -22,10 +22,10 @@ export default Schema.intersect([
   Schema.object({
     foo: Schema.number(),
     bar: Schema.string(),
-  }).description('Part 1'),
+  }).description('配置项 1'),
   Schema.object({
     baz: Schema.string(),
     qux: Schema.boolean(),
-  }).description('Part 2'),
+  }).description('配置项 2'),
 ])
 ```

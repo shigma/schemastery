@@ -5,7 +5,7 @@ code: |
     text: Schema.string().description('一段普通的文本。'),
     secret: Schema.string().role('secret').default('114514').description('请输入密码。'),
     link: Schema.string().role('url').default('https://github.com').description('点击访问链接。'),
-  })
+  }).description('配置项')
 ---
 
 # String

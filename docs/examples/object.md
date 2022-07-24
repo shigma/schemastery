@@ -7,7 +7,7 @@ code: |
     baz: Schema.object({
       qux: Schema.boolean().description('这是一个嵌套属性。'),
     }),
-  })
+  }).description('配置项')
 ---
 
 # Object
