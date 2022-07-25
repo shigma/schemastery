@@ -11,8 +11,8 @@
   </template>
 
   <el-input v-else v-model="value" :disabled="disabled"
-    :style="{ width: schema.meta.role === 'url' ? '18rem' : '12rem' }" :type="type">
-    <template #suffix v-if="schema.meta.role === 'url'">
+    :style="{ width: isLink ? '16rem' : '12rem' }" :type="type">
+    <template #suffix v-if="isLink">
       <icon-external @click="onClickExternal(value)"></icon-external>
     </template>
     <template #suffix v-else-if="schema.meta.role === 'secret'">
@@ -32,7 +32,6 @@ const emit = defineEmits(['update:modelValue'])
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
-  initial: {},
   modelValue: {},
   disabled: Boolean,
 })
@@ -43,6 +42,8 @@ const value = computed({
   get: () => props.modelValue,
   set: emit.bind(null, 'update:modelValue'),
 })
+
+const isLink = computed(() => ['url', 'link'].includes(props.schema.meta.role))
 
 const type = computed(() => {
   const { type, meta } = props.schema

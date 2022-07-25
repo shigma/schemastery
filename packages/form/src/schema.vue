@@ -1,5 +1,6 @@
 <template>
-  <template v-if="!schema || schema.meta.hidden"/>
+  <template v-if="isHidden"></template>
+  <template v-else-if="schema.type === 'const'"></template>
 
   <template v-else-if="schema.type === 'object'">
     <h2 class="k-schema-header" v-if="schema.meta.description">{{ schema.meta.description }}</h2>
@@ -30,8 +31,6 @@
     </k-schema>
   </template>
 
-  <template v-else-if="schema.type === 'const'"></template>
-
   <schema-item v-else-if="prefix || (!isComposite && schema?.type !== 'union')" :disabled="disabled" :class="{ changed, required, invalid }" @command="handleCommand">
     <template #menu>
       <el-dropdown-item command="discard">撤销更改</el-dropdown-item>
@@ -44,7 +43,7 @@
     </template>
 
     <template #right>
-      <template v-if="schema.type === 'union' && !isRadio">
+      <template v-if="schema.type === 'union' && schema.meta.role !== 'radio'">
         <el-select v-model="selectModel" :disabled="disabled">
           <el-option
             v-for="(item, index) in choices"
@@ -55,13 +54,8 @@
         </el-select>
       </template>
 
-      <template v-if="isPrimitive(active) && (schema.type !== 'union' || active.type !== 'const')">
-        <schema-primitive
-          v-model="config"
-          :initial="initial"
-          :schema="active"
-          :disabled="disabled"
-        ></schema-primitive>
+      <template v-if="isPrimitive">
+        <schema-primitive v-model="config" :schema="active" :disabled="disabled"></schema-primitive>
       </template>
 
       <template v-else-if="isComposite">
@@ -69,7 +63,7 @@
       </template>
     </template>
 
-    <ul class="bottom" v-if="isRadio">
+    <ul class="bottom" v-if="schema.type === 'union' && schema.meta.role === 'radio'">
       <li v-for="item in choices" :key="item.value">
         <el-radio
           v-model="config"
@@ -89,9 +83,13 @@
         ></bit-checkbox>
       </li>
     </ul>
+
+    <div class="bottom" v-else-if="schema.type === 'string' && schema.meta.role === 'textarea'">
+      <el-input autosize v-model="config" type="textarea" :disabled="disabled"></el-input>
+    </div>
   </schema-item>
 
-  <template v-if="schema && !schema.meta.hidden && isComposite">
+  <template v-if="!isHidden && isComposite">
     <div class="k-schema-group" v-if="prefix">
       <schema-group v-model:signal="signal"
         :schema="active" v-model="config" :prefix="prefix" :disabled="disabled" :instant="instant" :initial="initial">
@@ -184,10 +182,13 @@ const selectModel = computed({
   },
 })
 
-const isRadio = computed(() => {
-  return props.schema.type === 'union'
-    && choices.value.every(item => item.type === 'const')
-    && choices.value.every(item => item.meta.description)
+const isHidden = computed(() => {
+  return !props.schema || props.schema.meta.hidden
+})
+
+const isPrimitive = computed(() => {
+  return ['string', 'number', 'boolean'].includes(active.value.type)
+    && active.value.meta.role !== 'textarea'
 })
 
 const isComposite = computed(() => {
@@ -229,10 +230,6 @@ watch(config, (value) => {
     emit('update:modelValue', value)
   }
 }, { deep: true })
-
-function isPrimitive(schema: Schema) {
-  return ['string', 'number', 'boolean'].includes(schema.type)
-}
 
 function handleCommand(action: string) {
   if (action === 'discard') {
@@ -279,7 +276,7 @@ function handleCommand(action: string) {
   h3 {
     margin: 0;
     font-size: 1.125em;
-    line-height: 1.7;
+    line-height: 1.5;
     position: relative;
     user-select: none;
 
