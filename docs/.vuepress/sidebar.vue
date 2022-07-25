@@ -34,7 +34,7 @@ import ToggleColorModeButton from '@vuepress/theme-default/lib/client/components
 <style lang="scss" scoped>
 
 .sidebar-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-flow: column;
 }

@@ -69,7 +69,7 @@
       </template>
     </template>
 
-    <ul v-if="isRadio">
+    <ul class="bottom" v-if="isRadio">
       <li v-for="item in choices" :key="item.value">
         <el-radio
           v-model="config"
@@ -79,7 +79,7 @@
       </li>
     </ul>
 
-    <ul v-else-if="schema.type === 'bitset'">
+    <ul class="bottom" v-else-if="schema.type === 'bitset'">
       <li v-for="(value, key) in schema.bits" :key="value">
         <bit-checkbox
           v-model="config"
@@ -298,9 +298,7 @@ function handleCommand(action: string) {
     list-style: none;
     width: 100%;
     padding-left: 1rem;
-    margin: 0;
     font-size: 0.875rem;
-    margin: 0.5rem 0 0.25rem;
 
     .el-radio, .el-checkbox {
       height: 1.375rem;

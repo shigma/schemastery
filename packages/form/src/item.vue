@@ -72,6 +72,10 @@ defineEmits(['command'])
     float: right;
   }
 
+  .bottom {
+    margin: 0.5rem 0 0.25rem;
+  }
+
   $actions-width: 3rem;
 
   .actions {
