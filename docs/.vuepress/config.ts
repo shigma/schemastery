@@ -16,9 +16,10 @@ export default defineUserConfig({
     }, {
       text: 'Meta Properties',
       children: [
-        '/examples/description.md',
-        '/examples/default.md',
-        '/examples/hidden.md',
+        '/meta/description.md',
+        '/meta/required.md',
+        '/meta/default.md',
+        '/meta/hidden.md',
       ],
     }, {
       text: 'Basic Types',
