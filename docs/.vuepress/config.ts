@@ -14,6 +14,13 @@ export default defineUserConfig({
       text: 'Introduction',
       link: '/',
     }, {
+      text: 'Meta Properties',
+      children: [
+        '/examples/description.md',
+        '/examples/default.md',
+        '/examples/hidden.md',
+      ],
+    }, {
       text: 'Basic Types',
       children: [
         '/examples/number.md',
@@ -25,10 +32,8 @@ export default defineUserConfig({
         '/examples/object.md',
       ],
     }, {
-      text: 'Advanced Types',
+      text: 'Composite Types',
       children: [
-        '/examples/default.md',
-        '/examples/hidden.md',
         '/examples/intersect.md',
         '/examples/union-select.md',
         '/examples/union-arbitrary.md',
