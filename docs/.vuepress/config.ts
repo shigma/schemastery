@@ -27,6 +27,7 @@ export default defineUserConfig({
     }, {
       text: 'Advanced Types',
       children: [
+        '/examples/default.md',
         '/examples/hidden.md',
         '/examples/intersect.md',
         '/examples/union-select.md',
