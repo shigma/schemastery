@@ -69,7 +69,7 @@
           v-model="config"
           :disabled="disabled"
           :label="item.value"
-        >{{ item.meta.description }}</el-radio>
+        >{{ item.meta.description || item.value }}</el-radio>
       </li>
     </ul>
 
@@ -211,15 +211,15 @@ function optional(schema: Schema) {
 }
 
 watch(() => props.modelValue, (value) => {
+  config.value = value ?? getFallback(props.schema)
   active.value = props.schema
   for (const item of choices.value) {
     try {
-      optional(item)(value)
+      optional(item)(config.value)
       active.value = item
       break
     } catch {}
   }
-  config.value = value ?? getFallback(props.schema)
 }, { immediate: true, deep: true })
 
 watch(config, (value) => {
@@ -275,7 +275,7 @@ function handleCommand(action: string) {
 .schema-item {
   h3 {
     margin: 0;
-    font-size: 1.125em;
+    font-size: 1.125rem;
     line-height: 1.5;
     position: relative;
     user-select: none;
