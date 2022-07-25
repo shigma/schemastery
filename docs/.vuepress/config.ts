@@ -19,6 +19,7 @@ export default defineUserConfig({
         '/meta/description.md',
         '/meta/required.md',
         '/meta/default.md',
+        '/meta/role.md',
         '/meta/hidden.md',
       ],
     }, {
