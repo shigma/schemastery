@@ -161,6 +161,21 @@ html.dark {
   --el-fill-color-light: var(--page-bg);
 }
 
+:root {
+  // one-dark-pro
+  --shiki-color-background: transparent;
+  --shiki-color-text: #ABB2BF;
+  --shiki-token-constant: #E5C07B;
+  --shiki-token-string: #98C379;
+  --shiki-token-comment: #7F848E;
+  --shiki-token-keyword: #C678DD;
+  --shiki-token-parameter: #E06C75;
+  --shiki-token-function: #61AFEF;
+  --shiki-token-string-expression: #ABB2BF;
+  --shiki-token-punctuation: #ABB2BF;
+  --shiki-token-link: #ABB2BF;
+}
+
 aside.sidebar {
   top: 0;
   z-index: 20;

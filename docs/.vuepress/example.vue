@@ -8,15 +8,26 @@
           </main>
         </el-scrollbar>
       </section>
+
       <section>
         <header>Input</header>
-        <main>{{ config ?? 'null' }}</main>
+        <main>
+          <code>
+            <json :data="input"></json>
+          </code>
+        </main>
       </section>
+
       <section>
         <header>Output</header>
-        <main>{{ output ?? 'null' }}</main>
+        <main>
+          <code>
+            <json :data="output"></json>
+          </code>
+        </main>
       </section>
     </div>
+
     <section class="right-container">
       <el-scrollbar>
         <form>
@@ -32,6 +43,7 @@
 import { computed, ref, watch } from 'vue'
 import { clone } from 'schemastery-vue'
 import { usePageFrontmatter } from '@vuepress/client'
+import Json from './json.vue'
 
 const frontmatter = usePageFrontmatter()
 
@@ -43,6 +55,12 @@ const config = ref(null)
 const output = computed(() => {
   try {
     return schema.value(config.value)
+  } catch (e) {}
+})
+
+const input = computed(() => {
+  try {
+    return JSON.parse(JSON.stringify(config.value))
   } catch (e) {}
 })
 
@@ -90,6 +108,13 @@ const output = computed(() => {
         + p {
           margin-top: 1rem;
         }
+      }
+    }
+
+    section:not(.theme-default-content) {
+      code {
+        color: var(--shiki-color-text);
+        background-color: var(--shiki-color-background);
       }
     }
   }
