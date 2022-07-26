@@ -5,7 +5,7 @@ export * from 'cosmokit'
 export { Schema }
 
 const primitive = ['string', 'number', 'boolean', 'bitset', 'const']
-const dynamic = ['function', 'transform']
+const dynamic = ['function', 'transform', 'is']
 const composite = ['array', 'dict']
 
 export function isObjectSchema(schema: Schema) {
@@ -21,7 +21,13 @@ export function isObjectSchema(schema: Schema) {
 }
 
 export function getChoices(schema: Schema) {
-  return schema.list.filter(item => !item.meta.hidden && !dynamic.includes(item.type))
+  const inner: Schema[] = []
+  const choices = schema.list.filter((item) => {
+    if (item.meta.hidden) return
+    if (item.type === 'transform') inner.push(item.inner)
+    return !dynamic.includes(item.type)
+  })
+  return choices.length ? choices : inner
 }
 
 export function getFallback(schema: Schema, required = false) {
@@ -62,7 +68,7 @@ export function hasTitle(schema: Schema, root?: boolean) {
   } else if (schema.type === 'intersect') {
     return hasTitle(schema.list[0])
   } else if (schema.type === 'union') {
-    const choices = schema.list.filter(item => !dynamic.includes(item.type))
+    const choices = getChoices(schema)
     return choices.length === 1 ? hasTitle(choices[0]) : false
   } else if (root && composite.includes(schema.type) && validate(schema.inner)) {
     return true

@@ -86,6 +86,7 @@ namespace Schema {
     natural(): Schema<number>
     percent(): Schema<number>
     boolean(): Schema<boolean>
+    date(): Schema<string | Date, Date>
     bitset<K extends string>(bits: Dict<number, K>): Schema<number | readonly K[], number>
     function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
@@ -225,6 +226,15 @@ Schema.natural = function natural() {
 Schema.percent = function percent() {
   return Schema.number().step(0.01).min(0).max(1).role('slider')
 }
+
+Schema.date = () => Schema.union([
+  Schema.is(Date),
+  Schema.transform(Schema.string().role('datetime'), (value) => {
+    const date = new Date(value)
+    if (isNaN(+date)) throw new TypeError(`invalid date "${value}"`)
+    return date
+  }),
+])
 
 Schema.extend('any', (data) => {
   return [data]

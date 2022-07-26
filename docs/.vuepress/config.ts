@@ -23,19 +23,20 @@ export default defineUserConfig({
         '/meta/hidden.md',
       ],
     }, {
-      text: 'Basic Types',
+      text: 'Atomic Types',
       children: [
         '/examples/number.md',
         '/examples/string.md',
         '/examples/boolean.md',
+        '/atomic/date.md',
         '/examples/bitset.md',
-        '/examples/array.md',
-        '/examples/dict.md',
-        '/examples/object.md',
       ],
     }, {
       text: 'Composite Types',
       children: [
+        '/examples/array.md',
+        '/examples/dict.md',
+        '/examples/object.md',
         '/examples/intersect.md',
         '/examples/union-select.md',
         '/examples/union-arbitrary.md',

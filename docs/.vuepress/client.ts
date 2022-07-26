@@ -14,6 +14,8 @@ import {
   ElSelect,
   ElSlider,
   ElSwitch,
+  ElDatePicker,
+  ElTimePicker,
 } from 'element-plus'
 
 // import 'element-plus/es/components/button/style/css'
@@ -47,6 +49,8 @@ export default defineClientConfig({
     app.use(ElSelect)
     app.use(ElSlider)
     app.use(ElSwitch)
+    app.use(ElDatePicker)
+    app.use(ElTimePicker)
     app.use(form)
   },
   setup() {},
