@@ -4,6 +4,7 @@ import { resolve } from 'path'
 import theme from './theme'
 
 export default defineUserConfig({
+  port: 8004,
   title: 'Schemastery',
   base: '/schemastery/',
   dest: resolve(__dirname, 'dist/schemastery'),
@@ -25,23 +26,23 @@ export default defineUserConfig({
     }, {
       text: 'Atomic Types',
       children: [
-        '/examples/number.md',
-        '/examples/string.md',
-        '/examples/boolean.md',
+        '/atomic/number.md',
+        '/atomic/string.md',
+        '/atomic/boolean.md',
         '/atomic/date.md',
-        '/examples/bitset.md',
+        '/atomic/bitset.md',
       ],
     }, {
       text: 'Composite Types',
       children: [
-        '/examples/array.md',
-        '/examples/dict.md',
-        '/examples/object.md',
-        '/examples/intersect.md',
-        '/examples/union-select.md',
-        '/examples/union-arbitrary.md',
-        '/examples/union-tagged.md',
-        '/examples/transform.md',
+        '/composite/array.md',
+        '/composite/dict.md',
+        '/composite/object.md',
+        '/composite/intersect.md',
+        '/composite/union-select.md',
+        '/composite/union-arbitrary.md',
+        '/composite/union-tagged.md',
+        '/composite/transform.md',
       ],
     }],
     themePlugins: {
