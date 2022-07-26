@@ -10,7 +10,7 @@ code: |
 
 # Bitset
 
-以 bitset 的形式表达一个整数，通常每一位表达某种特征。
+以 Bitset 的形式表达一个整数，通常每一位表达某种特征。
 
 ```ts
 enum Intents { FOO = 1, BAR = 2, QUX = 4 }

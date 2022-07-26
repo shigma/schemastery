@@ -38,13 +38,13 @@
     "shx": "^0.3.4",
     "typescript": "^4.7.2",
     "vuepress": "2.0.0-beta.49",
-    "yakumo": "^0.2.8",
+    "yakumo": "^0.2.9",
     "yakumo-esbuild": "^0.2.6",
     "yakumo-mocha": "^0.2.6",
     "yakumo-publish": "^0.2.5",
     "yakumo-tsc": "^0.2.5",
     "yakumo-upgrade": "^0.2.3",
-    "yakumo-version": "^0.2.5"
+    "yakumo-version": "^0.2.6"
   },
   "yakumo": {
     "require": [
