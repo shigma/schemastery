@@ -37,6 +37,7 @@ export default defineUserConfig({
       children: [
         '/composite/array.md',
         '/composite/dict.md',
+        '/composite/tuple.md',
         '/composite/object.md',
         '/composite/intersect.md',
         '/composite/union-select.md',

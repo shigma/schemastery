@@ -12,7 +12,7 @@ code: |
         foo: Schema.string(),
         bar: Schema.number(),
       }).description('object'),
-    ]),
+    ]).description('从六种可能情况中选择一个。'),
   }).description('配置项')
 ---
 

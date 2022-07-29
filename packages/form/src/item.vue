@@ -70,6 +70,10 @@ defineEmits(['command'])
   .right {
     margin: 0.5rem 0;
     float: right;
+    display: inline-flex;
+    gap: 1rem;
+    flex: 1;
+    justify-content: flex-end;
   }
 
   .bottom {

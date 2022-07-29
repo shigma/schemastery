@@ -61,6 +61,11 @@
       <template v-else-if="isComposite">
         <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
       </template>
+
+      <template v-else-if="schema.type === 'tuple'">
+        <schema-primitive v-for="(item, index) in active.list" :key="index"
+          v-model="config[index]" :schema="item" :disabled="disabled"></schema-primitive>
+      </template>
     </template>
 
     <ul class="bottom" v-if="schema.type === 'union' && schema.meta.role === 'radio'">
@@ -300,11 +305,6 @@ function handleCommand(action: string) {
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
-  }
-
-  .el-select:not(:last-child) {
-    width: 10rem;
-    margin-right: 1rem;
   }
 }
 

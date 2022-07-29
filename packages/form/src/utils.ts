@@ -53,6 +53,8 @@ export function validate(schema: Schema): boolean {
     return choices.length === 1 || choices.every(item => validate(item))
   } else if (composite.includes(schema.type)) {
     return validate(schema.inner)
+  } else if (schema.type === 'tuple') {
+    return schema.list.every(item => primitive.includes(item.type))
   } else {
     return primitive.includes(schema.type)
   }
