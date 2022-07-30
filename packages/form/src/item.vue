@@ -1,7 +1,7 @@
 <template>
   <div class="schema-item">
-    <div class="actions" v-if="!disabled">
-      <el-dropdown placement="bottom-start" @command="$emit('command', $event)">
+    <div class="actions" :class="{ visible }" v-if="!disabled">
+      <el-dropdown placement="bottom-start" @command="$emit('command', $event)" @visible-change="visible = $event">
         <icon-cog></icon-cog>
         <template #dropdown>
           <el-dropdown-menu>
@@ -24,6 +24,7 @@
 
 <script lang="ts" setup>
 
+import { ref } from 'vue'
 import { IconCog } from './icons'
 
 defineProps<{
@@ -31,6 +32,8 @@ defineProps<{
 }>()
 
 defineEmits(['command'])
+
+const visible = ref(false)
 
 </script>
 
@@ -96,19 +99,19 @@ defineEmits(['command'])
     transition: var(--color-transition);
 
     .k-icon {
+      height: 1rem;
       padding: 0 5px;
       cursor: pointer;
       opacity: 0;
-      color: var(--disabled);
       transition: var(--color-transition);
-
-      &:hover {
-        color: var(--fg1);
-      }
     }
   }
 
   &:hover .actions .k-icon {
+    opacity: 0.75;
+  }
+
+  .actions.visible .k-icon {
     opacity: 1;
   }
 

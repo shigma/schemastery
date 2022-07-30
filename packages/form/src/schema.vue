@@ -94,7 +94,9 @@
     </div>
   </schema-item>
 
-  <template v-if="!isHidden && isComposite">
+  <template v-if="isHidden || schema.type === 'union' && choices.length === 1"></template>
+
+  <template v-else-if="isComposite">
     <div class="k-schema-group" v-if="prefix">
       <schema-group v-model:signal="signal"
         :schema="active" v-model="config" :prefix="prefix" :disabled="disabled" :instant="instant" :initial="initial">

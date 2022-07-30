@@ -125,7 +125,7 @@ const input = computed(() => {
     }
 
     form {
-      padding: 2rem 2rem;
+      padding: 2rem 3rem;
     }
   }
 
