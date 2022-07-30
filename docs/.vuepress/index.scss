@@ -1,3 +1,5 @@
+@import './code.scss';
+
 :root {
   --white: #ffffff;
   --white-soft: #f9f9f9;
@@ -76,7 +78,6 @@
   --c-bg: var(--white);
   --c-bg-soft: var(--white-soft);
   --c-bg-mute: var(--white-mute);
-  --c-bg-alt: var(--white-soft);
   --c-divider: var(--c-divider-light-1);
   --c-divider-light: var(--c-divider-light-2);
   --c-divider-inverse: var(--c-divider-dark-1);
@@ -95,6 +96,7 @@
   --c-brand-light: var(--brand-lighter);
 
   // override vuepress
+  --c-bg-sidebar: var(--c-bg);
   --c-border: var(--c-divider-light);
   --c-border-dark: var(--c-divider);
   --c-text: var(--c-text-1);
@@ -102,10 +104,9 @@
 }
 
 html.dark {
-  --c-bg: var(--black-soft);
-  --c-bg-soft: var(--black-mute);
-  --c-bg-mute: var(--gray-dark-3);
-  --c-bg-alt: var(--black);
+  --c-bg: var(--black);
+  --c-bg-soft: var(--black-soft);
+  --c-bg-mute: var(--black-mute);
   --c-divider: var(--c-divider-dark-1);
   --c-divider-light: var(--c-divider-dark-2);
   --c-divider-inverse: var(--c-divider-light-1);
@@ -128,6 +129,10 @@ html.dark {
   --c-border-dark: var(--c-divider);
   --c-text: var(--c-text-1);
   --code-bg-color: var(--c-bg-alt);
+}
+
+html, body {
+  background-color: var(--c-bg-soft);
 }
 
 :root {
@@ -156,30 +161,14 @@ html.dark {
   --el-color-white: var(--white);
   --el-color-black: var(--fg1);
   --el-bg-color: var(--bg0);
-  --el-bg-color-overlay: var(--bg0);
+  --el-fill-color-light: var(--c-bg-soft);
+  --el-bg-color-overlay: var(--c-bg);
   --el-fill-color-blank: transparent;
-  --el-fill-color-light: var(--page-bg);
-}
-
-:root {
-  // one-dark-pro
-  --shiki-color-background: transparent;
-  --shiki-color-text: #ABB2BF;
-  --shiki-token-constant: #E5C07B;
-  --shiki-token-string: #98C379;
-  --shiki-token-comment: #7F848E;
-  --shiki-token-keyword: #C678DD;
-  --shiki-token-parameter: #E06C75;
-  --shiki-token-function: #61AFEF;
-  --shiki-token-string-expression: #ABB2BF;
-  --shiki-token-punctuation: #ABB2BF;
-  --shiki-token-link: #ABB2BF;
 }
 
 aside.sidebar {
   top: 0;
   z-index: 20;
-  background-color: var(--c-bg-alt);
 
   .sidebar-items {
     padding-bottom: 0;
@@ -223,12 +212,9 @@ div[class*=language-]::before {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.el-dropdown-menu {
-  background-color: var(--white);
-}
-
-.el-dropdown__popper.el-popper[role=tooltip] {
-  background-color: var(--white);
+.el-dropdown__popper {
+  --el-dropdown-menuItem-hover-fill: var(--c-bg-soft);
+  --el-dropdown-menuItem-hover-color: var(--el-color-primary);
 }
 
 .el-dropdown-menu__item.is-disabled {

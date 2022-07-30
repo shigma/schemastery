@@ -120,6 +120,9 @@ const input = computed(() => {
   }
 
   .right-container {
+    background-color: var(--c-bg-mute);
+    transition: var(--color-transition);
+
     h2, h3 {
       border-bottom: none;
     }
@@ -138,6 +141,7 @@ const input = computed(() => {
     align-items: center;
     font-weight: 500;
     font-size: 1.125rem;
+    transition: var(--color-transition);
   }
 }
 
