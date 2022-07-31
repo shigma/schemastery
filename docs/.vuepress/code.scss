@@ -8,7 +8,7 @@
   }
 }
 
-// One Dark Pro
+// color from One Dark Pro
 @include token-color(text, #ABB2BF);
 @include token-color(constant, #E5C07B);
 @include token-color(number, #D19A66);
@@ -21,6 +21,7 @@
 @include token-color(punctuation, #ABB2BF);
 
 :root {
+  // modified from GitHub Light Default
   --shiki-token-text: #000000;
   --shiki-token-constant: #005CC5;
   --shiki-token-number: #005CC5;
