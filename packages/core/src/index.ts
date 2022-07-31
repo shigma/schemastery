@@ -102,7 +102,7 @@ namespace Schema {
 
 let index = 0
 
-const kSchema = Symbol('schemastery')
+const kSchema = Symbol.for('schemastery')
 
 const Schema = function (options: Schema.Base) {
   const schema = function (data: any) {
