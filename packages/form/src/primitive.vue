@@ -1,5 +1,5 @@
 <template>
-  <el-switch v-if="schema.type === 'boolean'" v-model="value" :disabled="disabled"></el-switch>
+  <el-switch v-if="schema.type === 'boolean'" v-model="value" :class="{ nullable }" :disabled="disabled"></el-switch>
 
   <template v-else-if="schema.type === 'number'">
     <el-slider v-if="schema.meta.role === 'slider'" style="width: 200px"
@@ -13,8 +13,9 @@
   <template v-else>
     <el-time-picker v-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
     <el-date-picker v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"></el-date-picker>
-    <el-input v-else v-model="value" :disabled="disabled"
+    <el-input v-else v-model="value" :disabled="disabled" :class="{ nullable }"
       :style="{ width: isLink ? '16rem' : '12rem' }" :type="type">
+      <template #prefix v-if="nullable"></template>
       <template #suffix v-if="isLink">
         <icon-external @click="onClickExternal(value)"></icon-external>
       </template>
@@ -30,6 +31,7 @@
 
 import { computed, PropType, ref } from 'vue'
 import { IconExternal, IconEye, IconEyeSlash } from './icons'
+import { isNullable } from './utils'
 import Schema from 'schemastery'
 
 const emit = defineEmits(['update:modelValue'])
@@ -41,6 +43,8 @@ const props = defineProps({
 })
 
 const showPass = ref(false)
+
+const nullable = computed(() => isNullable(props.modelValue))
 
 const value = computed({
   get: () => props.modelValue,
@@ -56,7 +60,7 @@ const type = computed(() => {
 
 const date = computed({
   get() {
-    if (!props.modelValue) return new Date('1970-01-01')
+    if (!props.modelValue) return
     if (['date', 'datetime'].includes(props.schema.meta.role)) {
       return new Date(value.value)
     } else if (props.schema.meta.role === 'time') {
@@ -87,12 +91,27 @@ function onClickExternal(value: string) {
   .el-input {
     .k-icon {
       color: var(--fg3);
-      transition: color 0.3s ease;
+      transition: var(--color-transition);
       cursor: pointer;
 
       &:hover {
         color: var(--fg1);
       }
+    }
+
+    &.nullable:not(:focus-within) .el-input__prefix {
+      display: block;
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      border-top: var(--el-border);
+      transition: var(--color-transition);
+    }
+  }
+
+  .el-switch.nullable {
+    .el-switch__action {
+      left: 11px;
     }
   }
 }
