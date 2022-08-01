@@ -1,0 +1,1 @@
+const e=JSON.parse(`{"key":"v-45731108","path":"/atomic/boolean.html","title":"Boolean","lang":"en-US","frontmatter":{"example":true,"code":"Schema.object({\\n  enable: Schema.boolean().description('\u8FD9\u662F\u4E00\u4E2A\u5F00\u5173\u3002'),\\n}).description('\u914D\u7F6E\u9879')\\n"},"excerpt":"","headers":[],"filePathRelative":"atomic/boolean.md"}`);export{e as data};
