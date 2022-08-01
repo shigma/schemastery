@@ -241,7 +241,7 @@ Schema.extend('any', (data) => {
 })
 
 Schema.extend('never', (data) => {
-  throw new TypeError(`expected nullable but got ${data}`)
+  throw new TypeError(`expected nullable but got ${typeof data} ${data}`)
 })
 
 Schema.extend('const', (data, { value }) => {
@@ -256,13 +256,13 @@ function checkWithinRange(data: number, meta: Schema.Meta<any>, description: str
 }
 
 Schema.extend('string', (data, { meta }) => {
-  if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
+  if (typeof data !== 'string') throw new TypeError(`expected string but got ${typeof data} ${data}`)
   checkWithinRange(data.length, meta, 'string length')
   return [data]
 })
 
 Schema.extend('number', (data, { meta }) => {
-  if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
+  if (typeof data !== 'number') throw new TypeError(`expected number but got ${typeof data} ${data}`)
   checkWithinRange(data, meta, 'number')
   const { step } = meta
   if (step) {
@@ -276,15 +276,15 @@ Schema.extend('number', (data, { meta }) => {
 
 Schema.extend('boolean', (data) => {
   if (typeof data === 'boolean') return [data]
-  throw new TypeError(`expected boolean but got ${data}`)
+  throw new TypeError(`expected boolean but got ${typeof data} ${data}`)
 })
 
 Schema.extend('bitset', (data, { bits }) => {
   if (typeof data === 'number') return [data]
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${typeof data} ${data}`)
   let result = 0
   for (const value of data) {
-    if (typeof value !== 'string') throw new TypeError(`expected string but got ${value}`)
+    if (typeof value !== 'string') throw new TypeError(`expected string but got ${typeof value} ${value}`)
     if (!(value in bits)) throw new TypeError(`unknown value ${value}`)
     result |= bits[value]
   }
@@ -293,12 +293,12 @@ Schema.extend('bitset', (data, { bits }) => {
 
 Schema.extend('function', (data) => {
   if (typeof data === 'function') return [data]
-  throw new TypeError(`expected function but got ${data}`)
+  throw new TypeError(`expected function but got ${typeof data} ${data}`)
 })
 
 Schema.extend('is', (data, { callback }) => {
   if (data instanceof callback) return [data]
-  throw new TypeError(`expected ${callback.name} but got ${data}`)
+  throw new TypeError(`expected ${callback.name} but got ${typeof data} ${data}`)
 })
 
 function property(data: any, key: keyof any, schema?: Schema) {
@@ -308,13 +308,13 @@ function property(data: any, key: keyof any, schema?: Schema) {
 }
 
 Schema.extend('array', (data, { inner, meta }) => {
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${typeof data} ${data}`)
   checkWithinRange(data.length, meta, 'array length')
   return [data.map((_, index) => property(data, index, inner))]
 })
 
 Schema.extend('dict', (data, { inner, sKey }, strict) => {
-  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${typeof data} ${data}`)
   const result = {}
   for (const key in data) {
     let rKey: string
@@ -332,7 +332,7 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
 })
 
 Schema.extend('tuple', (data, { list }, strict) => {
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${typeof data} ${data}`)
   const result = list.map((inner, index) => property(data, index, inner))
   if (strict) return [result]
   result.push(...data.slice(list.length))
@@ -347,7 +347,7 @@ function merge(result: any, data: any) {
 }
 
 Schema.extend('object', (data, { dict }, strict) => {
-  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new TypeError(`expected object but got ${typeof data} ${data}`)
   const result = {}
   for (const key in dict) {
     const value = property(data, key, dict[key])
