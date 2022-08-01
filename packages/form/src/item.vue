@@ -54,7 +54,7 @@ const visible = ref(false)
   }
 
   &:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--el-fill-color-light);
   }
 
   .header {

@@ -31,7 +31,7 @@ import {
 // import 'element-plus/es/components/slider/style/css'
 // import 'element-plus/es/components/switch/style/css'
 import 'element-plus/dist/index.css'
-import './index.scss'
+import './styles/index.scss'
 
 globalThis.Schema = Schema
 

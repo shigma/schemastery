@@ -1,0 +1,46 @@
+.el-dropdown__popper {
+  --el-dropdown-menuItem-hover-fill: var(--c-bg-soft);
+  --el-dropdown-menuItem-hover-color: var(--el-color-primary);
+}
+
+.el-dropdown-menu__item.is-disabled {
+  pointer-events: none;
+}
+
+.el-dropdown-menu__item--divided {
+  &:first-child, &:last-child {
+    display: none;
+  }
+}
+
+.el-input .k-icon {
+  height: 0.75rem;
+}
+
+.el-input__wrapper,
+.el-input-number__decrease,
+.el-input-number__increase,
+.el-checkbox__label {
+  transition: var(--color-transition);
+}
+
+.el-input__prefix-inner, .el-input__suffix-inner {
+  align-items: center;
+}
+
+.el-radio {
+  height: 1.2rem;
+}
+
+.el-radio__label {
+  --el-color-primary: var(--active);
+  padding-top: 1px;
+}
+
+.el-scrollbar__bar {
+  z-index: 500;
+}
+
+html.dark .el-switch {
+  --el-switch-off-color: #72767d;
+}

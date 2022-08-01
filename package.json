@@ -11,7 +11,7 @@
     "build:js": "yakumo esbuild core",
     "build:dts": "yakumo tsc core",
     "build": "yarn build:js && yarn build:dts",
-    "dev": "vuepress dev docs",
+    "dev": "vuepress dev docs --open",
     "build:docs": "vuepress build docs",
     "serve": "serve docs/.vuepress/dist",
     "bump": "yakumo version",

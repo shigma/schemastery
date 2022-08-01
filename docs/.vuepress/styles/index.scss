@@ -1,4 +1,5 @@
 @import './code.scss';
+@import './element.scss';
 
 :root {
   --white: #ffffff;
@@ -75,9 +76,9 @@
 }
 
 :root {
-  --c-bg: var(--white);
+  --c-bg: var(--white-mute);
   --c-bg-soft: var(--white-soft);
-  --c-bg-mute: var(--white-mute);
+  --c-bg-mute: var(--white);
   --c-divider: var(--c-divider-light-1);
   --c-divider-light: var(--c-divider-light-2);
   --c-divider-inverse: var(--c-divider-dark-1);
@@ -212,53 +213,6 @@ div[class*=language-]::before {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-.el-dropdown__popper {
-  --el-dropdown-menuItem-hover-fill: var(--c-bg-soft);
-  --el-dropdown-menuItem-hover-color: var(--el-color-primary);
-}
-
-.el-dropdown-menu__item.is-disabled {
-  pointer-events: none;
-}
-
-.el-dropdown-menu__item--divided {
-  &:first-child, &:last-child {
-    display: none;
-  }
-}
-
-.el-input .k-icon {
-  height: 0.75rem;
-}
-
-.el-input__wrapper,
-.el-input-number__decrease,
-.el-input-number__increase,
-.el-checkbox__label {
-  transition: var(--color-transition);
-}
-
-.el-input__prefix-inner, .el-input__suffix-inner {
-  align-items: center;
-}
-
-.el-radio {
-  height: 1.2rem;
-}
-
-.el-radio__label {
-  --el-color-primary: var(--active);
-  padding-top: 1px;
-}
-
-.el-scrollbar__bar {
-  z-index: 500;
-}
-
-html.dark .el-switch {
-  --el-switch-off-color: #72767d;
-}
-
 .theme-container.no-navbar .theme-default-content h1 {
   margin-top: 3rem;
 }
@@ -268,4 +222,9 @@ a > img + span {
   > .external-link-icon {
     display: none;
   }
+}
+
+code {
+  padding: 3px 6px;
+  transition: var(--color-transition);
 }
