@@ -113,6 +113,7 @@ const input = computed(() => {
 
     section:not(.theme-default-content) {
       code {
+        white-space: pre-wrap;
         color: var(--shiki-color-text);
         background-color: var(--shiki-color-background);
       }

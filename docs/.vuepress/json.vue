@@ -1,6 +1,6 @@
 <template>
   <span style="color: var(--shiki-token-constant)" v-if="isNullable(data)">null</span>
-  <span style="color: var(--shiki-token-string)" v-else-if="typeof data === 'string'">"{{ data }}"</span>
+  <span style="color: var(--shiki-token-string)" v-else-if="typeof data === 'string'">"{{ escape(data) }}"</span>
   <span style="color: var(--shiki-token-constant)" v-else-if="typeof data === 'number'">{{ data }}</span>
   <span style="color: var(--shiki-token-constant)" v-else-if="typeof data === 'boolean'">{{ data }}</span>
   <template v-else-if="(data instanceof Date)">
@@ -35,5 +35,12 @@ import { isNullable } from 'cosmokit'
 defineProps({
   data: {},
 })
+
+function escape(source: string) {
+  return source
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+}
 
 </script>
