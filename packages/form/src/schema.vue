@@ -11,11 +11,13 @@
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix + key + '.'">
-      <h3>
+      <template #default>
         <span class="prefix">{{ prefix }}</span>
         <span>{{ key }}</span>
-      </h3>
-      <k-markdown inline :source="item.meta.description"></k-markdown>
+      </template>
+      <template #description>
+        <k-markdown inline :source="item.meta.description"></k-markdown>
+      </template>
     </k-schema>
   </template>
 
@@ -38,8 +40,12 @@
       <slot name="menu"></slot>
     </template>
 
-    <template #left>
+    <template #header>
       <slot></slot>
+    </template>
+
+    <template #description>
+      <slot name="description"></slot>
     </template>
 
     <template #right>
@@ -280,18 +286,6 @@ function handleCommand(action: string) {
 }
 
 .schema-item {
-  h3 {
-    margin: 0;
-    font-size: 1.125rem;
-    line-height: 1.5;
-    position: relative;
-    user-select: none;
-
-    .prefix {
-      font-weight: normal;
-    }
-  }
-
   p {
     margin: 0;
     line-height: 1.7;

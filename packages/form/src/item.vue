@@ -1,18 +1,23 @@
 <template>
-  <div class="schema-item">
-    <div class="actions" :class="{ visible }" v-if="!disabled">
-      <el-dropdown placement="bottom-start" @command="$emit('command', $event)" @visible-change="visible = $event">
-        <icon-cog></icon-cog>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <slot name="menu"></slot>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+  <div class="schema-item" :class="{ visible }">
+    <div class="actions" v-if="!disabled">
     </div>
     <div class="header">
       <div class="left">
-        <slot name="left"></slot>
+        <h3>
+          <slot name="header"></slot>
+          <el-dropdown placement="bottom" @command="$emit('command', $event)" @visible-change="visible = $event">
+            <svg class="trigger" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+              <path fill="currentColor" d="m192 384 320 384 320-384z"></path>
+            </svg>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <slot name="menu"></slot>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </h3>
+        <slot name="description"></slot>
       </div>
       <div class="right">
         <slot name="right"></slot>
@@ -25,7 +30,6 @@
 <script lang="ts" setup>
 
 import { ref } from 'vue'
-import { IconCog } from './icons'
 
 defineProps<{
   disabled?: boolean
@@ -66,8 +70,40 @@ const visible = ref(false)
     min-height: 3rem;
   }
 
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.5;
+    position: relative;
+    user-select: none;
+    display: flex;
+    align-items: center;
+
+    * {
+      flex: 0 0 auto;
+    }
+
+    .prefix {
+      font-weight: normal;
+      text-overflow: ellipsis;
+      flex: 0 1 auto;
+      overflow: hidden;
+    }
+  }
+
   .left {
     display: inline-block;
+
+    .el-dropdown {
+      margin-left: 0.25rem;
+    }
+
+    .trigger {
+      height: 1rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: var(--color-transition);
+    }
   }
 
   .right {
@@ -86,45 +122,33 @@ const visible = ref(false)
   $actions-width: 3rem;
 
   .actions {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
     position: absolute;
     top: 0;
     height: 100%;
-    left: -$actions-width;
+    left: 0;
     width: $actions-width;
-    border-right: 2px solid transparent;
+    border-left: 2px solid transparent;
     transition: var(--color-transition);
-
-    .k-icon {
-      height: 1rem;
-      padding: 0 5px;
-      cursor: pointer;
-      opacity: 0;
-      transition: var(--color-transition);
-    }
   }
 
-  &:hover .actions .k-icon {
+  &:hover .trigger {
     opacity: 0.75;
   }
 
-  .actions.visible .k-icon {
+  &.visible .trigger {
     opacity: 1;
   }
 
   &.changed .actions {
-    border-right-color: var(--el-color-primary);
+    border-left-color: var(--el-color-primary);
   }
 
   &.required .actions {
-    border-right-color: var(--el-color-error);
+    border-left-color: var(--el-color-error);
   }
 
   &.invalid .actions {
-    border-right-color: var(--el-color-warning);
+    border-left-color: var(--el-color-warning);
   }
 }
 

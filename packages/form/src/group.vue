@@ -3,15 +3,15 @@
     <template v-if="isObjectSchema(schema.inner)">
       <schema-item @command="handleCommand($event, index)"
         :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }">
-        <template #left>
-          <h3 v-if="schema.type === 'array'">
-            <span class="prefix">{{ prefix.slice(0, -1) }}</span>
-            <span>[{{ key }}]</span>
-          </h3>
-          <h3 v-else>
-            <span class="prefix">{{ prefix }}</span>
-            <el-input v-model="entries[index][0]"></el-input>
-          </h3>
+        <template #header v-if="schema.type === 'array'">
+          <span class="prefix">{{ prefix.slice(0, -1) }}</span>
+          <span>[{{ key }}]</span>
+        </template>
+        <template #header v-else>
+          <span class="prefix">{{ prefix }}</span>
+          <el-input v-model="entries[index][0]"></el-input>
+        </template>
+        <template #description>
           <k-markdown inline :source="schema.inner.meta.description"></k-markdown>
         </template>
         <template #menu>
@@ -29,10 +29,8 @@
           :disabled="disabled"
           :instant="instant"
           :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'">
-          <h3>
-            <span class="prefix">{{ prefix }}</span>
-            <span>{{ key }}</span>
-          </h3>
+          <span class="prefix">{{ prefix }}</span>
+          <span>{{ key }}</span>
         </k-schema>
       </div>
     </template>
@@ -51,14 +49,14 @@
         <el-dropdown-item :disabled="index === entries.length - 1" command="down">下移</el-dropdown-item>
         <el-dropdown-item command="delete">删除</el-dropdown-item>
       </template>
-      <h3 v-if="schema.type === 'array'">
+      <template #default v-if="schema.type === 'array'">
         <span class="prefix">{{ prefix.slice(0, -1) }}</span>
         <span>[{{ key }}]</span>
-      </h3>
-      <h3 v-else>
+      </template>
+      <template #default v-else>
         <span class="prefix">{{ prefix }}</span>
         <el-input v-model="entries[index][0]"></el-input>
-      </h3>
+      </template>
     </k-schema>
   </template>
 </template>
@@ -154,6 +152,10 @@ function doWatch() {
       border-radius: 0;
     }
   }
+}
+
+.k-schema-group + h2 {
+  margin-top: 2rem;
 }
 
 </style>
