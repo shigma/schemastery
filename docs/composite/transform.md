@@ -5,7 +5,7 @@ code: |
     value: Schema.union([
       Schema.array(String),
       Schema.transform(String, value => [value]),
-    ]).default([]),
+    ]).default([]).description('点击右侧的按钮添加元素。'),
   }).description('配置项')
 ---
 

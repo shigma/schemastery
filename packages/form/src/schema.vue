@@ -11,13 +11,8 @@
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix + key + '.'">
-      <template #default>
-        <span class="prefix">{{ prefix }}</span>
-        <span>{{ key }}</span>
-      </template>
-      <template #description>
-        <k-markdown inline :source="item.meta.description"></k-markdown>
-      </template>
+      <span class="prefix">{{ prefix }}</span>
+      <span>{{ key }}</span>
     </k-schema>
   </template>
 
@@ -25,7 +20,7 @@
     <k-schema v-for="(item, index) in choices" :key="index"
       v-model="config"
       :initial="initial"
-      :schema="{ ...item, meta: { default: schema.meta.default, ...item.meta } }"
+      :schema="{ ...item, meta: { ...schema.meta, ...item.meta } }"
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix">
@@ -45,7 +40,7 @@
     </template>
 
     <template #description>
-      <slot name="description"></slot>
+      <k-markdown inline :source="schema.meta.description"></k-markdown>
     </template>
 
     <template #right>

@@ -96,6 +96,7 @@ const visible = ref(false)
 
     .el-dropdown {
       margin-left: 0.25rem;
+      margin-top: 2px;
     }
 
     .trigger {
