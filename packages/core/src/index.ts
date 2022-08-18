@@ -97,6 +97,7 @@ namespace Schema {
     union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
     intersect<X>(list: readonly X[]): Schema<Intersect<TypeS<X>>, Intersect<TypeT<X>>>
     transform<X, T>(inner: X, callback: (value: TypeS<X>) => T): Schema<TypeS<X>, T>
+    resetIndex(): void
   }
 }
 
@@ -463,5 +464,9 @@ defineMethod('intersect', ['list'], ({ list }) => {
 })
 
 defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner.toString(isInner))
+
+defineMethod('resetIndex', [], () => {
+  index = 0;
+})
 
 export = Schema
