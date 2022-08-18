@@ -170,7 +170,13 @@ for (const key of ['required', 'hidden']) {
   })
 }
 
-for (const key of ['default', 'role', 'link', 'comment', 'pattern', 'description', 'max', 'min', 'step']) {
+Schema.prototype.pattern = function pattern(source, flag) {
+  const schema = Schema(this)
+  schema.meta = { ...schema.meta, pattern: { source, flag } }
+  return schema
+}
+
+for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](value: any) {
       const schema = Schema(this)
