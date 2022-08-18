@@ -12,7 +12,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
-  pattern(regex: string): Schema<S, T>
+  pattern(source: string, flags?: string): Schema<S, T>
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
   step(value: number): Schema<S, T>
