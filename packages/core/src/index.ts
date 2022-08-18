@@ -61,7 +61,7 @@ namespace Schema {
     link?: string
     description?: string
     comment?: string
-    pattern?: string
+    pattern?: { source: string, flag?: string }
     max?: number
     min?: number
     step?: number
