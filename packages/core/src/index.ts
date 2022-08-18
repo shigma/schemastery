@@ -259,7 +259,10 @@ function checkWithinRange(data: number, meta: Schema.Meta<any>, description: str
 
 Schema.extend('string', (data, { meta }) => {
   if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
-  if (meta.pattern && !new RegExp(meta.pattern).test(data)) throw new TypeError(`expect string to match regex ${meta.pattern}`)
+  if (meta.pattern) {
+    const regexp = new RegExp(meta.pattern.source, meta.pattern.flag)
+    if (!regexp.test(data)) throw new TypeError(`expect string to match regexp ${regexp}`)
+  }
   checkWithinRange(data.length, meta, 'string length')
   return [data]
 })
