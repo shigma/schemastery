@@ -12,6 +12,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
+  pattern(source: string, flags?: string): Schema<S, T>
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
   step(value: number): Schema<S, T>
@@ -60,6 +61,7 @@ namespace Schema {
     link?: string
     description?: string
     comment?: string
+    pattern?: { source: string, flag?: string }
     max?: number
     min?: number
     step?: number
@@ -168,6 +170,12 @@ for (const key of ['required', 'hidden']) {
   })
 }
 
+Schema.prototype.pattern = function pattern(source, flag) {
+  const schema = Schema(this)
+  schema.meta = { ...schema.meta, pattern: { source, flag } }
+  return schema
+}
+
 for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](value: any) {
@@ -257,6 +265,10 @@ function checkWithinRange(data: number, meta: Schema.Meta<any>, description: str
 
 Schema.extend('string', (data, { meta }) => {
   if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
+  if (meta.pattern) {
+    const regexp = new RegExp(meta.pattern.source, meta.pattern.flag)
+    if (!regexp.test(data)) throw new TypeError(`expect string to match regexp ${regexp}`)
+  }
   checkWithinRange(data.length, meta, 'string length')
   return [data]
 })
