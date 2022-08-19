@@ -1,4 +1,4 @@
-import { clone, Dict, Intersect, isNullable, isPlainObject, valueMap } from 'cosmokit'
+import { clone, Dict, Intersect, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data?: S): T
@@ -13,6 +13,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
   pattern(source: string, flags?: string): Schema<S, T>
+  pattern(regexp: RegExp): Schema<S, T>
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
   step(value: number): Schema<S, T>
@@ -61,7 +62,7 @@ namespace Schema {
     link?: string
     description?: string
     comment?: string
-    pattern?: { source: string, flag?: string }
+    pattern?: { source: string, flags?: string }
     max?: number
     min?: number
     step?: number
@@ -170,9 +171,12 @@ for (const key of ['required', 'hidden']) {
   })
 }
 
-Schema.prototype.pattern = function pattern(source, flag) {
+Schema.prototype.pattern = function pattern(...args) {
   const schema = Schema(this)
-  schema.meta = { ...schema.meta, pattern: { source, flag } }
+  const pattern = args.length === 1
+    ? pick(args[0], ['source', 'flags'])
+    : { source: args[0], flags: args[1] }
+  schema.meta = { ...schema.meta, pattern }
   return schema
 }
 
@@ -266,7 +270,7 @@ function checkWithinRange(data: number, meta: Schema.Meta<any>, description: str
 Schema.extend('string', (data, { meta }) => {
   if (typeof data !== 'string') throw new TypeError(`expected string but got ${data}`)
   if (meta.pattern) {
-    const regexp = new RegExp(meta.pattern.source, meta.pattern.flag)
+    const regexp = new RegExp(meta.pattern.source, meta.pattern.flags)
     if (!regexp.test(data)) throw new TypeError(`expect string to match regexp ${regexp}`)
   }
   checkWithinRange(data.length, meta, 'string length')

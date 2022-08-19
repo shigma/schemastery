@@ -20,6 +20,6 @@
     "vue": "^3"
   },
   "dependencies": {
-    "schemastery": "^3.5.1"
+    "schemastery": "^3.5.2"
   }
 }
