@@ -21,7 +21,6 @@ describe('Schema API', () => {
     const config = Schema.never()
     expect(config.toString()).to.equal('never')
 
-    // @ts-expect-error (null is not assignable to never)
     expect(config(null)).to.equal(null)
     // @ts-expect-error
     expect(() => config(123)).to.throw()
@@ -47,19 +46,12 @@ describe('Schema API', () => {
     expect(() => config('uniform')).to.throw()
   })
 
-  it('string (pattern 1)', () => {
+  it('string (pattern)', () => {
     const config = Schema.string().pattern(/^[a-z]+$/i)
     expect(config('dress')).to.equal('dress')
     expect(config('SKIRT')).to.equal('SKIRT')
 
     expect(() => config('?')).to.throw()
-  })
-
-  it('string (pattern 2)', () => {
-    const config = Schema.string().pattern(/^[a-z]+:\/\//)
-    expect(config('https://localhost:8080')).to.equal('https://localhost:8080')
-
-    expect(() => config('localhost:8080')).to.throw()
   })
 
   it('number', () => {

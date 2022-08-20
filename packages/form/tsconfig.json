@@ -3,6 +3,8 @@
   "compilerOptions": {
     "rootDir": "src",
     "jsx": "preserve",
+    "noImplicitAny": true,
+    "strictNullChecks": false,
   },
   "include": [
     "src",
