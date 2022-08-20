@@ -173,7 +173,7 @@ for (const key of ['required', 'hidden']) {
 
 Schema.prototype.pattern = function pattern(...args) {
   const schema = Schema(this)
-  const pattern = args.length === 1
+  const pattern = (args.length === 1 && typeof args[0] === 'object')
     ? pick(args[0], ['source', 'flags'])
     : { source: args[0], flags: args[1] }
   schema.meta = { ...schema.meta, pattern }
