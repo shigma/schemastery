@@ -26,34 +26,6 @@ describe('Schema API', () => {
     expect(() => config(123)).to.throw()
   })
 
-  it('string', () => {
-    const config = Schema.string().default('bar')
-    expect(config.toString()).to.equal('string')
-
-    expect(config('foo')).to.equal('foo')
-    expect(config('')).to.equal('')
-    expect(config(null)).to.equal('bar')
-
-    // @ts-expect-error
-    expect(() => config(123)).to.throw()
-  })
-
-  it('string (length)', () => {
-    const config = Schema.string().min(5).max(6)
-    expect(config('dress')).to.equal('dress')
-
-    expect(() => config('sock')).to.throw()
-    expect(() => config('uniform')).to.throw()
-  })
-
-  it('string (pattern)', () => {
-    const config = Schema.string().pattern(/^[a-z]+$/i)
-    expect(config('dress')).to.equal('dress')
-    expect(config('SKIRT')).to.equal('SKIRT')
-
-    expect(() => config('?')).to.throw()
-  })
-
   it('number', () => {
     const config = Schema.number().min(1).step(2).default(123)
     expect(config.toString()).to.equal('number')

@@ -2,8 +2,8 @@ import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Intersect', () => {
-  it('intersect (primitive)', () => {
-    const validate = Schema.intersect([String, Number])
+  it('intersect (primitive 1)', () => {
+    const validate = Schema.intersect([String, Number] as const)
     expect(validate.toString()).to.equal('string & number')
 
     expect(validate(null)).to.equal(null)
@@ -11,6 +11,16 @@ describe('Intersect', () => {
     expect(() => validate('foo')).to.throw()
     // @ts-expect-error
     expect(() => validate(123)).to.throw()
+  })
+
+  it('intersect (primitive 2)', () => {
+    const validate = Schema.intersect([String, 'foo'] as const)
+    expect(validate.toString()).to.equal('string & "foo"')
+
+    expect(validate(null)).to.equal(null)
+    expect(validate('foo')).to.equal('foo')
+    // @ts-expect-error
+    expect(() => validate('bar')).to.throw()
   })
 
   it('intersect (object)', () => {

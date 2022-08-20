@@ -1,24 +1,27 @@
-import { clone, Dict, Intersect, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
+import { clone, Dict, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 const kSchema = Symbol.for('schemastery')
 
 namespace Schema {
-  export type From<T> =
-    | T extends string | number | boolean ? Schema<T>
-    : T extends Schema ? T
-    : T extends typeof String ? Schema<string>
-    : T extends typeof Number ? Schema<number>
-    : T extends typeof Boolean ? Schema<boolean>
-    : T extends typeof Function ? Schema<Function, (...args: any[]) => any>
-    : T extends Constructor<infer S> ? Schema<S>
+  export type From<X> =
+    | X extends string | number | boolean ? Schema<X>
+    : X extends Schema ? X
+    : X extends typeof String ? Schema<string>
+    : X extends typeof Number ? Schema<number>
+    : X extends typeof Boolean ? Schema<boolean>
+    : X extends typeof Function ? Schema<Function, (...args: any[]) => any>
+    : X extends Constructor<infer S> ? Schema<S>
     : never
 
   type _TypeS<X> = X extends Schema<infer S, unknown> ? S : never
-  type _TypeT<X> = ReturnType<Extract<X, Schema>>
+  type Inverse<X> = X extends Schema<any, infer Y> ? (arg: Y) => void : never
 
   export type TypeS<X> = _TypeS<From<X>>
-  export type TypeT<X> = _TypeT<From<X>>
+  export type TypeT<X> = ReturnType<From<X>>
   export type Resolve = (data: any, schema: Schema, strict?: boolean) => [any, any?]
+
+  export type IntersectS<X> = From<X> extends Schema<infer S, unknown> ? S : never
+  export type IntersectT<X> = Inverse<From<X>> extends ((arg: infer T) => void) ? T : never
 
   export interface Base<T = any> {
     uid: number
@@ -60,7 +63,7 @@ namespace Schema {
     new <T = any>(options: Partial<Base<T>>): Schema<T>
     prototype: Schema
     resolve: Resolve
-    from<T = any>(source?: T): Schema<From<T>>
+    from<X = any>(source?: X): From<X>
     extend(type: string, resolve: Resolve): void
     any(): Schema<any>
     never(): Schema<never>
@@ -79,7 +82,7 @@ namespace Schema {
     tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
     object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
     union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
-    intersect<X>(list: readonly X[]): Schema<Intersect<TypeS<X>>, Intersect<TypeT<X>>>
+    intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
     transform<X, T>(inner: X, callback: (value: TypeS<X>) => T): Schema<TypeS<X>, T>
   }
 }
@@ -109,7 +112,7 @@ const Schema = function (options: Schema.Base) {
   return schema
 } as Schema.Static
 
-interface Schema<S = any, T = S> extends Schema.Base<T> {
+interface Schema<in S = any, out T = S> extends Schema.Base<T> {
   (data?: S | null): T
   new (data?: S | null): T
   [kSchema]: true
@@ -384,11 +387,20 @@ Schema.extend('union', (data, { list, toString }) => {
   throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
 })
 
-Schema.extend('intersect', (data, { list }, strict) => {
-  const result = {}
+Schema.extend('intersect', (data, { list, toString }, strict) => {
+  let result
   for (const inner of list!) {
     const value = Schema.resolve(data, inner, true)[0]
-    Object.assign(result, value)
+    if (isNullable(value)) continue
+    if (isNullable(result)) {
+      result = value
+    } else if (typeof result !== typeof value) {
+      throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
+    } else if (typeof value === 'object') {
+      result = { ...result as any, ...value }
+    } else if (result !== value) {
+      throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
+    }
   }
   if (!strict && isPlainObject(data)) merge(result, data)
   return [result]
