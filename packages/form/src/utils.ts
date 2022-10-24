@@ -8,7 +8,7 @@ const primitive = ['string', 'number', 'boolean', 'bitset', 'const']
 const dynamic = ['function', 'transform', 'is']
 const composite = ['array', 'dict']
 
-export function isObjectSchema(schema: Schema) {
+export function isObjectSchema(schema: Schema): boolean {
   if (schema.type === 'object') {
     return true
   } else if (schema.type === 'intersect') {
@@ -60,7 +60,7 @@ export function validate(schema: Schema): boolean {
   }
 }
 
-export function hasTitle(schema: Schema, root?: boolean) {
+export function hasTitle(schema: Schema, root?: boolean): boolean {
   if (!schema) return true
   if (schema.type === 'object') {
     if (schema.meta.description) return true
@@ -77,22 +77,4 @@ export function hasTitle(schema: Schema, root?: boolean) {
   } else {
     return false
   }
-}
-
-export function deepEqual(a: any, b: any) {
-  if (a === b) return true
-  if (typeof a !== typeof b) return false
-  if (typeof a !== 'object') return false
-  if (!a || !b) return false
-
-  // check array
-  if (Array.isArray(a)) {
-    if (!Array.isArray(b) || a.length !== b.length) return false
-    return a.every((item, index) => deepEqual(item, b[index]))
-  } else if (Array.isArray(b)) {
-    return false
-  }
-
-  // check object
-  return Object.keys({ ...a, ...b }).every(key => deepEqual(a[key], b[key]))
 }

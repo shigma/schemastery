@@ -142,7 +142,7 @@ import SchemaPrimitive from './primitive.vue'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
-  initial: {},
+  initial: {} as PropType<any>,
   modelValue: {},
   instant: Boolean,
   invalid: Boolean,
@@ -206,13 +206,15 @@ const isComposite = computed(() => {
 const config = ref()
 const signal = ref(false)
 
-function optional(schema: Schema) {
+function optional(schema: Schema): Schema {
   if (schema.type === 'object') {
     return Schema.object(valueMap(schema.dict, (item) => {
       return item.type === 'const' ? item : item.required(false)
     }))
   } else if (schema.type === 'intersect') {
     return Schema.intersect(schema.list.map(optional))
+  } else if (schema.type === 'union') {
+    return Schema.union(schema.list.map(optional))
   } else {
     return schema
   }
