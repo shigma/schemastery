@@ -1,6 +1,6 @@
 <template>
   <template v-if="isHidden"></template>
-  <template v-else-if="schema.type === 'const'"></template>
+  <template v-else-if="schema.type === 'const' || schema.type === 'never'"></template>
 
   <template v-else-if="schema.type === 'object'">
     <h2 class="k-schema-header" v-if="schema.meta.description">{{ schema.meta.description }}</h2>
@@ -20,7 +20,7 @@
     <k-schema v-for="(item, index) in choices" :key="index"
       v-model="config"
       :initial="initial"
-      :schema="{ ...item, meta: { ...schema.meta, ...item.meta } }"
+      :schema="{ ...item, meta: { ...item.meta, ...schema.meta } }"
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix">
@@ -100,7 +100,7 @@
   <template v-else-if="isComposite">
     <div class="k-schema-group" v-if="prefix">
       <schema-group v-model:signal="signal"
-        :schema="active" v-model="config" :prefix="prefix" :disabled="disabled" :instant="instant" :initial="initial">
+        :schema="active" v-model="config" :prefix="prefix" :disabled="disabled" :instant="instant" :initial="initial ?? active.meta.default">
       </schema-group>
     </div>
 
