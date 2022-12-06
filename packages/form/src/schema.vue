@@ -19,6 +19,7 @@
   <template v-else-if="schema.type === 'intersect' || schema.type === 'union' && choices.length === 1">
     <k-schema v-for="(item, index) in choices" :key="index"
       v-model="config"
+      :branch="schema.type === 'intersect'"
       :initial="initial"
       :schema="{ ...item, meta: { ...item.meta, ...schema.meta } }"
       :instant="instant"
@@ -28,7 +29,11 @@
     </k-schema>
   </template>
 
-  <schema-item v-else-if="prefix || (!isComposite && schema?.type !== 'union')" :disabled="disabled" :class="{ changed, required, invalid }" @command="handleCommand">
+  <schema-item
+    v-else-if="!branch && (prefix || !isComposite)"
+    :disabled="disabled"
+    :class="{ changed, required, invalid }"
+    @command="handleCommand">
     <template #menu>
       <el-dropdown-item command="discard">撤销更改</el-dropdown-item>
       <el-dropdown-item command="default">恢复默认值</el-dropdown-item>
@@ -121,7 +126,7 @@
     <k-schema 
       v-model="config"
       :initial="initial"
-      :schema="{ ...active, meta: { ...active.meta } }"
+      :schema="{ ...active, meta: { ...active.meta, description: '' } }"
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix"
@@ -147,6 +152,7 @@ const props = defineProps({
   instant: Boolean,
   invalid: Boolean,
   disabled: Boolean,
+  branch: Boolean,
   prefix: { type: String, default: '' },
 })
 
