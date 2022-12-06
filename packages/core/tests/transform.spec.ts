@@ -88,4 +88,27 @@ describe('Transform', () => {
     expect(() => validate(null)).to.throw()
     expect(() => validate({ id: 1, children: {} })).to.throw()
   })
+
+  it.skip('adaptive root', () => {
+    const original = Schema.object({
+      bar: Schema.boolean().default(false),
+      id: Schema.never(),
+    })
+    const validate = Schema.union([
+      original,
+      Schema.transform(Schema.dict(Schema.any()), (data) => {
+        data.foo = {
+          ...data.foo,
+          id: data.id,
+        }
+        delete data.id
+        return original(data)
+      }),
+    ])
+
+    const root: any = { id: 1 }
+    expect(validate(null)).to.deep.equal(null)
+    expect(validate(root)).to.deep.equal({ foo: { id: 1 }, bar: false })
+    expect(root).to.deep.equal({ foo: { id: 1 } })
+  })
 })

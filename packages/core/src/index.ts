@@ -1,4 +1,4 @@
-import { clone, Dict, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
+import { clone, deepEqual, Dict, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 const kSchema = Symbol.for('schemastery')
 
@@ -74,7 +74,7 @@ namespace Schema {
     percent(): Schema<number>
     boolean(): Schema<boolean>
     date(): Schema<string | Date, Date>
-    bitset<K extends string>(bits: Dict<number, K>): Schema<number | readonly K[], number>
+    bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
     function(): Schema<Function, (...args: any[]) => any>
     is<T>(constructor: Constructor<T>): Schema<T>
     array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
@@ -112,7 +112,7 @@ const Schema = function (options: Schema.Base) {
   return schema
 } as Schema.Static
 
-interface Schema<in S = any, out T = S> extends Schema.Base<T> {
+interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data?: S | null): T
   new (data?: S | null): T
   [kSchema]: true
@@ -130,6 +130,7 @@ interface Schema<in S = any, out T = S> extends Schema.Base<T> {
   step(value: number): Schema<S, T>
   set(key: string, value: Schema): Schema<S, T>
   push(value: Schema): Schema<S, T>
+  simplify(value?: any): any
 }
 
 let index = 0
@@ -178,6 +179,32 @@ Schema.prototype.pattern = function pattern(regexp) {
   const pattern = pick(regexp, ['source', 'flags'])
   schema.meta = { ...schema.meta, pattern }
   return schema
+}
+
+Schema.prototype.simplify = function simplify(this: Schema, value) {
+  if (deepEqual(value, this.meta.default)) return
+  if (this.type === 'object') {
+    const result: Dict = {}
+    for (const key in value) {
+      const item = this.dict![key]?.simplify(value[key])
+      if (!isNullable(item)) result[key] = item
+    }
+    return result
+  } else if (this.type === 'dict') {
+    const result: Dict = {}
+    for (const key in value) {
+      const item = this.inner?.simplify(value[key])
+      if (!isNullable(item)) result[key] = item
+    }
+    return result
+  } else if (this.type === 'intersect') {
+    const result: Dict = {}
+    for (const item of this.list!) {
+      Object.assign(result, item.simplify(value))
+    }
+    return result
+  }
+  return value
 }
 
 for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
