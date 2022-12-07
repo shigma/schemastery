@@ -183,18 +183,20 @@ Schema.prototype.pattern = function pattern(regexp) {
 
 Schema.prototype.simplify = function simplify(this: Schema, value) {
   if (deepEqual(value, this.meta.default)) return
-  if (this.type === 'object') {
+  if (this.type === 'object' || this.type === 'dict') {
     const result: Dict = {}
     for (const key in value) {
-      const item = this.dict![key]?.simplify(value[key])
+      const schema = this.type === 'object' ? this.dict![key] : this.inner
+      const item = schema?.simplify(value[key])
       if (!isNullable(item)) result[key] = item
     }
     return result
-  } else if (this.type === 'dict') {
-    const result: Dict = {}
-    for (const key in value) {
-      const item = this.inner?.simplify(value[key])
-      if (!isNullable(item)) result[key] = item
+  } else if (this.type === 'array' || this.type === 'tuple') {
+    const result: any[] = []
+    for (const key of value) {
+      const schema = this.type === 'array' ? this.inner : this.list![key]
+      const item = schema ? schema.simplify(value[key]) : value[key]
+      result.push(item)
     }
     return result
   } else if (this.type === 'intersect') {
@@ -203,6 +205,13 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
       Object.assign(result, item.simplify(value))
     }
     return result
+  } else if (this.type === 'union') {
+    for (const schema of this.list!) {
+      try {
+        Schema.resolve(value, schema)
+        return schema.simplify(value)
+      } catch {}
+    }
   }
   return value
 }
