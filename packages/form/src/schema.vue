@@ -61,7 +61,7 @@
       </template>
 
       <template v-if="isPrimitive">
-        <schema-primitive v-model="config" :schema="active" :disabled="disabled"></schema-primitive>
+        <schema-primitive v-model="config" :schema="active" :disabled="disabled" v-if="!check(schema, initial)"></schema-primitive>
       </template>
 
       <template v-else-if="isComposite">
@@ -158,6 +158,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'command'])
 
+function check(schema: any, value: any) {
+  try {
+    optional(schema)(value)
+    return true
+  } catch {
+    return false
+  }
+}
+
 const changed = computed(() => {
   return !props.instant && !deepEqual(props.initial, props.modelValue)
 })
@@ -213,16 +222,15 @@ const config = ref()
 const signal = ref(false)
 
 function optional(schema: Schema): Schema {
+  if (schema.type === 'const') return schema
   if (schema.type === 'object') {
-    return Schema.object(valueMap(schema.dict, (item) => {
-      return item.type === 'const' ? item : item.required(false)
-    }))
+    return Schema.object(valueMap(schema.dict, optional))
   } else if (schema.type === 'intersect') {
     return Schema.intersect(schema.list.map(optional))
   } else if (schema.type === 'union') {
     return Schema.union(schema.list.map(optional))
   } else {
-    return schema
+    return schema.required(false)
   }
 }
 
@@ -230,11 +238,8 @@ watch(() => props.modelValue, (value) => {
   config.value = value ?? getFallback(props.schema)
   active.value = props.schema
   for (const item of choices.value) {
-    try {
-      optional(item)(config.value)
-      active.value = item
-      break
-    } catch {}
+    if (!check(item, config.value)) continue
+    active.value = item
   }
 }, { immediate: true, deep: true })
 
