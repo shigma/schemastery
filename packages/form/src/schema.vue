@@ -61,7 +61,7 @@
       </template>
 
       <template v-if="isPrimitive">
-        <schema-primitive v-model="config" :schema="active" :disabled="disabled" v-if="!check(schema, initial)"></schema-primitive>
+        <schema-primitive v-model="config" :schema="active" :disabled="disabled" v-if="check(schema, initial)"></schema-primitive>
       </template>
 
       <template v-else-if="isComposite">
