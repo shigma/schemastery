@@ -230,7 +230,7 @@ function optional(schema: Schema): Schema {
   } else if (schema.type === 'union') {
     return Schema.union(schema.list.map(optional))
   } else {
-    return schema.required(false)
+    return Schema(schema).required(false)
   }
 }
 
