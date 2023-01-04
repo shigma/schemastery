@@ -33,7 +33,9 @@ export default Schema.intersect([
       foo: Schema.number().description('请输入一个数值。'),
       bar: Schema.string().description('请输入一个字符串。'),
     }),
-    Schema.object({}),
+    Schema.object({
+      enabled: Schema.const(false).required(),
+    }),
   ])
 ])
 ```
