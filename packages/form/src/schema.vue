@@ -123,7 +123,7 @@
 
   <!-- union containing object -->
   <template v-else-if="schema?.type === 'union' && choices.length > 1 && ['object', 'intersect'].includes(active?.type)">
-    <k-schema 
+    <k-schema
       v-model="config"
       :initial="initial"
       :schema="{ ...active, meta: { ...active.meta, description: '' } }"
@@ -240,6 +240,7 @@ watch(() => props.modelValue, (value) => {
   for (const item of choices.value) {
     if (!check(item, config.value)) continue
     active.value = item
+    break
   }
 }, { immediate: true, deep: true })
 
