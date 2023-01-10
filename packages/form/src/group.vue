@@ -139,14 +139,13 @@ function doWatch() {
 <style lang="scss">
 
 .schema-item h3 {
-  .el-input {
-    display: inline;
+  > .el-input {
+    max-width: 12rem;
 
     input {
-      width: auto;
       border: none;
       padding: 0;
-      font-size: 1.125rem;
+      font-size: 1rem;
       font-weight: inherit;
       font-family: inherit;
       border-radius: 0;

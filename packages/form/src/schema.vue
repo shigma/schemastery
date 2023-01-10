@@ -45,7 +45,7 @@
     </template>
 
     <template #description>
-      <k-markdown inline :source="schema.meta.description"></k-markdown>
+      <k-markdown :source="schema.meta.description"></k-markdown>
     </template>
 
     <template #right>
@@ -272,7 +272,7 @@ function handleCommand(action: string) {
 
   .el-button {
     float: right;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
   }
 }
 

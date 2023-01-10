@@ -72,14 +72,14 @@ const visible = ref(false)
 
   h3 {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: 1rem;
     line-height: 1.5;
     position: relative;
     user-select: none;
     display: flex;
     align-items: center;
 
-    * {
+    > * {
       flex: 0 0 auto;
     }
 
