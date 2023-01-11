@@ -126,7 +126,7 @@
     <k-schema
       v-model="config"
       :initial="initial"
-      :schema="{ ...active, meta: { ...active.meta, description: '' } }"
+      :schema="branch ? active : { ...active, meta: { ...active.meta, description: '' } }"
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix"
