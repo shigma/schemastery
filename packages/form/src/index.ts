@@ -1,5 +1,5 @@
 import { App } from 'vue'
-import Markdown from './markdown.vue'
+import Markdown from 'marked-vue'
 import Schema from './schema.vue'
 
 export * from './icons'

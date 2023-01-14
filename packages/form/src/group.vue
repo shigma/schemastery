@@ -12,7 +12,7 @@
           <el-input v-model="entries[index][0]"></el-input>
         </template>
         <template #description>
-          <k-markdown inline :source="schema.inner.meta.description"></k-markdown>
+          <k-markdown :source="schema.inner.meta.description"></k-markdown>
         </template>
         <template #menu>
           <el-dropdown-item divided :disabled="!index" command="up">上移</el-dropdown-item>
