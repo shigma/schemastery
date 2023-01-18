@@ -50,7 +50,7 @@
 
     <template #right>
       <template v-if="schema.type === 'union' && schema.meta.role !== 'radio'">
-        <el-select v-model="selectModel" :disabled="disabled">
+        <el-select filterable v-model="selectModel" :disabled="disabled">
           <el-option
             v-for="(item, index) in choices"
             :key="index"
