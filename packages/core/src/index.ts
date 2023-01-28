@@ -115,6 +115,7 @@ const Schema = function (options: Schema.Base) {
   Object.defineProperty(schema, 'uid', { value: globalThis.__schemastery_index__++ })
   Object.setPrototypeOf(schema, Schema.prototype)
   schema.meta ||= {}
+  schema.toString = schema.toString.bind(schema)
   return schema
 } as Schema.Static
 
@@ -218,6 +219,10 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
     }
   }
   return value
+}
+
+Schema.prototype.toString = function toString(this: Schema, inline?: boolean) {
+  return formatters[this.type]?.(this, inline) ?? (console.log(this), `Schema<${this.type}>`)
 }
 
 for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
@@ -463,12 +468,13 @@ Schema.extend('transform', (data, { inner, callback }) => {
 })
 
 type Formatter = (schema: Schema, inline?: boolean) => string
+const formatters: Dict<Formatter> = {}
 
 function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatter) {
+  formatters[name] = format
   Object.assign(Schema, {
     [name](...args: any[]) {
       const schema = new Schema({ type: name } as Schema.Base)
-      schema.toString = format.bind(null, schema)
       keys.forEach((key, index) => {
         switch (key) {
           case 'sKey': schema.sKey = args[index] ?? Schema.string(); break

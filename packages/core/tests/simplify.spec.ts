@@ -16,7 +16,7 @@ describe('Simplify', () => {
       }),
     ])
 
-    expect(schema.simplify(null)).to.deep.equal({})
+    expect(schema.simplify(null)).to.deep.equal(null)
     expect(schema.simplify({ a: 'a', b: 1 })).to.deep.equal({ b: 1 })
     expect(schema.simplify({ c: {} })).to.deep.equal({})
     expect(schema.simplify({ c: { d: false } })).to.deep.equal({ c: { d: false } })
