@@ -87,6 +87,12 @@ namespace Schema {
   }
 }
 
+declare module globalThis {
+  export let __schemastery_index__: number
+}
+
+globalThis.__schemastery_index__ ??= 0
+
 const Schema = function (options: Schema.Base) {
   const schema = function (data: any) {
     return Schema.resolve(data, schema)[0]
@@ -106,7 +112,7 @@ const Schema = function (options: Schema.Base) {
   }
 
   Object.assign(schema, options)
-  Object.defineProperty(schema, 'uid', { value: index++ })
+  Object.defineProperty(schema, 'uid', { value: globalThis.__schemastery_index__++ })
   Object.setPrototypeOf(schema, Schema.prototype)
   schema.meta ||= {}
   return schema
@@ -132,8 +138,6 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   push(value: Schema): Schema<S, T>
   simplify(value?: any): any
 }
-
-let index = 0
 
 Schema.prototype = Object.create(Function.prototype)
 
@@ -182,7 +186,7 @@ Schema.prototype.pattern = function pattern(regexp) {
 }
 
 Schema.prototype.simplify = function simplify(this: Schema, value) {
-  if (deepEqual(value, this.meta.default)) return
+  if (deepEqual(value, this.meta.default)) return null
   if (this.type === 'object' || this.type === 'dict') {
     const result: Dict = {}
     for (const key in value) {
