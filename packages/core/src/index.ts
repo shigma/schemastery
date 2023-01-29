@@ -2,27 +2,65 @@ import { clone, deepEqual, Dict, isNullable, isPlainObject, pick, valueMap } fro
 
 const kSchema = Symbol.for('schemastery')
 
+declare global {
+  namespace Schemastery {
+    export type From<X> =
+      | X extends string | number | boolean ? Schema<X>
+      : X extends Schema ? X
+      : X extends typeof String ? Schema<string>
+      : X extends typeof Number ? Schema<number>
+      : X extends typeof Boolean ? Schema<boolean>
+      : X extends typeof Function ? Schema<Function, (...args: any[]) => any>
+      : X extends Constructor<infer S> ? Schema<S>
+      : never
+
+    type _TypeS<X> = X extends Schema<infer S, unknown> ? S : never
+    type Inverse<X> = X extends Schema<any, infer Y> ? (arg: Y) => void : never
+
+    export type TypeS<X> = _TypeS<From<X>>
+    export type TypeT<X> = ReturnType<From<X>>
+    export type Resolve = (data: any, schema: Schema, strict?: boolean) => [any, any?]
+
+    export type IntersectS<X> = From<X> extends Schema<infer S, unknown> ? S : never
+    export type IntersectT<X> = Inverse<From<X>> extends ((arg: infer T) => void) ? T : never
+
+    type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
+    type TupleT<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
+    type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> } & Dict
+    type ObjectT<X extends Dict> = { [K in keyof X]: TypeT<X[K]> } & Dict
+    type Constructor<T = any> = new (...args: any[]) => T
+
+    export interface Static {
+      <T = any>(options: Partial<Schema.Base<T>>): Schema<T>
+      new <T = any>(options: Partial<Schema.Base<T>>): Schema<T>
+      prototype: Schema
+      resolve: Resolve
+      from<X = any>(source?: X): From<X>
+      extend(type: string, resolve: Resolve): void
+      any(): Schema<any>
+      never(): Schema<never>
+      const<T>(value: T): Schema<T>
+      string(): Schema<string>
+      number(): Schema<number>
+      natural(): Schema<number>
+      percent(): Schema<number>
+      boolean(): Schema<boolean>
+      date(): Schema<string | Date, Date>
+      bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
+      function(): Schema<Function, (...args: any[]) => any>
+      is<T>(constructor: Constructor<T>): Schema<T>
+      array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
+      dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
+      tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
+      object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
+      union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
+      intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
+      transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
+    }
+  }
+}
+
 namespace Schema {
-  export type From<X> =
-    | X extends string | number | boolean ? Schema<X>
-    : X extends Schema ? X
-    : X extends typeof String ? Schema<string>
-    : X extends typeof Number ? Schema<number>
-    : X extends typeof Boolean ? Schema<boolean>
-    : X extends typeof Function ? Schema<Function, (...args: any[]) => any>
-    : X extends Constructor<infer S> ? Schema<S>
-    : never
-
-  type _TypeS<X> = X extends Schema<infer S, unknown> ? S : never
-  type Inverse<X> = X extends Schema<any, infer Y> ? (arg: Y) => void : never
-
-  export type TypeS<X> = _TypeS<From<X>>
-  export type TypeT<X> = ReturnType<From<X>>
-  export type Resolve = (data: any, schema: Schema, strict?: boolean) => [any, any?]
-
-  export type IntersectS<X> = From<X> extends Schema<infer S, unknown> ? S : never
-  export type IntersectT<X> = Inverse<From<X>> extends ((arg: infer T) => void) ? T : never
-
   export interface Base<T = any> {
     uid: number
     meta: Meta<T>
@@ -51,40 +89,6 @@ namespace Schema {
     max?: number
     min?: number
     step?: number
-  }
-
-  type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
-  type TupleT<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
-  type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> } & Dict
-  type ObjectT<X extends Dict> = { [K in keyof X]: TypeT<X[K]> } & Dict
-  type Constructor<T = any> = new (...args: any[]) => T
-
-  export interface Static {
-    <T = any>(options: Partial<Base<T>>): Schema<T>
-    new <T = any>(options: Partial<Base<T>>): Schema<T>
-    prototype: Schema
-    resolve: Resolve
-    from<X = any>(source?: X): From<X>
-    extend(type: string, resolve: Resolve): void
-    any(): Schema<any>
-    never(): Schema<never>
-    const<T>(value: T): Schema<T>
-    string(): Schema<string>
-    number(): Schema<number>
-    natural(): Schema<number>
-    percent(): Schema<number>
-    boolean(): Schema<boolean>
-    date(): Schema<string | Date, Date>
-    bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
-    function(): Schema<Function, (...args: any[]) => any>
-    is<T>(constructor: Constructor<T>): Schema<T>
-    array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
-    dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
-    tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
-    object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
-    union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
-    intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
-    transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
   }
 }
 
@@ -118,7 +122,7 @@ const Schema = function (options: Schema.Base) {
   schema.meta ||= {}
   schema.toString = schema.toString.bind(schema)
   return schema
-} as Schema.Static
+} as Schemastery.Static
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
   (data?: S | null): T
@@ -236,7 +240,7 @@ for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', '
   })
 }
 
-const resolvers: Dict<Schema.Resolve> = {}
+const resolvers: Dict<Schemastery.Resolve> = {}
 
 Schema.extend = function extend(type: string, resolve) {
   resolvers[type] = resolve
@@ -285,14 +289,16 @@ Schema.percent = function percent() {
   return Schema.number().step(0.01).min(0).max(1).role('slider')
 }
 
-Schema.date = () => Schema.union([
-  Schema.is(Date),
-  Schema.transform(Schema.string().role('datetime'), (value) => {
-    const date = new Date(value)
-    if (isNaN(+date)) throw new TypeError(`invalid date "${value}"`)
-    return date
-  }, true),
-])
+Schema.date = function date() {
+  return Schema.union([
+    Schema.is(Date),
+    Schema.transform(Schema.string().role('datetime'), (value) => {
+      const date = new Date(value)
+      if (isNaN(+date)) throw new TypeError(`invalid date "${value}"`)
+      return date
+    }, true),
+  ])
+}
 
 Schema.extend('any', (data) => {
   return [data]
