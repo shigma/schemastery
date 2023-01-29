@@ -35,6 +35,7 @@ namespace Schema {
     callback?: Function
     value?: T
     refs?: Dict<Schema>
+    preserve?: boolean
     toString(inline?: boolean): string
   }
 
@@ -83,7 +84,7 @@ namespace Schema {
     object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
     union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
     intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
-    transform<X, T>(inner: X, callback: (value: TypeS<X>) => T): Schema<TypeS<X>, T>
+    transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
   }
 }
 
@@ -290,7 +291,7 @@ Schema.date = () => Schema.union([
     const date = new Date(value)
     if (isNaN(+date)) throw new TypeError(`invalid date "${value}"`)
     return date
-  }),
+  }, true),
 ])
 
 Schema.extend('any', (data) => {
@@ -451,7 +452,7 @@ Schema.extend('intersect', (data, { list, toString }, strict) => {
   return [result]
 })
 
-Schema.extend('transform', (data, { inner, callback }) => {
+Schema.extend('transform', (data, { inner, callback, preserve }) => {
   const [result, adapted = data] = Schema.resolve(data, inner!, true)
   if (isPlainObject(data)) {
     const temp: any = {}
@@ -461,6 +462,8 @@ Schema.extend('transform', (data, { inner, callback }) => {
       delete data[key]
     }
     Object.assign(data, callback!(temp))
+    return [callback!(result)]
+  } else if (preserve) {
     return [callback!(result)]
   } else {
     return [callback!(result), callback!(adapted)]
@@ -533,6 +536,6 @@ defineMethod('intersect', ['list'], ({ list }) => {
   return `${list!.map((inner) => inner.toString(true)).join(' & ')}`
 })
 
-defineMethod('transform', ['inner', 'callback'], ({ inner }, isInner) => inner!.toString(isInner))
+defineMethod('transform', ['inner', 'callback', 'preserve'], ({ inner }, isInner) => inner!.toString(isInner))
 
 export = Schema
