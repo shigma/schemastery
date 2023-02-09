@@ -98,6 +98,8 @@
     <div class="bottom" v-else-if="schema.type === 'string' && schema.meta.role === 'textarea'">
       <el-input autosize v-model="config" type="textarea" :disabled="disabled"></el-input>
     </div>
+
+    <schema-table class="bottom" v-else-if="isTable" v-model="config" :schema="schema" :disabled="disabled"></schema-table>
   </schema-item>
 
   <template v-if="isHidden || schema.type === 'union' && choices.length === 1"></template>
@@ -143,6 +145,7 @@ import { clone, isNullable, valueMap } from 'cosmokit'
 import BitCheckbox from './bit.vue'
 import SchemaItem from './item.vue'
 import SchemaGroup from './group.vue'
+import SchemaTable from './table.vue'
 import SchemaPrimitive from './primitive.vue'
 
 const props = defineProps({
@@ -215,7 +218,13 @@ const isPrimitive = computed(() => {
 })
 
 const isComposite = computed(() => {
-  return ['array', 'dict'].includes(active.value.type) && validate(active.value.inner)
+  return ['array', 'dict'].includes(active.value.type) && validate(active.value.inner) && active.value.meta.role !== 'table'
+})
+
+const isTable = computed(() => {
+  return ['array', 'dict'].includes(active.value.type)
+    && active.value.meta.role === 'table'
+    && ['string', 'number'].includes(active.value.inner.type)
 })
 
 const config = ref()
@@ -310,6 +319,10 @@ function handleCommand(action: string) {
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
+  }
+
+  table {
+    margin-bottom: 0.5rem;
   }
 }
 

@@ -93,8 +93,8 @@ function handleCommand(action: string, index?: number) {
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
-  modelValue: {},
-  initial: {},
+  modelValue: {} as PropType<any>,
+  initial: {} as PropType<any>,
   prefix: String,
   disabled: Boolean,
   instant: Boolean,
@@ -122,7 +122,7 @@ watch(() => props.signal, (value) => {
 function doWatch() {
   return watch(entries, () => {
     if (props.schema.type === 'dict') {
-      const result = {}
+      const result: any = {}
       for (const [key, value] of entries.value) {
         if (key in result) return
         result[key] = value

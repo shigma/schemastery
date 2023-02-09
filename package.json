@@ -30,7 +30,7 @@
     "c8": "^7.12.0",
     "chai": "^4.3.7",
     "element-plus": "2.2.17",
-    "esbuild": "^0.14.54",
+    "esbuild": "^0.17.6",
     "esbuild-register": "^3.4.2",
     "mocha": "^9.2.2",
     "serve": "^13.0.4",

@@ -5,6 +5,9 @@
     "jsx": "preserve",
     "noImplicitAny": true,
     "strictNullChecks": false,
+    "types": [
+      "vite/global",
+    ],
   },
   "include": [
     "src",

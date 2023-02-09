@@ -73,7 +73,7 @@ const visible = ref(false)
   h3 {
     margin: 0;
     font-size: 1rem;
-    line-height: 1.5;
+    line-height: 1.7;
     position: relative;
     user-select: none;
     display: flex;
@@ -92,8 +92,6 @@ const visible = ref(false)
   }
 
   .left {
-    display: inline-block;
-
     .el-dropdown {
       margin-left: 0.25rem;
       margin-top: 2px;
@@ -108,9 +106,7 @@ const visible = ref(false)
   }
 
   .right {
-    margin: 0.5rem 0;
-    float: right;
-    display: inline-flex;
+    display: flex;
     gap: 1rem;
     flex: 1;
     justify-content: flex-end;

@@ -46,7 +46,7 @@ const showPass = ref(false)
 
 const nullable = computed(() => isNullable(props.modelValue))
 
-const value = computed({
+const value = computed<any>({
   get: () => props.modelValue,
   set: emit.bind(null, 'update:modelValue'),
 })
@@ -80,7 +80,7 @@ const date = computed({
 
 function onClickExternal(value: string) {
   if (!value) return
-  open(value, '', 'noopener=yes,noreferrer=yes')
+  open(value, '_blank')
 }
 
 </script>
