@@ -1,5 +1,6 @@
 import { defineClientConfig } from '@vuepress/client'
-import form from 'schemastery-vue'
+import Markdown from 'marked-vue'
+import Form from 'schemastery-vue'
 import Schema from 'schemastery'
 import {
   ElButton,
@@ -51,7 +52,8 @@ export default defineClientConfig({
     app.use(ElSwitch)
     app.use(ElDatePicker)
     app.use(ElTimePicker)
-    app.use(form)
+    app.component('k-markdown', Markdown)
+    app.use(Form)
   },
   setup() {},
 })
