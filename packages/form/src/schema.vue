@@ -107,6 +107,13 @@
       :schema="schema"
       :disabled="disabled"
     ></schema-table>
+
+    <k-filter
+      v-else-if="schema.type === 'any' && schema.meta.role === 'filter'"
+      class="bottom"
+      v-model="config"
+      :disabled="disabled"
+    ></k-filter>
   </schema-item>
 
   <template v-if="isHidden || schema.type === 'union' && choices.length === 1"></template>

@@ -116,7 +116,7 @@ const visible = ref(false)
     margin: 0.5rem 0 0.25rem;
   }
 
-  $actions-width: 3rem;
+  $actions-width: 0.5rem;
 
   .actions {
     position: absolute;
