@@ -93,7 +93,7 @@ const visible = ref(false)
 
   .left {
     .el-dropdown {
-      margin-left: 0.25rem;
+      margin-left: 0.5rem;
       margin-top: 2px;
     }
 

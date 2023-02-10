@@ -1,6 +1,7 @@
 import IconClose from './close.vue'
+import IconEllipsis from './ellipsis.vue'
 import IconExternal from './external.vue'
 import IconEyeSlash from './eye-slash.vue'
 import IconEye from './eye.vue'
 
-export { IconClose, IconExternal, IconEyeSlash, IconEye }
+export { IconClose, IconEllipsis, IconExternal, IconEyeSlash, IconEye }

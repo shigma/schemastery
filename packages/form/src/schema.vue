@@ -21,12 +21,47 @@
       v-model="config"
       :branch="schema.type === 'intersect'"
       :initial="initial"
-      :schema="{ ...item, meta: { ...item.meta, ...schema.meta } }"
+      :schema="{ ...item, meta: { ...schema.meta, ...item.meta } }"
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix">
       <slot></slot>
+      <template #after v-if="schema.meta.role === 'computed'">
+        <el-button v-if="config?.$switch" @click="addBranch">
+          添加分支
+        </el-button>
+        <el-button v-else-if="check(schema, initial)" @click="addBranch">
+          <icon-ellipsis></icon-ellipsis>
+        </el-button>
+      </template>
     </k-schema>
+
+    <div class="k-schema-group" v-if="schema.meta.role === 'computed' && config?.$switch">
+      <k-schema
+        v-for="(_, index) in config.$switch.branches"
+        v-model="config.$switch.branches[index].then"
+        @command="handleComputedCommand($event, index)"
+        :key="index"
+        :schema="schema.list[0]"
+        :disabled="disabled"
+        :instant="instant">
+        <template #menu>
+          <el-dropdown-item divided :disabled="!index" command="up">上移</el-dropdown-item>
+          <el-dropdown-item :disabled="index === config.$switch.branches.length - 1" command="down">下移</el-dropdown-item>
+          <el-dropdown-item command="delete">删除</el-dropdown-item>
+        </template>
+        <span>当满足条件：</span>
+        <k-filter-button v-model="config.$switch.branches[index].case" :disabled="disabled"></k-filter-button>
+      </k-schema>
+      <k-schema
+        v-model="config.$switch.default"
+        :schema="schema.list[0]"
+        :disabled="disabled"
+        :initial="initial?.$switch ? initial.$switch.default : initial"
+        :instant="instant">
+        <span>其他情况下</span>
+      </k-schema>
+    </div>
   </template>
 
   <schema-item
@@ -49,6 +84,8 @@
     </template>
 
     <template #right>
+      <slot name="before"></slot>
+
       <template v-if="schema.type === 'union' && schema.meta.role !== 'radio'">
         <el-select filterable v-model="selectModel" :disabled="disabled">
           <el-option
@@ -60,60 +97,66 @@
         </el-select>
       </template>
 
-      <template v-if="isPrimitive">
-        <schema-primitive v-model="config" :schema="active" :disabled="disabled" v-if="check(schema, initial)"></schema-primitive>
+      <template v-if="isValid">
+        <template v-if="isPrimitive">
+          <schema-primitive v-model="config" :schema="active" :disabled="disabled"></schema-primitive>
+        </template>
+
+        <template v-else-if="['array', 'dict'].includes(active.type)">
+          <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
+        </template>
+
+        <template v-else-if="schema.type === 'tuple'">
+          <schema-primitive v-for="(item, index) in active.list" :key="index"
+            v-model="config[index]" :schema="item" :disabled="disabled"></schema-primitive>
+        </template>
       </template>
 
-      <template v-else-if="['array', 'dict'].includes(active.type)">
-        <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
-      </template>
-
-      <template v-else-if="schema.type === 'tuple'">
-        <schema-primitive v-for="(item, index) in active.list" :key="index"
-          v-model="config[index]" :schema="item" :disabled="disabled"></schema-primitive>
-      </template>
+      <slot name="after"></slot>
     </template>
 
-    <ul class="bottom" v-if="schema.type === 'union' && schema.meta.role === 'radio'">
-      <li v-for="item in choices" :key="item.value">
-        <el-radio
-          v-model="config"
-          :disabled="disabled"
-          :label="item.value"
-        >{{ item.meta.description || item.value }}</el-radio>
-      </li>
-    </ul>
+    <template v-if="isValid">
+      <ul class="bottom" v-if="schema.type === 'union' && schema.meta.role === 'radio'">
+        <li v-for="item in choices" :key="item.value">
+          <el-radio
+            v-model="config"
+            :disabled="disabled"
+            :label="item.value"
+          >{{ item.meta.description || item.value }}</el-radio>
+        </li>
+      </ul>
 
-    <ul class="bottom" v-else-if="schema.type === 'bitset'">
-      <li v-for="(value, key) in schema.bits" :key="value">
-        <bit-checkbox
-          v-model="config"
-          :disabled="disabled"
-          :label="key"
-          :value="value"
-        ></bit-checkbox>
-      </li>
-    </ul>
+      <ul class="bottom" v-else-if="schema.type === 'bitset'">
+        <li v-for="(value, key) in schema.bits" :key="value">
+          <bit-checkbox
+            v-model="config"
+            :disabled="disabled"
+            :label="key"
+            :value="value"
+          ></bit-checkbox>
+        </li>
+      </ul>
 
-    <div class="bottom" v-else-if="schema.type === 'string' && schema.meta.role === 'textarea'">
-      <el-input autosize v-model="config" type="textarea" :disabled="disabled"></el-input>
-    </div>
+      <div class="bottom" v-else-if="schema.type === 'string' && schema.meta.role === 'textarea'">
+        <el-input autosize v-model="config" type="textarea" :disabled="disabled"></el-input>
+      </div>
 
-    <schema-table
-      v-else-if="isTable"
-      class="bottom"
-      v-model="config"
-      v-model:signal="signal"
-      :schema="schema"
-      :disabled="disabled"
-    ></schema-table>
+      <schema-table
+        v-else-if="isTable"
+        class="bottom"
+        v-model="config"
+        v-model:signal="signal"
+        :schema="schema"
+        :disabled="disabled"
+      ></schema-table>
 
-    <k-filter
-      v-else-if="schema.type === 'any' && schema.meta.role === 'filter'"
-      class="bottom"
-      v-model="config"
-      :disabled="disabled"
-    ></k-filter>
+      <k-filter
+        v-else-if="schema.type === 'any' && schema.meta.role === 'filter'"
+        class="bottom"
+        v-model="config"
+        :disabled="disabled"
+      ></k-filter>
+    </template>
   </schema-item>
 
   <template v-if="isHidden || schema.type === 'union' && choices.length === 1"></template>
@@ -154,8 +197,9 @@
 
 import { watch, ref, computed } from 'vue'
 import type { PropType } from 'vue'
-import { deepEqual, getChoices, getFallback, Schema, validate } from './utils'
+import { deepEqual, getChoices, getFallback, Schema } from './utils'
 import { clone, isNullable, valueMap } from 'cosmokit'
+import { IconEllipsis } from './icons'
 import BitCheckbox from './bit.vue'
 import SchemaItem from './item.vue'
 import SchemaGroup from './group.vue'
@@ -226,6 +270,10 @@ const isHidden = computed(() => {
   return !props.schema || props.schema.meta.hidden
 })
 
+const isValid = computed(() => {
+  return check(active.value, config.value)
+})
+
 const isPrimitive = computed(() => {
   return ['string', 'number', 'boolean'].includes(active.value.type)
     && active.value.meta.role !== 'textarea'
@@ -236,10 +284,24 @@ const isComposite = computed(() => {
 })
 
 const isTable = computed(() => {
-  return ['array', 'dict'].includes(active.value.type)
+  return props.schema.meta.role !== 'computed'
+    && ['array', 'dict'].includes(active.value.type)
     && active.value.meta.role === 'table'
     && ['string', 'number'].includes(active.value.inner.type)
 })
+
+function addBranch() {
+  if (config.value?.$switch) {
+    config.value.$switch.branches.push({ case: null, then: null })
+  } else {
+    config.value = {
+      $switch: {
+        branches: [{ case: null, then: null }],
+        default: clone(config.value),
+      },
+    }
+  }
+}
 
 const config = ref()
 const signal = ref(false)
@@ -283,6 +345,20 @@ function handleCommand(action: string) {
     emit('update:modelValue', undefined)
   } else {
     emit('command', action)
+  }
+}
+
+function handleComputedCommand(action: string, index?: number) {
+  if (action === 'down') {
+    config.value.$switch.branches.splice(index + 1, 0, config.value.$switch.branches.splice(index, 1)[0])
+  } else if (action === 'up') {
+    config.value.$switch.branches.splice(index - 1, 0, config.value.$switch.branches.splice(index, 1)[0])
+  } else if (action === 'delete') {
+    if (config.value.$switch.branches.length > 1) {
+      config.value.$switch.branches.splice(index, 1)
+    } else {
+      config.value = config.value.$switch.default
+    }
   }
 }
 
@@ -333,6 +409,10 @@ function handleCommand(action: string) {
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
+  }
+
+  .el-button + .el-button {
+    margin-left: 0;
   }
 }
 
