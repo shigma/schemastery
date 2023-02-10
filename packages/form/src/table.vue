@@ -1,28 +1,30 @@
 <template>
-  <div class="bottom">
-    <table class="schema-table">
-      <tr v-for="([key], index) in entries">
-        <td class="key" v-if="schema.type === 'dict'">
-          <el-input :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }" v-model="entries[index][0]"></el-input>
-        </td>
-        <td>
-          <el-input
-            v-model="entries[index][1]"
-            :type="schema.inner.type === 'number' ? 'number' : 'text'"
-            :max="schema.inner.meta.max"
-            :min="schema.inner.meta.min"
-            :step="schema.inner.meta.step"
-          ></el-input>
-        </td>
-        <td class="close">
-          <div class="inner" @click.stop="deleteEntry(index)">
-            <icon-close></icon-close>
-          </div>
-        </td>
-      </tr>
-    </table>
-    <el-button solid @click.stop="addEntry" :disabled="disabled">添加项</el-button>
-  </div>
+  <table class="schema-table" v-if="entries.length">
+    <tr v-for="([key], index) in entries">
+      <td class="key" v-if="schema.type === 'dict'">
+        <el-input
+          v-model="entries[index][0]"
+          :disabled="disabled"
+          :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }"
+        ></el-input>
+      </td>
+      <td>
+        <el-input
+          v-model="entries[index][1]"
+          :disabled="disabled"
+          :type="schema.inner.type === 'number' ? 'number' : 'text'"
+          :max="schema.inner.meta.max"
+          :min="schema.inner.meta.min"
+          :step="schema.inner.meta.step"
+        ></el-input>
+      </td>
+      <td class="close">
+        <div class="inner" :class="{ disabled }" @click.stop="deleteEntry(index)">
+          <icon-close></icon-close>
+        </div>
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script lang="ts" setup>
@@ -33,11 +35,18 @@ import { IconClose } from './icons'
 
 const props = defineProps<{
   schema: Schema
+  signal?: boolean
   modelValue: any
   disabled?: boolean
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'update:signal'])
+
+watch(() => props.signal, (value) => {
+  if (!value) return
+  addEntry()
+  emit('update:signal', false)
+})
 
 const entries = ref<any[]>()
 
@@ -46,6 +55,7 @@ function addEntry() {
 }
 
 function deleteEntry(index: number) {
+  if (props.disabled) return
   entries.value.splice(index, 1)
 }
 
@@ -112,6 +122,10 @@ function doWatch() {
       color: var(--fg3);
       transition: var(--color-transition);
       cursor: pointer;
+    }
+
+    .inner.disabled {
+      pointer-events: none;
     }
 
     .inner:hover {

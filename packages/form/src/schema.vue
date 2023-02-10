@@ -64,7 +64,7 @@
         <schema-primitive v-model="config" :schema="active" :disabled="disabled" v-if="check(schema, initial)"></schema-primitive>
       </template>
 
-      <template v-else-if="isComposite">
+      <template v-else-if="['array', 'dict'].includes(active.type)">
         <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
       </template>
 
@@ -99,7 +99,14 @@
       <el-input autosize v-model="config" type="textarea" :disabled="disabled"></el-input>
     </div>
 
-    <schema-table class="bottom" v-else-if="isTable" v-model="config" :schema="schema" :disabled="disabled"></schema-table>
+    <schema-table
+      v-else-if="isTable"
+      class="bottom"
+      v-model="config"
+      v-model:signal="signal"
+      :schema="schema"
+      :disabled="disabled"
+    ></schema-table>
   </schema-item>
 
   <template v-if="isHidden || schema.type === 'union' && choices.length === 1"></template>
@@ -218,7 +225,7 @@ const isPrimitive = computed(() => {
 })
 
 const isComposite = computed(() => {
-  return ['array', 'dict'].includes(active.value.type) && validate(active.value.inner) && active.value.meta.role !== 'table'
+  return ['array', 'dict'].includes(active.value.type) && active.value.meta.role !== 'table'
 })
 
 const isTable = computed(() => {
@@ -319,10 +326,6 @@ function handleCommand(action: string) {
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
-  }
-
-  table {
-    margin-bottom: 0.5rem;
   }
 }
 
