@@ -19,7 +19,7 @@
     "vue": "^3"
   },
   "dependencies": {
-    "marked-vue": "^1.1.6",
+    "marked-vue": "^1.2.0",
     "schemastery": "^3.7.0"
   }
 }
