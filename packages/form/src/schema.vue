@@ -27,7 +27,7 @@
       :prefix="prefix">
       <slot></slot>
       <template #after v-if="schema.meta.role === 'computed'">
-        <el-button v-if="config?.$switch" @click="addBranch">
+        <el-button v-if="isSwitch" @click="addBranch">
           添加分支
         </el-button>
         <el-button class="ellipsis" v-else-if="check(schema, initial)" @click="addBranch">
@@ -36,7 +36,7 @@
       </template>
     </k-schema>
 
-    <div class="k-schema-group" v-if="schema.meta.role === 'computed' && config?.$switch">
+    <div class="k-schema-group" v-if="isSwitch">
       <k-schema
         v-for="(_, index) in config.$switch.branches"
         v-model="config.$switch.branches[index].then"
@@ -86,7 +86,7 @@
     <template #right>
       <slot name="before"></slot>
 
-      <template v-if="schema.type === 'union' && schema.meta.role !== 'radio'">
+      <template v-if="schema.type === 'union' && schema.meta.role !== 'radio' && !isSwitch">
         <el-select filterable v-model="selectModel" :disabled="disabled">
           <el-option
             v-for="(item, index) in choices"
@@ -181,7 +181,7 @@
   </template>
 
   <!-- union containing object -->
-  <template v-else-if="schema?.type === 'union' && choices.length > 1 && ['object', 'intersect'].includes(active?.type)">
+  <template v-else-if="schema?.type === 'union' && !isSwitch && choices.length > 1 && ['object', 'intersect'].includes(active?.type)">
     <k-schema
       v-model="config"
       :initial="initial"
@@ -277,6 +277,10 @@ const isValid = computed(() => {
 const isPrimitive = computed(() => {
   return ['string', 'number', 'boolean'].includes(active.value.type)
     && active.value.meta.role !== 'textarea'
+})
+
+const isSwitch = computed(() => {
+  return props.schema?.meta.role === 'computed' && config.value?.$switch
 })
 
 const isComposite = computed(() => {
