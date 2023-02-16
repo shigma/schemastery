@@ -15,9 +15,9 @@
           <k-markdown :source="schema.inner.meta.description"></k-markdown>
         </template>
         <template #menu>
-          <el-dropdown-item divided :disabled="!index" command="up">上移</el-dropdown-item>
-          <el-dropdown-item :disabled="index === entries.length - 1" command="down">下移</el-dropdown-item>
-          <el-dropdown-item command="delete">删除</el-dropdown-item>
+          <el-dropdown-item divided :disabled="!index" command="up">上移项目</el-dropdown-item>
+          <el-dropdown-item :disabled="index === entries.length - 1" command="down">下移项目</el-dropdown-item>
+          <el-dropdown-item command="delete">删除项目</el-dropdown-item>
         </template>
       </schema-item>
 

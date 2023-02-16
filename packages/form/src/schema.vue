@@ -30,7 +30,7 @@
         <el-button v-if="config?.$switch" @click="addBranch">
           添加分支
         </el-button>
-        <el-button v-else-if="check(schema, initial)" @click="addBranch">
+        <el-button class="ellipsis" v-else-if="check(schema, initial)" @click="addBranch">
           <icon-ellipsis></icon-ellipsis>
         </el-button>
       </template>
@@ -46,9 +46,9 @@
         :disabled="disabled"
         :instant="instant">
         <template #menu>
-          <el-dropdown-item divided :disabled="!index" command="up">上移</el-dropdown-item>
-          <el-dropdown-item :disabled="index === config.$switch.branches.length - 1" command="down">下移</el-dropdown-item>
-          <el-dropdown-item command="delete">删除</el-dropdown-item>
+          <el-dropdown-item divided :disabled="!index" command="up">上移分支</el-dropdown-item>
+          <el-dropdown-item :disabled="index === config.$switch.branches.length - 1" command="down">下移分支</el-dropdown-item>
+          <el-dropdown-item command="delete">删除分支</el-dropdown-item>
         </template>
         <span>当满足条件：</span>
         <k-filter-button v-model="config.$switch.branches[index].case" :disabled="disabled"></k-filter-button>
@@ -409,6 +409,10 @@ function handleComputedCommand(action: string, index?: number) {
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
+  }
+
+  .el-button.ellipsis {
+    padding: 8px 10px;
   }
 
   .el-button + .el-button {
