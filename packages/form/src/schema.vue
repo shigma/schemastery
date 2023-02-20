@@ -42,7 +42,7 @@
         v-model="config.$switch.branches[index].then"
         @command="handleComputedCommand($event, index)"
         :key="index"
-        :schema="schema.list[0]"
+        :schema="{ ...schema.list[0], meta: { ...schema.meta, ...schema.list[0].meta, description: null } }"
         :disabled="disabled"
         :instant="instant">
         <template #menu>
@@ -55,7 +55,7 @@
       </k-schema>
       <k-schema
         v-model="config.$switch.default"
-        :schema="schema.list[0]"
+        :schema="{ ...schema.list[0], meta: { ...schema.meta, ...schema.list[0].meta, description: null } }"
         :disabled="disabled"
         :initial="initial?.$switch ? initial.$switch.default : initial"
         :instant="instant">

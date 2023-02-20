@@ -82,6 +82,7 @@ namespace Schema {
     required?: boolean
     hidden?: boolean
     role?: string
+    extra?: any
     link?: string
     description?: string
     comment?: string
@@ -131,7 +132,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   toJSON(): Schema.Base<T>
   required(value?: boolean): Schema<S, T>
   hidden(value?: boolean): Schema<S, T>
-  role(text: string): Schema<S, T>
+  role(text: string, extra?: any): Schema<S, T>
   link(link: string): Schema<S, T>
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
@@ -230,7 +231,13 @@ Schema.prototype.toString = function toString(this: Schema, inline?: boolean) {
   return formatters[this.type]?.(this, inline) ?? (console.log(this), `Schema<${this.type}>`)
 }
 
-for (const key of ['default', 'role', 'link', 'comment', 'description', 'max', 'min', 'step']) {
+Schema.prototype.role = function role(role, extra) {
+  const schema = Schema(this)
+  schema.meta = { ...schema.meta, role, extra }
+  return schema
+}
+
+for (const key of ['default', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value: any) {
       const schema = Schema(this)
