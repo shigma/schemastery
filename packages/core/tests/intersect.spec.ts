@@ -30,7 +30,7 @@ describe('Intersect', () => {
     ])
     expect(validate.toString()).to.equal('{ a?: string } & { b: number }')
 
-    expect(validate(null)).to.equal(null)
+    expect(() => validate(null)).to.throw()
     expect(validate({ b: 1, c: true })).to.deep.equal({ a: 'foo', b: 1, c: true })
 
     expect(() => validate({})).to.throw()
@@ -48,12 +48,31 @@ describe('Intersect', () => {
     ])
     expect(validate.toString()).to.equal('{ a?: string } & { b?: number } & { c?: boolean }')
 
-    expect(validate(null)).to.equal(null)
+    expect(validate(null)).to.deep.equal({})
     expect(validate({})).to.deep.equal({})
 
     // @ts-expect-error
     expect(() => validate({ b: '' })).to.throw()
     // @ts-expect-error
     expect(() => validate({ c: '' })).to.throw()
+  })
+
+  it('intersect (tagged)', () => {
+    // https://github.com/shigma/schemastery/issues/31
+    const validate = Schema.intersect([
+      Schema.object({ e: Schema.boolean().default(true) }),
+      Schema.union([
+        Schema.object({
+          e: Schema.const(true),
+          x: Schema.number().default(114),
+        }),
+        Schema.object({
+          e: Schema.const(false),
+          y: Schema.number().default(514),
+        })
+      ]),
+    ])
+
+    expect(validate(null)).to.deep.equal({ e: true, x: 114 })
   })
 })
