@@ -194,6 +194,7 @@ Schema.prototype.pattern = function pattern(regexp) {
 
 Schema.prototype.simplify = function simplify(this: Schema, value) {
   if (deepEqual(value, this.meta.default)) return null
+  if (isNullable(value)) return value
   if (this.type === 'object' || this.type === 'dict') {
     const result: Dict = {}
     for (const key in value) {
@@ -228,7 +229,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
 }
 
 Schema.prototype.toString = function toString(this: Schema, inline?: boolean) {
-  return formatters[this.type]?.(this, inline) ?? (console.log(this), `Schema<${this.type}>`)
+  return formatters[this.type]?.(this, inline) ?? `Schema<${this.type}>`
 }
 
 Schema.prototype.role = function role(role, extra) {
@@ -449,7 +450,7 @@ Schema.extend('union', (data, { list, toString }) => {
 Schema.extend('intersect', (data, { list, toString }, strict) => {
   let result
   for (const inner of list!) {
-    const value = Schema.resolve(data, inner, true)[0]
+    const value: any = Schema.resolve(data, inner, true)[0]
     if (isNullable(value)) continue
     if (isNullable(result)) {
       result = value

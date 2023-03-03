@@ -51,7 +51,7 @@
           <el-dropdown-item command="delete">删除分支</el-dropdown-item>
         </template>
         <span>当满足条件：</span>
-        <k-filter-button v-model="config.$switch.branches[index].case" :disabled="disabled"></k-filter-button>
+        <k-filter-button v-model="config.$switch.branches[index].case" :options="schema.meta.extra" :disabled="disabled"></k-filter-button>
       </k-schema>
       <k-schema
         v-model="config.$switch.default"
@@ -335,7 +335,7 @@ watch(() => props.modelValue, (value) => {
 
 watch(config, (value) => {
   if (!props.schema) return
-  if (props.initial === undefined && deepEqual(value, props.schema.meta.default)) {
+  if (deepEqual(value, props.schema.meta.default)) {
     emit('update:modelValue', undefined)
   } else {
     emit('update:modelValue', value)
