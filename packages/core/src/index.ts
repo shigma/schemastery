@@ -258,12 +258,14 @@ Schema.resolve = function resolve(data, schema, strict) {
   if (!schema) return [data]
 
   if (isNullable(data)) {
-    if (schema.meta.required) throw new TypeError(`missing required value`)
     let current = schema
     let fallback = schema.meta.default
     while (current?.type === 'intersect' && isNullable(fallback)) {
       current = current.list![0]
       fallback = current?.meta.default
+    }
+    if (schema.meta.required && isNullable(fallback)) {
+      throw new TypeError(`missing required value`)
     }
     if (isNullable(fallback)) return [data]
     data = clone(fallback)
