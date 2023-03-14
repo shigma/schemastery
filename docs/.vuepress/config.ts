@@ -17,6 +17,7 @@ export default defineUserConfig({
     }, {
       text: 'Meta Properties',
       children: [
+        '/meta/label.md',
         '/meta/description.md',
         '/meta/required.md',
         '/meta/default.md',
@@ -58,7 +59,7 @@ export default defineUserConfig({
       lineNumbers: false,
     },
   },
-  
+
   plugins: [
     shikiPlugin({
       theme: 'one-dark-pro',

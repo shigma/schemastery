@@ -3,7 +3,7 @@
   <template v-else-if="schema.type === 'const' || schema.type === 'never'"></template>
 
   <template v-else-if="schema.type === 'object'">
-    <h2 class="k-schema-header" v-if="schema.meta.description">{{ schema.meta.description }}</h2>
+    <h2 class="k-schema-header" v-if="label">{{ label }}</h2>
     <k-schema v-for="(item, key) in schema.dict" :key="key"
       v-model="config[key]"
       :schema="item"
@@ -11,8 +11,13 @@
       :instant="instant"
       :disabled="disabled"
       :prefix="prefix + key + '.'">
-      <span class="prefix">{{ prefix }}</span>
-      <span>{{ key }}</span>
+      <template v-if='item.meta.label'>
+        <span>{{ item.meta.label ?? key }}</span>
+      </template>
+      <template v-else>
+        <span class="prefix">{{ prefix }}</span>
+        <span>{{ key }}</span>
+      </template>
     </k-schema>
   </template>
 
@@ -92,7 +97,8 @@
             v-for="(item, index) in choices"
             :key="index"
             :value="index"
-            :label="item.meta.description || item.value"
+            :label="item.meta.label || item.meta.description || item.value"
+            :title="item.meta.description"
           ></el-option>
         </el-select>
       </template>
@@ -122,7 +128,8 @@
             v-model="config"
             :disabled="disabled"
             :label="item.value"
-          >{{ item.meta.description || item.value }}</el-radio>
+            :title="item.meta.description"
+          >{{ item.meta.label || item.meta.description || item.value }}</el-radio>
         </li>
       </ul>
 
@@ -171,7 +178,7 @@
     <!-- top level array / dict -->
     <template v-else>
       <h2 class="k-schema-header">
-        {{ schema.meta.description || '配置列表' }}
+        {{ label || '配置列表' }}
         <el-button solid @click="signal = true" :disabled="disabled">添加项</el-button>
       </h2>
       <schema-group v-model:signal="signal"
@@ -278,6 +285,8 @@ const isPrimitive = computed(() => {
   return ['string', 'number', 'boolean'].includes(active.value.type)
     && active.value.meta.role !== 'textarea'
 })
+
+const label = computed(() => props.schema.meta.label ?? props.schema.meta.description)
 
 const isSwitch = computed(() => {
   return props.schema?.meta.role === 'computed' && config.value?.$switch
