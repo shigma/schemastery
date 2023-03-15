@@ -12,7 +12,7 @@
       :disabled="disabled"
       :prefix="prefix + key + '.'">
       <template v-if='item.meta.label'>
-        <span>{{ item.meta.label ?? key }}</span>
+        <span>{{ item.meta.label }}</span>
       </template>
       <template v-else>
         <span class="prefix">{{ prefix }}</span>
