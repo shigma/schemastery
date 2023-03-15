@@ -59,6 +59,7 @@ export default defineUserConfig({
       lineNumbers: false,
     },
   },
+  
   plugins: [
     shikiPlugin({
       theme: 'one-dark-pro',
