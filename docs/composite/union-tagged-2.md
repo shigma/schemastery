@@ -12,7 +12,7 @@ code: |
         bar: Schema.string().description('请输入一个字符串。'),
       }),
       Schema.object({}),
-    ])
+    ]),
   ])
 ---
 

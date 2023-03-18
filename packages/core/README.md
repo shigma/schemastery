@@ -238,6 +238,8 @@ validate(10)                // 11
 
 ## Instance Methods
 
+Note: `default` and `required` are mutually exclusive.
+
 ### schema.required()
 
 Assert that the value is not nullable.
