@@ -314,6 +314,8 @@ function optional(schema: Schema): Schema {
   if (schema.type === 'const') return schema
   if (schema.type === 'object') {
     return Schema.object(valueMap(schema.dict, optional))
+  } else if (schema.type === 'tuple') {
+    return Schema.tuple(schema.list.map(optional))
   } else if (schema.type === 'intersect') {
     return Schema.intersect(schema.list.map(optional))
   } else if (schema.type === 'union') {
