@@ -84,6 +84,7 @@ namespace Schema {
     role?: string
     extra?: any
     link?: string
+    label?: string
     description?: string
     comment?: string
     pattern?: { source: string, flags?: string }
@@ -136,6 +137,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   link(link: string): Schema<S, T>
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
+  label(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
   pattern(regexp: RegExp): Schema<S, T>
   max(value: number): Schema<S, T>
@@ -238,7 +240,7 @@ Schema.prototype.role = function role(role, extra) {
   return schema
 }
 
-for (const key of ['default', 'link', 'comment', 'description', 'max', 'min', 'step']) {
+for (const key of ['default', 'link', 'comment', 'description', 'label', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value: any) {
       const schema = Schema(this)
