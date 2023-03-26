@@ -325,9 +325,9 @@ function optional(schema: Schema): Schema {
   }
 }
 
-watch(() => props.modelValue, (value) => {
-  config.value = value ?? getFallback(props.schema)
-  active.value = props.schema
+watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
+  config.value = value ?? getFallback(schema)
+  active.value = schema
   for (const item of choices.value) {
     if (!check(item, config.value)) continue
     active.value = item
