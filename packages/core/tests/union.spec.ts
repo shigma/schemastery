@@ -16,16 +16,28 @@ describe('Union', () => {
   it('object', () => {
     const validate = Schema.union([
       Schema.object({ a: 'foo', b: Schema.number() }),
-      Schema.object({ a: 'bar', b: Schema.string() }),
-    ])
-    expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", b?: string }')
+      Schema.object({ a: 'bar', c: Schema.string() }),
+    ] as const)
+    expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", c?: string }')
 
     expect(validate(null)).to.equal(null)
     expect(validate({ a: 'foo', b: 123 })).to.deep.equal({ a: 'foo', b: 123 })
-    expect(validate({ a: 'bar', b: 'x' })).to.deep.equal({ a: 'bar', b: 'x' })
+    expect(validate({ a: 'bar', c: 'x' })).to.deep.equal({ a: 'bar', c: 'x' })
 
     expect(() => validate([])).to.throw()
     expect(() => validate({ b: 123 })).to.throw()
-    expect(() => validate({ b: 'x' })).to.throw()
+    expect(() => validate({ c: 'x' })).to.throw()
+  })
+
+  it('default', () => {
+    const validate = Schema.union([
+      Schema.object({ a: 'foo', b: Schema.number().default(123) }),
+      Schema.object({ a: 'bar', b: Schema.number().default(456) }),
+    ])
+    expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", b?: number }')
+
+    expect(validate(null)).to.equal(null)
+    expect(validate({ a: 'foo' })).to.deep.equal({ a: 'foo', b: 123 })
+    expect(validate({ a: 'bar' })).to.deep.equal({ a: 'bar', b: 456 })
   })
 })
