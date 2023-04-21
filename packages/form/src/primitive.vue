@@ -11,8 +11,9 @@
   </template>
 
   <template v-else>
-    <el-color-picker v-if="schema.meta.role === 'color'" v-model="value" show-alpha></el-color-picker>
-    <el-time-picker v-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
+    <k-file-picker v-if="schema.meta.role === 'path'" v-model="value"></k-file-picker>
+    <el-color-picker v-else-if="schema.meta.role === 'color'" v-model="value" show-alpha></el-color-picker>
+    <el-time-picker v-else-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
     <el-date-picker v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"></el-date-picker>
     <el-input v-else v-model="value" :disabled="disabled" :class="{ nullable }"
       :style="{ width: isLink ? '16rem' : '12rem' }" :type="type">
