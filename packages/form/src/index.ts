@@ -1,5 +1,5 @@
 import { App } from 'vue'
-import Schema from './schema.vue'
+import Schema from './schema'
 
 export * from './icons'
 export * from './utils'

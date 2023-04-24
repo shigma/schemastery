@@ -43,6 +43,60 @@ const visible = ref(false)
 
 <style lang="scss">
 
+.k-schema-header {
+  font-size: 1.25rem;
+
+  .el-button {
+    float: right;
+    transform: translateY(-2px);
+  }
+}
+
+.k-schema-group {
+  position: relative;
+  padding-left: 1rem;
+  border-bottom: 1px solid var(--el-border-color);
+
+  &:empty {
+    border-bottom: none;
+  }
+
+  > :first-child {
+    border-top: none;
+  }
+
+  > :last-child {
+    border-bottom: none;
+  }
+}
+
+.schema-item {
+  p {
+    margin: 0;
+    line-height: 1.7;
+    font-size: 0.875rem;
+  }
+
+  ul {
+    list-style: none;
+    width: 100%;
+    padding-left: 1rem;
+    font-size: 0.875rem;
+
+    .el-radio, .el-checkbox {
+      height: 1.375rem;
+    }
+  }
+
+  .el-button.ellipsis {
+    padding: 8px 10px;
+  }
+
+  .el-button + .el-button {
+    margin-left: 0;
+  }
+}
+
 .schema-item {
   position: relative;
   padding: 0.5rem 1rem;
