@@ -44,7 +44,7 @@ import SchemaBase from '../base.vue'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
-  modelValue: {} as PropType<number>,
+  modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
 })
 

@@ -237,7 +237,7 @@ export default defineComponent({
           return true
         })
         output.push(h(isValid && ext ? ext.component : SchemaBase, {
-          schema: props.schema,
+          schema: active.value,
           disabled: props.disabled,
           class: {
             changed: !props.instant && !deepEqual(props.initial, props.modelValue),
@@ -274,7 +274,7 @@ export default defineComponent({
           }),
           control: () => {
             if (!isValid) return
-            if (['string', 'number', 'boolean'].includes(active.value.type) && active.value.meta.role !== 'textarea') {
+            if (['string', 'number', 'boolean'].includes(active.value.type)) {
               return h(SchemaPrimitive, {
                 modelValue: config.value,
                 'onUpdate:modelValue': (value: any) => config.value = value,
@@ -287,16 +287,6 @@ export default defineComponent({
                 onClick: () => signal.value = true,
                 disabled: props.disabled,
               }, () => '添加项')
-            } else if (props.schema.type === 'tuple') {
-              return active.value.list.map((item, index) => {
-                return h(SchemaPrimitive, {
-                  key: index,
-                  modelValue: config.value[index],
-                  'onUpdate:modelValue': (value: any) => config.value[index] = value,
-                  schema: item,
-                  disabled: props.disabled,
-                })
-              })
             }
           },
         }))

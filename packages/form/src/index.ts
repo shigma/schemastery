@@ -3,6 +3,7 @@ import Bitset from './extensions/bitset.vue'
 import Radio from './extensions/radio.vue'
 import Table from './extensions/table.vue'
 import Textarea from './extensions/textarea.vue'
+import Tuple from './extensions/tuple.vue'
 import Schema from './schema'
 
 export * from './icons'
@@ -37,6 +38,11 @@ extensions.add({
   type: ['string'],
   role: 'textarea',
   component: Textarea,
+})
+
+extensions.add({
+  type: ['tuple'],
+  component: Tuple,
 })
 
 export default function (app: App) {
