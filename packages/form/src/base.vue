@@ -1,5 +1,4 @@
 <template>
-  <slot name="before"></slot>
   <div class="schema-item" v-bind="$attrs">
     <div class="actions"></div>
     <div class="header">
@@ -14,7 +13,6 @@
     </div>
     <slot></slot>
   </div>
-  <slot name="after"></slot>
 </template>
 
 <script lang="ts">

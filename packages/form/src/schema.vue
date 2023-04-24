@@ -1,35 +1,12 @@
+<script lang="ts">
+
 import { computed, defineComponent, h, PropType, ref, resolveComponent, VNode, watch } from 'vue'
-import { clone, deepEqual, getChoices, getFallback, isNullable, makeArray, Schema, valueMap } from './utils'
+import { check, clone, deepEqual, getChoices, getFallback, isNullable, makeArray, Schema } from './utils'
 import { IconEllipsis } from './icons'
 import { extensions } from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaHeader from './header.vue'
 import SchemaBase from './base.vue'
-import SchemaGroup from './group.vue'
-
-function optional(schema: Schema): Schema {
-  if (schema.type === 'const') return schema
-  if (schema.type === 'object') {
-    return Schema.object(valueMap(schema.dict, optional))
-  } else if (schema.type === 'tuple') {
-    return Schema.tuple(schema.list.map(optional))
-  } else if (schema.type === 'intersect') {
-    return Schema.intersect(schema.list.map(optional))
-  } else if (schema.type === 'union') {
-    return Schema.union(schema.list.map(optional))
-  } else {
-    return Schema(schema).required(false)
-  }
-}
-
-function check(schema: any, value: any) {
-  try {
-    optional(schema)(value)
-    return true
-  } catch {
-    return false
-  }
-}
 
 export default defineComponent({
   props: {
@@ -50,7 +27,6 @@ export default defineComponent({
     const choices = ref<Schema[]>()
     const cache = ref<any[]>()
     const active = ref<Schema>()
-    const signal = ref(false)
 
     watch(() => props.schema, (value) => {
       if (!value?.list) {
@@ -229,7 +205,6 @@ export default defineComponent({
 
       const output: VNode[] = []
       const isValid = check(active.value, config.value)
-      const isComposite = ['array', 'dict'].includes(active.value.type) && active.value.meta.role !== 'table'
       if (!props.branch) {
         const [ext] = [...extensions].filter(ext => {
           if (!ext.type.includes(active.value.type)) return false
@@ -281,32 +256,12 @@ export default defineComponent({
                 schema: active.value,
                 disabled: props.disabled,
               })
-            } else if (['array', 'dict'].includes(active.value.type)) {
-              return h(resolveComponent('el-button'), {
-                solid: true,
-                onClick: () => signal.value = true,
-                disabled: props.disabled,
-              }, () => '添加项')
             }
           },
         }))
       }
 
-      if (isComposite) {
-        output.push(h('div', { class: 'k-schema-group' }, [
-          h(SchemaGroup, {
-            modelValue: config.value,
-            'onUpdate:modelValue': (value: any) => config.value = value,
-            signal: signal.value,
-            'onUpdate:signal': (value: any) => signal.value = value,
-            schema: active.value,
-            prefix: props.prefix,
-            disabled: props.disabled,
-            instant: props.instant,
-            initial: props.initial ?? active.value.meta.default,
-          }),
-        ]))
-      } else if (props.schema.type === 'union' && choices.value.length > 1 && ['object', 'intersect'].includes(active.value?.type)) {
+      if (props.schema.type === 'union' && choices.value.length > 1 && ['object', 'intersect'].includes(active.value?.type)) {
         output.push(h(KSchema, {
           modelValue: config.value,
           'onUpdate:modelValue': (value: any) => config.value = value,
@@ -321,3 +276,36 @@ export default defineComponent({
     }
   },
 })
+
+</script>
+
+<style lang="scss">
+
+.k-schema-header {
+  font-size: 1.25rem;
+
+  .el-button {
+    float: right;
+    transform: translateY(-2px);
+  }
+}
+
+.k-schema-group {
+  position: relative;
+  padding-left: 1rem;
+  border-bottom: 1px solid var(--el-border-color);
+
+  &:empty {
+    border-bottom: none;
+  }
+
+  > :first-child {
+    border-top: none;
+  }
+
+  > :last-child {
+    border-bottom: none;
+  }
+}
+
+</style>

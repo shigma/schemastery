@@ -1,5 +1,5 @@
 import Schema from 'schemastery'
-import { clone } from 'cosmokit'
+import { clone, valueMap } from 'cosmokit'
 
 export * from 'cosmokit'
 export { Schema }
@@ -77,6 +77,30 @@ export function hasTitle(schema: Schema, root?: boolean): boolean {
   } else if (root && composite.includes(schema.type) && validate(schema.inner)) {
     return true
   } else {
+    return false
+  }
+}
+
+function optional(schema: Schema): Schema {
+  if (schema.type === 'const') return schema
+  if (schema.type === 'object') {
+    return Schema.object(valueMap(schema.dict, optional))
+  } else if (schema.type === 'tuple') {
+    return Schema.tuple(schema.list.map(optional))
+  } else if (schema.type === 'intersect') {
+    return Schema.intersect(schema.list.map(optional))
+  } else if (schema.type === 'union') {
+    return Schema.union(schema.list.map(optional))
+  } else {
+    return Schema(schema).required(false)
+  }
+}
+
+export function check(schema: any, value: any) {
+  try {
+    optional(schema)(value)
+    return true
+  } catch {
     return false
   }
 }

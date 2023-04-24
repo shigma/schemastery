@@ -1,10 +1,11 @@
 import { App, Component } from 'vue'
 import Bitset from './extensions/bitset.vue'
+import Group from './extensions/group.vue'
 import Radio from './extensions/radio.vue'
 import Table from './extensions/table.vue'
 import Textarea from './extensions/textarea.vue'
 import Tuple from './extensions/tuple.vue'
-import Schema from './schema'
+import Schema from './schema.vue'
 
 export * from './icons'
 export * from './utils'
@@ -20,6 +21,11 @@ export const extensions = new Set<Extension>()
 extensions.add({
   type: ['bitset'],
   component: Bitset,
+})
+
+extensions.add({
+  type: ['array', 'dict'],
+  component: Group,
 })
 
 extensions.add({
