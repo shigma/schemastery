@@ -1,52 +1,52 @@
 <template>
-  <table class="schema-table" v-if="entries.length">
-    <tr v-for="([key], index) in entries">
-      <td class="key" v-if="schema.type === 'dict'">
-        <el-input
-          v-model="entries[index][0]"
-          :disabled="disabled"
-          :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }"
-        ></el-input>
-      </td>
-      <td>
-        <el-input
-          v-model="entries[index][1]"
-          :disabled="disabled"
-          :type="schema.inner.type === 'number' ? 'number' : 'text'"
-          :max="schema.inner.meta.max"
-          :min="schema.inner.meta.min"
-          :step="schema.inner.meta.step"
-        ></el-input>
-      </td>
-      <td class="close">
-        <div class="inner" :class="{ disabled }" @click.stop="deleteEntry(index)">
-          <icon-close></icon-close>
-        </div>
-      </td>
-    </tr>
-  </table>
+  <schema-base>
+    <template #header><slot name="header"></slot></template>
+    <template #control>
+      <el-button solid @click="addEntry" :disabled="disabled">添加项</el-button>
+    </template>
+    <table class="bottom schema-table" v-if="entries.length">
+      <tr v-for="([key], index) in entries">
+        <td class="key" v-if="schema.type === 'dict'">
+          <el-input
+            v-model="entries[index][0]"
+            :disabled="disabled"
+            :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }"
+          ></el-input>
+        </td>
+        <td>
+          <el-input
+            v-model="entries[index][1]"
+            :disabled="disabled"
+            :type="schema.inner.type === 'number' ? 'number' : 'text'"
+            :max="schema.inner.meta.max"
+            :min="schema.inner.meta.min"
+            :step="schema.inner.meta.step"
+          ></el-input>
+        </td>
+        <td class="close">
+          <div class="inner" :class="{ disabled }" @click.stop="deleteEntry(index)">
+            <icon-close></icon-close>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </schema-base>
 </template>
 
 <script lang="ts" setup>
 
-import { getFallback, Schema } from './utils'
-import { ref, watch, WatchStopHandle } from 'vue'
-import { IconClose } from './icons'
+import { PropType, ref, watch, WatchStopHandle } from 'vue'
+import { IconClose } from '../icons'
+import { getFallback, Schema } from '../utils'
+import SchemaBase from '../base.vue'
 
-const props = defineProps<{
-  schema: Schema
-  signal?: boolean
-  modelValue: any
-  disabled?: boolean
-}>()
-
-const emit = defineEmits(['update:modelValue', 'update:signal'])
-
-watch(() => props.signal, (value) => {
-  if (!value) return
-  addEntry()
-  emit('update:signal', false)
+const props = defineProps({
+  schema: {} as PropType<Schema>,
+  modelValue: {} as PropType<number>,
+  disabled: {} as PropType<boolean>,
 })
+
+const emit = defineEmits(['update:modelValue'])
 
 const entries = ref<any[]>()
 
