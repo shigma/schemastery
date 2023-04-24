@@ -1,9 +1,11 @@
 import { computed, defineComponent, h, PropType, ref, resolveComponent, VNode, watch } from 'vue'
 import { clone, deepEqual, getChoices, getFallback, isNullable, makeArray, Schema, valueMap } from './utils'
 import { IconEllipsis } from './icons'
-import SchemaItem from './item.vue'
+import { extensions } from '.'
+import SchemaPrimitive from './primitive.vue'
+import SchemaHeader from './header.vue'
+import SchemaBase from './base.vue'
 import SchemaGroup from './group.vue'
-import SchemaTable from './table.vue'
 
 function optional(schema: Schema): Schema {
   if (schema.type === 'const') return schema
@@ -30,8 +32,6 @@ function check(schema: any, value: any) {
 }
 
 export default defineComponent({
-  name: 'k-schema',
-
   props: {
     schema: {} as PropType<Schema>,
     initial: {} as PropType<any>,
@@ -174,17 +174,17 @@ export default defineComponent({
           prefix: props.prefix,
         }, {
           default: () => slots.default?.(),
-          after: () => {
+          suffix: () => {
             if (props.schema.meta.role !== 'computed') return
             if (isSwitch) {
-              return h('el-button', {
+              return h(resolveComponent('el-button'), {
                 onClick: () => addBranch(),
-              }, '添加分支')
+              }, () => '添加分支')
             } else if (check(props.schema, props.initial)) {
-              return h('el-button', {
+              return h(resolveComponent('el-button'), {
                 class: 'ellipsis',
                 onClick: () => addBranch(),
-              }, h(IconEllipsis))
+              }, () => h(IconEllipsis))
             }
           },
         }))
@@ -201,7 +201,7 @@ export default defineComponent({
           }, {
             default: () => [
               h('span', '当满足条件：'),
-              h('k-filter-button', {
+              h(resolveComponent('k-filter-button'), {
                 modelValue: config.value.$switch.branches[index].case,
                 'onUpdate:modelValue': (value: any) => config.value.$switch.branches[index].case = value,
                 options: props.schema.meta.extra,
@@ -209,9 +209,9 @@ export default defineComponent({
               }),
             ],
             menu: () => [
-              h('el-dropdown-item', { divided: true, disabled: !index, command: 'up' }, '上移分支'),
-              h('el-dropdown-item', { disabled: index === config.value.$switch.branches.length - 1, command: 'down' }, '下移分支'),
-              h('el-dropdown-item', { command: 'delete' }, '删除分支'),
+              h(resolveComponent('el-dropdown-item'), { divided: true, disabled: !index, command: 'up' }, () => '上移分支'),
+              h(resolveComponent('el-dropdown-item'), { disabled: index === config.value.$switch.branches.length - 1, command: 'down' }, () => '下移分支'),
+              h(resolveComponent('el-dropdown-item'), { command: 'delete' }, () => '删除分支'),
             ],
           }))
           children.push(h(KSchema, {
@@ -221,7 +221,7 @@ export default defineComponent({
             disabled: props.disabled,
             initial: props.initial?.$switch ? props.initial.$switch.default : props.initial,
             instant: props.instant,
-          }, h('span', '其他情况下')))
+          }, () => h('span', '其他情况下')))
           output.push(h('div', { class: 'k-schema-group' }, children))
         }
         return output
@@ -231,116 +231,72 @@ export default defineComponent({
       const isValid = check(active.value, config.value)
       const isComposite = ['array', 'dict'].includes(active.value.type) && active.value.meta.role !== 'table'
       if (!props.branch) {
-        output.push(h(SchemaItem, {
+        const [ext] = [...extensions].filter(ext => {
+          if (!ext.type.includes(active.value.type)) return false
+          if (ext.role && ext.role !== props.schema.meta.role) return false
+          return true
+        })
+        output.push(h(isValid && ext ? ext.component : SchemaBase, {
+          schema: props.schema,
           disabled: props.disabled,
           class: {
             changed: !props.instant && !deepEqual(props.initial, props.modelValue),
             required: props.schema.meta.required && isNullable(props.schema.meta.default) && isNullable(props.modelValue),
             invalid: props.invalid,
           },
-          onCommand: handleCommand,
+          modelValue: config.value,
+          'onUpdate:modelValue': (value: any) => config.value = value,
         }, {
-          menu: () => [
-            h('el-dropdown-item', { command: 'discard' }, '撤销更改'),
-            h('el-dropdown-item', { command: 'default' }, '恢复默认值'),
-            ...makeArray(slots.menu?.()),
-          ],
-          header: () => slots.default?.(),
-          description: () => h('k-markdown', { source: props.schema.meta.description }),
-          right: () => {
-            const output: VNode[] = []
-            if (props.schema.type === 'union' && props.schema.meta.role !== 'radio') {
-              output.push(h('el-select', {
-                modelValue: selectModel.value,
-                'onUpdate:modelValue': (value: any) => selectModel.value = value,
-                filterable: true,
-                disabled: props.disabled,
-              }, choices.value.map((item, index) => h('el-option', {
-                key: index,
-                value: index,
-                label: item.meta.description || item.value,
-              }))))
-            }
-
-            if (isValid) {
-              if (['string', 'number', 'boolean'].includes(active.value.type) && active.value.meta.role !== 'textarea') {
-                output.push(h('k-schema-primitive', {
-                  modelValue: config.value,
-                  'onUpdate:modelValue': (value: any) => config.value = value,
-                  schema: active.value,
-                  disabled: props.disabled,
-                }))
-              } else if (['array', 'dict'].includes(active.value.type)) {
-                output.push(h('el-button', {
-                  solid: true,
-                  onClick: () => signal.value = true,
-                  disabled: props.disabled,
-                }, '添加项'))
-              } else if (props.schema.type === 'tuple') {
-                output.push(...active.value.list.map((item, index) => {
-                  return h('k-schema-primitive', {
-                    key: index,
-                    modelValue: config.value[index],
-                    'onUpdate:modelValue': (value: any) => config.value[index] = value,
-                    schema: item,
-                    disabled: props.disabled,
-                  })
-                }))
-              }
-            }
-
-            output.unshift(...makeArray(slots.before?.()))
-            output.push(...makeArray(slots.after?.()))
-            return output
+          prefix: () => {
+            if (props.schema.type !== 'union' || props.schema.meta.role === 'radio') return
+            return h(resolveComponent('el-select'), {
+              modelValue: selectModel.value,
+              'onUpdate:modelValue': (value: any) => selectModel.value = value,
+              filterable: true,
+              disabled: props.disabled,
+            }, () => choices.value.map((item, index) => h(resolveComponent('el-option'), {
+              key: index,
+              value: index,
+              label: item.meta.description || item.value,
+            })))
           },
-          default: () => {
+          suffix: () => slots.suffix?.(),
+          header: () => h(SchemaHeader, {
+            onCommand: handleCommand,
+          }, {
+            title: () => slots.default?.(),
+            description: () => h(resolveComponent('k-markdown'), { source: props.schema.meta.description }),
+            menu: () => [
+              h(resolveComponent('el-dropdown-item'), { command: 'discard' }, () => '撤销更改'),
+              h(resolveComponent('el-dropdown-item'), { command: 'default' }, () => '恢复默认值'),
+              ...makeArray(slots.menu?.()),
+            ],
+          }),
+          control: () => {
             if (!isValid) return
-            if (props.schema.type === 'union' && props.schema.meta.role === 'radio') {
-              return h('ul', { class: 'bottom' }, props.schema.list.map((item) => {
-                return h('li', { key: item.value }, h('el-radio', {
-                  modelValue: config.value,
-                  'onUpdate:modelValue': (value: any) => config.value = value,
-                  disabled: props.disabled,
-                  label: item.value,
-                }, item.meta.description || item.value))
-              }))
-            } else if (props.schema.type === 'bitset') {
-              return h('ul', { class: 'bottom' }, Object.entries(props.schema.bits).map(([key, value]) => {
-                return h('li', { key: value }, h('bit-checkbox', {
-                  modelValue: config.value,
-                  'onUpdate:modelValue': (value: any) => config.value = value,
-                  disabled: props.disabled,
-                  label: key,
-                  value,
-                }))
-              }))
-            } else if (props.schema.type === 'string' && props.schema.meta.role === 'textarea') {
-              return h('div', { class: 'bottom' }, [
-                h('el-input', {
-                  autosize: true,
-                  modelValue: config.value,
-                  'onUpdate:modelValue': (value: any) => config.value = value,
-                  type: 'textarea',
-                  disabled: props.disabled,
-                }),
-              ])
-            } else if (isTable()) {
-              return h(SchemaTable, {
-                class: 'bottom',
+            if (['string', 'number', 'boolean'].includes(active.value.type) && active.value.meta.role !== 'textarea') {
+              return h(SchemaPrimitive, {
                 modelValue: config.value,
                 'onUpdate:modelValue': (value: any) => config.value = value,
-                signal: signal.value,
-                'onUpdate:signal': (value: any) => signal.value = value,
-                schema: props.schema,
+                schema: active.value,
                 disabled: props.disabled,
               })
-            }
-
-            function isTable() {
-              return props.schema.meta.role !== 'computed'
-                && ['array', 'dict'].includes(active.value.type)
-                && active.value.meta.role === 'table'
-                && ['string', 'number'].includes(active.value.inner.type)
+            } else if (['array', 'dict'].includes(active.value.type)) {
+              return h(resolveComponent('el-button'), {
+                solid: true,
+                onClick: () => signal.value = true,
+                disabled: props.disabled,
+              }, () => '添加项')
+            } else if (props.schema.type === 'tuple') {
+              return active.value.list.map((item, index) => {
+                return h(SchemaPrimitive, {
+                  key: index,
+                  modelValue: config.value[index],
+                  'onUpdate:modelValue': (value: any) => config.value[index] = value,
+                  schema: item,
+                  disabled: props.disabled,
+                })
+              })
             }
           },
         }))

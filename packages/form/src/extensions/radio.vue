@@ -1,6 +1,8 @@
 <template>
   <schema-base>
     <template #header><slot name="header"></slot></template>
+    <template #prefix><slot name="prefix"></slot></template>
+    <template #suffix><slot name="suffix"></slot></template>
     <ul class="bottom">
       <li v-for="item in schema.list" :key="item.value">
         <el-radio

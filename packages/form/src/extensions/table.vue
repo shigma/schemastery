@@ -1,6 +1,8 @@
 <template>
   <schema-base>
     <template #header><slot name="header"></slot></template>
+    <template #prefix><slot name="prefix"></slot></template>
+    <template #suffix><slot name="suffix"></slot></template>
     <template #control>
       <el-button solid @click="addEntry" :disabled="disabled">添加项</el-button>
     </template>

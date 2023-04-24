@@ -7,7 +7,9 @@
         <slot name="header"></slot>
       </div>
       <div class="right">
+        <slot name="prefix"></slot>
         <slot name="control"></slot>
+        <slot name="suffix"></slot>
       </div>
     </div>
     <slot></slot>
