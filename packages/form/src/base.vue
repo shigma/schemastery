@@ -55,11 +55,11 @@ export default {
 .schema-item {
   position: relative;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--el-border-color);
+  border-bottom: 1px solid var(--el-border-color-light);
   transition: var(--color-transition);
 
   &:first-child, :not(.schema-item):not(.k-schema-group) + & {
-    border-top: 1px solid var(--el-border-color);
+    border-top: 1px solid var(--el-border-color-light);
   }
 
   & + h2 {

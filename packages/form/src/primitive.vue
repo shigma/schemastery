@@ -11,8 +11,7 @@
   </template>
 
   <template v-else>
-    <k-file-picker v-if="schema.meta.role === 'path'" v-model="value"></k-file-picker>
-    <el-color-picker v-else-if="schema.meta.role === 'color'" v-model="value" show-alpha></el-color-picker>
+    <el-color-picker v-if="schema.meta.role === 'color'" v-model="value" show-alpha></el-color-picker>
     <el-time-picker v-else-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
     <el-date-picker v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"></el-date-picker>
     <el-input v-else v-model="value" :disabled="disabled" :class="{ nullable }"
@@ -112,8 +111,23 @@ function onClickExternal(value: string) {
   }
 
   .el-switch.nullable {
+    .el-switch__core {
+      background-color: transparent;
+      border: 1px solid var(--el-border-color);
+    }
+
     .el-switch__action {
       left: 11px;
+      width: 16px;
+      border-radius: 0;
+      height: 1px;
+      background-color: var(--el-border-color);
+    }
+
+    &:hover {
+      .el-switch__core {
+        border-color: var(--el-color-primary);
+      }
     }
   }
 }

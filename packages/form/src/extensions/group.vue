@@ -76,7 +76,7 @@
 <script lang="ts" setup>
 
 import { PropType, ref, watch, WatchStopHandle } from 'vue'
-import { getFallback, isObjectSchema, Schema } from './utils'
+import { getFallback, isObjectSchema, Schema } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaHeader from '../header.vue'
 

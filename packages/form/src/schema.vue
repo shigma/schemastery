@@ -293,7 +293,7 @@ export default defineComponent({
 .k-schema-group {
   position: relative;
   padding-left: 1rem;
-  border-bottom: 1px solid var(--el-border-color);
+  border-bottom: 1px solid var(--el-border-color-light);
 
   &:empty {
     border-bottom: none;
