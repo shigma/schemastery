@@ -4,7 +4,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button type="primary" @click="handleCommand('add')" :disabled="disabled">添加项</el-button>
+      <el-button type="primary" @click="commandAdd()" :disabled="disabled">添加项</el-button>
     </template>
   </schema-base>
   <div class="k-schema-group">
@@ -25,9 +25,9 @@
               <k-markdown :source="schema.inner.meta.description"></k-markdown>
             </template>
             <template #menu>
-              <el-dropdown-item divided :disabled="!index" command="up">上移项目</el-dropdown-item>
-              <el-dropdown-item :disabled="index === entries.length - 1" command="down">下移项目</el-dropdown-item>
-              <el-dropdown-item command="delete">删除项目</el-dropdown-item>
+              <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移项目</el-dropdown-item>
+              <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移项目</el-dropdown-item>
+              <el-dropdown-item @click="actions.down(index)">删除项目</el-dropdown-item>
             </template>
           </schema-header>
         </schema-base>
@@ -51,12 +51,11 @@
         :initial="initial?.[key]"
         :schema="schema.inner"
         :disabled="disabled"
-        :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'"
-        @command="handleCommand($event, index)">
+        :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'">
         <template #menu>
-          <el-dropdown-item divided :disabled="!index" command="up">上移</el-dropdown-item>
-          <el-dropdown-item :disabled="index === entries.length - 1" command="down">下移</el-dropdown-item>
-          <el-dropdown-item command="delete">删除</el-dropdown-item>
+          <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移</el-dropdown-item>
+          <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移</el-dropdown-item>
+          <el-dropdown-item @click="actions.delete(index)">删除</el-dropdown-item>
         </template>
         <template #default v-if="schema.type === 'array'">
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
@@ -88,16 +87,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-function handleCommand(action: string, index?: number) {
-  if (action === 'down') {
-    if (props.schema.type === 'dict') {
-      entries.value.splice(index + 1, 0, ...entries.value.splice(index, 1))
-    } else {
-      const temp = entries.value[index][1]
-      entries.value[index][1] = entries.value[index + 1][1]
-      entries.value[index + 1][1] = temp
-    }
-  } else if (action === 'up') {
+const actions = {
+  up(index: number) {
     if (props.schema.type === 'dict') {
       entries.value.splice(index - 1, 0, ...entries.value.splice(index, 1))
     } else {
@@ -105,11 +96,23 @@ function handleCommand(action: string, index?: number) {
       entries.value[index][1] = entries.value[index - 1][1]
       entries.value[index - 1][1] = temp
     }
-  } else if (action === 'delete') {
+  },
+  down(index: number) {
+    if (props.schema.type === 'dict') {
+      entries.value.splice(index + 1, 0, ...entries.value.splice(index, 1))
+    } else {
+      const temp = entries.value[index][1]
+      entries.value[index][1] = entries.value[index + 1][1]
+      entries.value[index + 1][1] = temp
+    }
+  },
+  delete(index: number) {
     entries.value.splice(index, 1)
-  } else if (action === 'add') {
-    entries.value.push(['', getFallback(props.schema.inner, true)])
-  }
+  },
+}
+
+function commandAdd() {
+  entries.value.push(['', getFallback(props.schema.inner)])
 }
 
 const entries = ref<any[]>([])

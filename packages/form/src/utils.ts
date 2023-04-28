@@ -92,6 +92,10 @@ function optional(schema: Schema): Schema {
     return Schema.intersect(schema.list.map(optional))
   } else if (schema.type === 'union') {
     return Schema.union(schema.list.map(optional))
+  } else if (schema.type === 'dict') {
+    return Schema.dict(optional(schema.inner))
+  } else if (schema.type === 'array') {
+    return Schema.array(optional(schema.inner))
   } else {
     return Schema(schema).required(false)
   }

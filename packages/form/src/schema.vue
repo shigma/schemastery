@@ -71,30 +71,6 @@ export default defineComponent({
       },
     })
 
-    function handleCommand(action: string) {
-      if (action === 'discard') {
-        emit('update:modelValue', clone(props.initial))
-      } else if (action === 'default') {
-        emit('update:modelValue', undefined)
-      } else {
-        emit('command', action)
-      }
-    }
-
-    function handleComputedCommand(action: string, index?: number) {
-      if (action === 'down') {
-        config.value.$switch.branches.splice(index + 1, 0, config.value.$switch.branches.splice(index, 1)[0])
-      } else if (action === 'up') {
-        config.value.$switch.branches.splice(index - 1, 0, config.value.$switch.branches.splice(index, 1)[0])
-      } else if (action === 'delete') {
-        if (config.value.$switch.branches.length > 1) {
-          config.value.$switch.branches.splice(index, 1)
-        } else {
-          config.value = config.value.$switch.default
-        }
-      }
-    }
-
     function addBranch() {
       if (config.value?.$switch) {
         config.value.$switch.branches.push({ case: null, then: null })
@@ -173,7 +149,6 @@ export default defineComponent({
             schema: { ...props.schema.list[0], meta: { ...props.schema.meta, ...props.schema.list[0].meta, description: null } },
             disabled: props.disabled,
             instant: props.instant,
-            'onCommand': (action: string) => handleComputedCommand(action, index),
           }, {
             default: () => [
               h('span', '当满足条件：'),
@@ -185,9 +160,24 @@ export default defineComponent({
               }),
             ],
             menu: () => [
-              h(resolveComponent('el-dropdown-item'), { divided: true, disabled: !index, command: 'up' }, () => '上移分支'),
-              h(resolveComponent('el-dropdown-item'), { disabled: index === config.value.$switch.branches.length - 1, command: 'down' }, () => '下移分支'),
-              h(resolveComponent('el-dropdown-item'), { command: 'delete' }, () => '删除分支'),
+              h(resolveComponent('el-dropdown-item'), {
+                divided: true,
+                disabled: !index,
+                onClick: () => config.value.$switch.branches.splice(index - 1, 0, config.value.$switch.branches.splice(index, 1)[0]),
+              }, () => '上移分支'),
+              h(resolveComponent('el-dropdown-item'), {
+                disabled: index === config.value.$switch.branches.length - 1,
+                onClick: () => config.value.$switch.branches.splice(index + 1, 0, config.value.$switch.branches.splice(index, 1)[0]),
+              }, () => '下移分支'),
+              h(resolveComponent('el-dropdown-item'), {
+                onClick: () => {
+                  if (config.value.$switch.branches.length > 1) {
+                    config.value.$switch.branches.splice(index, 1)
+                  } else {
+                    config.value = config.value.$switch.default
+                  }
+                },
+              }, () => '删除分支'),
             ],
           }))
           children.push(h(KSchema, {
@@ -245,13 +235,19 @@ export default defineComponent({
           },
           suffix: () => slots.suffix?.(),
           header: () => h(SchemaHeader, {
-            onCommand: handleCommand,
+            onCommand: (...args) => emit('command', ...args),
           }, {
             title: () => slots.default?.(),
             description: () => h(resolveComponent('k-markdown'), { source: props.schema.meta.description }),
             menu: () => [
-              h(resolveComponent('el-dropdown-item'), { command: 'discard' }, () => '撤销更改'),
-              h(resolveComponent('el-dropdown-item'), { command: 'default' }, () => '恢复默认值'),
+              h(resolveComponent('el-dropdown-item'), {
+                command: 'discard',
+                onClick: () => emit('update:modelValue', clone(props.initial)),
+              }, () => '撤销更改'),
+              h(resolveComponent('el-dropdown-item'), {
+                command: 'default',
+                onClick: () => emit('update:modelValue'),
+              }, () => '恢复默认值'),
               ...makeArray(slots.menu?.()),
             ],
           }),
