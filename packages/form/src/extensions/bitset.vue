@@ -25,6 +25,8 @@ defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<number>,
   disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
 })
 
 defineEmits(['update:modelValue'])

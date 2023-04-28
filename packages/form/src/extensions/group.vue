@@ -1,10 +1,10 @@
 <template>
-  <schema-base>
+  <schema-base v-bind="$attrs">
     <template #header><slot name="header"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button solid @click="handleCommand('add')" :disabled="disabled">添加项</el-button>
+      <el-button type="primary" @click="handleCommand('add')" :disabled="disabled">添加项</el-button>
     </template>
   </schema-base>
   <div class="k-schema-group">
@@ -38,7 +38,6 @@
             :initial="initial?.[key]"
             :schema="{ ...schema.inner, meta: { ...schema.inner.meta, description: '' } }"
             :disabled="disabled"
-            :instant="instant"
             :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'">
             <span class="prefix">{{ prefix }}</span>
             <span>{{ key }}</span>
@@ -52,7 +51,6 @@
         :initial="initial?.[key]"
         :schema="schema.inner"
         :disabled="disabled"
-        :instant="instant"
         :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'"
         @command="handleCommand($event, index)">
         <template #menu>
@@ -84,8 +82,8 @@ const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
-  initial: {} as PropType<{}>,
   prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -114,7 +112,7 @@ function handleCommand(action: string, index?: number) {
   }
 }
 
-const entries = ref<any[]>()
+const entries = ref<any[]>([])
 
 let stop: WatchStopHandle
 

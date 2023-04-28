@@ -11,7 +11,7 @@ export * from './icons'
 export * from './utils'
 
 export interface Extension {
-  type: string[]
+  type: string
   role?: string
   component: Component
 }
@@ -19,35 +19,46 @@ export interface Extension {
 export const extensions = new Set<Extension>()
 
 extensions.add({
-  type: ['bitset'],
+  type: 'bitset',
   component: Bitset,
 })
 
 extensions.add({
-  type: ['array', 'dict'],
+  type: 'array',
   component: Group,
 })
 
 extensions.add({
-  type: ['union'],
+  type: 'dict',
+  component: Group,
+})
+
+extensions.add({
+  type: 'union',
   role: 'radio',
   component: Radio,
 })
 
 extensions.add({
-  type: ['array', 'dict'],
+  type: 'array',
   role: 'table',
   component: Table,
 })
 
 extensions.add({
-  type: ['string'],
+  type: 'dict',
+  role: 'table',
+  component: Table,
+})
+
+extensions.add({
+  type: 'string',
   role: 'textarea',
   component: Textarea,
 })
 
 extensions.add({
-  type: ['tuple'],
+  type: 'tuple',
   component: Tuple,
 })
 

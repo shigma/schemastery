@@ -5,8 +5,8 @@
     <template #suffix><slot name="suffix"></slot></template>
     <div class="bottom">
       <el-input
-        autosize
         type="textarea"
+        :autosize="autosize"
         :disabled="disabled"
         :modelValue="modelValue"
         @update:modelValue="$emit('update:modelValue', $event)"
@@ -17,16 +17,23 @@
 
 <script lang="ts" setup>
 
-import { PropType } from 'vue'
+import { computed, PropType } from 'vue'
 import { Schema } from '../utils'
 import SchemaBase from '../base.vue'
 
-defineProps({
+const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<string>,
   disabled: {} as PropType<boolean>,
 })
 
 defineEmits(['update:modelValue'])
+
+const autosize = computed(() => {
+  const { rows } = props.schema.meta.extra || {}
+  if (typeof rows === 'number') return { minRows: rows, maxRows: rows }
+  if (Array.isArray(rows)) return { minRows: rows[0], maxRows: rows[1] }
+  return true
+})
 
 </script>

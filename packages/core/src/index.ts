@@ -86,7 +86,7 @@ namespace Schema {
     link?: string
     description?: string
     comment?: string
-    pattern?: { source: string, flags?: string }
+    pattern?: { source: string; flags?: string }
     max?: number
     min?: number
     step?: number

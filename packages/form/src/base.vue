@@ -19,6 +19,14 @@
 
 export default {
   inheritAttrs: false,
+  props: {
+    schema: {} as PropType<Schema>,
+    modelValue: {} as PropType<{}>,
+    disabled: {} as PropType<boolean>,
+    prefix: {} as PropType<string>,
+    initial: {} as PropType<{}>,
+  },
+  emits: ['update:modelValue'],
 }
 
 </script>

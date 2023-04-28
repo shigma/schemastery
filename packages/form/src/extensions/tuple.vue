@@ -27,6 +27,8 @@ const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<any[]>,
   disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
 })
 
 const emit = defineEmits(['update:modelValue'])

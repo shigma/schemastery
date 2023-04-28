@@ -39,18 +39,20 @@
 
 import { PropType, ref, watch, WatchStopHandle } from 'vue'
 import { IconClose } from '../icons'
-import { getFallback, Schema } from '../utils'
+import { getFallback, Schema, useEntries } from '../utils'
 import SchemaBase from '../base.vue'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
 })
 
 const emit = defineEmits(['update:modelValue'])
 
-const entries = ref<any[]>()
+const entries = useEntries()
 
 function addEntry() {
   entries.value.push(['', getFallback(props.schema.inner, true)])
@@ -59,29 +61,6 @@ function addEntry() {
 function deleteEntry(index: number) {
   if (props.disabled) return
   entries.value.splice(index, 1)
-}
-
-let stop: WatchStopHandle
-
-watch(() => props.modelValue, (value) => {
-  stop?.()
-  entries.value = Object.entries(value || {})
-  stop = doWatch()
-}, { immediate: true, deep: true })
-
-function doWatch() {
-  return watch(entries, () => {
-    if (props.schema.type === 'dict') {
-      const result: any = {}
-      for (const [key, value] of entries.value) {
-        if (key in result) return
-        result[key] = value
-      }
-      emit('update:modelValue', result)
-    } else {
-      emit('update:modelValue', entries.value.map(([, value]) => value))
-    }
-  }, { deep: true })
 }
 
 </script>

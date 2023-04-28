@@ -1,5 +1,6 @@
 import Schema from 'schemastery'
 import { clone, valueMap } from 'cosmokit'
+import { getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 
 export * from 'cosmokit'
 export { Schema }
@@ -103,4 +104,33 @@ export function check(schema: any, value: any) {
   } catch {
     return false
   }
+}
+
+export function useEntries() {
+  let stop: WatchStopHandle
+  const entries = ref<any[]>()
+  const { props, emit } = getCurrentInstance() as any
+
+  watch(() => props.modelValue, (value) => {
+    stop?.()
+    entries.value = Object.entries(value || {})
+    stop = doWatch()
+  }, { immediate: true, deep: true })
+
+  function doWatch() {
+    return watch(entries, () => {
+      if (props.schema.type === 'dict') {
+        const result: any = {}
+        for (const [key, value] of entries.value) {
+          if (key in result) return
+          result[key] = value
+        }
+        emit('update:modelValue', result)
+      } else {
+        emit('update:modelValue', entries.value.map(([, value]) => value))
+      }
+    }, { deep: true })
+  }
+
+  return entries
 }

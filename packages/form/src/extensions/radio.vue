@@ -4,7 +4,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <ul class="bottom">
-      <li v-for="item in schema.list" :key="item.value">
+      <li v-for="item in getChoices(schema)" :key="item.value">
         <el-radio
           :label="item.value"
           :disabled="disabled"
@@ -19,13 +19,15 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { Schema } from '../utils'
+import { getChoices, Schema } from '../utils'
 import SchemaBase from '../base.vue'
 
 defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<any>,
   disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
 })
 
 defineEmits(['update:modelValue'])

@@ -206,13 +206,21 @@ export default defineComponent({
       const output: VNode[] = []
       const isValid = check(active.value, config.value)
       if (!props.branch) {
-        const [ext] = [...extensions].filter(ext => {
-          if (!ext.type.includes(active.value.type)) return false
-          if (ext.role && ext.role !== props.schema.meta.role) return false
-          return true
-        })
-        output.push(h(isValid && ext ? ext.component : SchemaBase, {
-          schema: active.value,
+        const [component, schema] = (() => {
+          if (!isValid) return [SchemaBase, active.value]
+          for (const ext of extensions) {
+            const schema = [active.value, props.schema].find((schema) => {
+              return schema.type === ext.type && (!ext.role || ext.role === schema.meta.role)
+            })
+            if (schema) return [ext.component, schema]
+          }
+          return [SchemaBase, active.value]
+        })()
+
+        output.push(h(component, {
+          schema,
+          prefix: props.prefix,
+          initial: props.initial,
           disabled: props.disabled,
           class: {
             changed: !props.instant && !deepEqual(props.initial, props.modelValue),
