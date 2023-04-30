@@ -4,7 +4,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button solid @click="addEntry" :disabled="disabled">添加项</el-button>
+      <el-button type="primary" @click="addEntry" :disabled="disabled">添加项</el-button>
     </template>
     <table class="bottom schema-table" v-if="entries.length">
       <tr v-for="([key], index) in entries">

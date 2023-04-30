@@ -25,9 +25,9 @@
               <k-markdown :source="schema.inner.meta.description"></k-markdown>
             </template>
             <template #menu>
-              <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移项目</el-dropdown-item>
-              <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移项目</el-dropdown-item>
-              <el-dropdown-item @click="actions.down(index)">删除项目</el-dropdown-item>
+              <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移</el-dropdown-item>
+              <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移</el-dropdown-item>
+              <el-dropdown-item @click="actions.delete(index)">删除</el-dropdown-item>
             </template>
           </schema-header>
         </schema-base>

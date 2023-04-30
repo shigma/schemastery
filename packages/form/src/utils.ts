@@ -56,8 +56,6 @@ export function validate(schema: Schema): boolean {
     return validate(schema.inner)
   } else if (schema.type === 'tuple') {
     return schema.list.every(item => primitive.includes(item.type))
-  } else if (schema.type === 'any') {
-    return ['filter'].includes(schema.meta.role)
   } else {
     return primitive.includes(schema.type)
   }
