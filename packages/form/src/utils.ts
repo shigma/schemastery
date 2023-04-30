@@ -1,5 +1,5 @@
 import Schema from 'schemastery'
-import { clone, valueMap } from 'cosmokit'
+import { clone, deepEqual, valueMap } from 'cosmokit'
 import { getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 
 export * from 'cosmokit'
@@ -113,26 +113,42 @@ export function useEntries() {
   const entries = ref<any[]>()
   const { props, emit } = getCurrentInstance() as any
 
+  const doWatch = () => watch(entries, () => {
+    if (props.schema.type === 'dict') {
+      const result: any = {}
+      for (const [key, value] of entries.value) {
+        if (key in result) return
+        result[key] = value
+      }
+      emit('update:modelValue', result)
+    } else {
+      emit('update:modelValue', entries.value.map(([, value]) => value))
+    }
+  }, { deep: true })
+
   watch(() => props.modelValue, (value) => {
     stop?.()
     entries.value = Object.entries(value || {})
     stop = doWatch()
   }, { immediate: true, deep: true })
 
-  function doWatch() {
-    return watch(entries, () => {
-      if (props.schema.type === 'dict') {
-        const result: any = {}
-        for (const [key, value] of entries.value) {
-          if (key in result) return
-          result[key] = value
-        }
-        emit('update:modelValue', result)
-      } else {
-        emit('update:modelValue', entries.value.map(([, value]) => value))
-      }
-    }, { deep: true })
-  }
-
   return entries
+}
+
+export function useConfig() {
+  const config = ref()
+  let stop: WatchStopHandle
+  const { props, emit } = getCurrentInstance() as any
+
+  const doWatch = () => watch(config, (value) => {
+    emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? undefined : value)
+  }, { deep: true })
+
+  watch(() => [props.modelValue, props.schema], ([value, schema]) => {
+    stop?.()
+    config.value = value ?? getFallback(schema)
+    stop = doWatch()
+  }, { immediate: true, deep: true })
+
+  return config
 }

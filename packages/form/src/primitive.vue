@@ -1,24 +1,24 @@
 <template>
-  <el-switch v-if="schema.type === 'boolean'" v-model="value" :class="{ nullable }" :disabled="disabled"></el-switch>
+  <el-switch v-if="schema.type === 'boolean'" v-model="config" :class="{ nullable }" :disabled="disabled"></el-switch>
 
   <template v-else-if="schema.type === 'number'">
     <el-slider v-if="schema.meta.role === 'slider'" style="width: 200px"
-      v-model="value" :disabled="disabled" :max="schema.meta.max" :min="schema.meta.min" :step="schema.meta.step"
+      v-model="config" :disabled="disabled" :max="schema.meta.max" :min="schema.meta.min" :step="schema.meta.step"
     ></el-slider>
     <el-input-number v-else
-      v-model="value" :disabled="disabled" :max="schema.meta.max" :min="schema.meta.min" :step="schema.meta.step"
+      v-model="config" :disabled="disabled" :max="schema.meta.max" :min="schema.meta.min" :step="schema.meta.step"
     ></el-input-number>
   </template>
 
   <template v-else>
-    <el-color-picker v-if="schema.meta.role === 'color'" v-model="value" show-alpha></el-color-picker>
+    <el-color-picker v-if="schema.meta.role === 'color'" v-model="config" show-alpha></el-color-picker>
     <el-time-picker v-else-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
     <el-date-picker v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"></el-date-picker>
-    <el-input v-else v-model="value" :disabled="disabled" :class="{ nullable }"
+    <el-input v-else v-model="config" :disabled="disabled" :class="{ nullable }"
       :style="{ width: isLink ? '16rem' : '12rem' }" :type="type">
       <template #prefix v-if="nullable"></template>
       <template #suffix v-if="isLink">
-        <icon-external @click="onClickExternal(value)"></icon-external>
+        <icon-external @click="onClickExternal(config)"></icon-external>
       </template>
       <template #suffix v-else-if="schema.meta.role === 'secret'">
         <icon-eye v-if="showPass" @click="showPass = !showPass"></icon-eye>
@@ -32,7 +32,7 @@
 
 import { computed, PropType, ref } from 'vue'
 import { IconExternal, IconEye, IconEyeSlash } from './icons'
-import { isNullable } from './utils'
+import { isNullable, useConfig } from './utils'
 import Schema from 'schemastery'
 
 const emit = defineEmits(['update:modelValue'])
@@ -45,12 +45,9 @@ const props = defineProps({
 
 const showPass = ref(false)
 
-const nullable = computed(() => isNullable(props.modelValue))
+const config = useConfig()
 
-const value = computed<any>({
-  get: () => props.modelValue,
-  set: emit.bind(null, 'update:modelValue'),
-})
+const nullable = computed(() => isNullable(config.value))
 
 const isLink = computed(() => ['url', 'link'].includes(props.schema.meta.role))
 
@@ -63,9 +60,9 @@ const date = computed({
   get() {
     if (!props.modelValue) return
     if (['date', 'datetime'].includes(props.schema.meta.role)) {
-      return new Date(value.value)
+      return new Date(config.value)
     } else if (props.schema.meta.role === 'time') {
-      return new Date('1970-01-01 ' + value.value)
+      return new Date('1970-01-01 ' + config.value)
     }
   },
   set(value) {

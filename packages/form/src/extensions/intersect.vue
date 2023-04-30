@@ -10,7 +10,7 @@
     :disabled="disabled"
     :prefix="prefix"
   >
-    <slot></slot>
+    <template #title><slot name="title"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
   </k-schema>
 </template>
@@ -26,6 +26,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
+  class: {} as PropType<any>,
 })
 
 defineEmits(['update:modelValue'])

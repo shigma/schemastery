@@ -1,6 +1,7 @@
 <template>
   <schema-base>
-    <template #header><slot name="header"></slot></template>
+    <template #title><slot name="title"></slot></template>
+    <template #desc><slot name="desc"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <ul class="bottom">
@@ -8,8 +9,7 @@
         <el-radio
           :label="item.value"
           :disabled="disabled"
-          :modelValue="modelValue"
-          @update:modelValue="$emit('update:modelValue', $event)"
+          v-model="config"
         >{{ item.meta.description || item.value }}</el-radio>
       </li>
     </ul>
@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { getChoices, Schema } from '../utils'
+import { getChoices, Schema, useConfig } from '../utils'
 import SchemaBase from '../base.vue'
 
 defineProps({
@@ -31,5 +31,7 @@ defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const config = useConfig()
 
 </script>

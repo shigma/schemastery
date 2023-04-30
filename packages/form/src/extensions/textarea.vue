@@ -1,6 +1,7 @@
 <template>
   <schema-base>
-    <template #header><slot name="header"></slot></template>
+    <template #title><slot name="title"></slot></template>
+    <template #desc><slot name="desc"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <div class="bottom">

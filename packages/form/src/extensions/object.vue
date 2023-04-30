@@ -5,12 +5,12 @@
   <k-schema
     v-for="(item, key) in schema.dict"
     :key="key"
-    :modelValue="modelValue?.[key]"
-    @update:modelValue="updateValue(key, $event)"
+    v-model="config[key]"
     :schema="item"
     :initial="initial?.[key]"
     :disabled="disabled"
     :prefix="prefix + key + '.'"
+    #title
   >
     <span class="prefix">{{ prefix }}</span>
     <span>{{ key }}</span>
@@ -20,22 +20,19 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { Schema } from '../utils'
+import { Schema, useConfig } from '../utils'
 
-const props = defineProps({
+defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<any>,
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
+  class: {} as PropType<any>,
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 
-function updateValue(key: string, value: any) {
-  const copy = { ...props.modelValue }
-  copy[key] = value
-  emit('update:modelValue', copy)
-}
+const config = useConfig()
 
 </script>

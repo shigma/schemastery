@@ -1,9 +1,24 @@
 <template>
-  <div class="schema-item" v-bind="$attrs">
+  <div class="schema-item">
     <div class="actions"></div>
     <div class="header">
       <div class="left">
-        <slot name="header"></slot>
+        <h3>
+          <slot name="title"></slot>
+          <el-dropdown
+            placement="bottom"
+            @visible-change="$emit('visible-change', $event)">
+            <svg class="trigger" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+              <path fill="currentColor" d="m192 384 320 384 320-384z"></path>
+            </svg>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <slot name="menu"></slot>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </h3>
+        <slot name="desc"></slot>
       </div>
       <div class="right">
         <slot name="prefix"></slot>
@@ -15,19 +30,20 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 
-export default {
-  inheritAttrs: false,
-  props: {
-    schema: {} as PropType<Schema>,
-    modelValue: {} as PropType<{}>,
-    disabled: {} as PropType<boolean>,
-    prefix: {} as PropType<string>,
-    initial: {} as PropType<{}>,
-  },
-  emits: ['update:modelValue'],
-}
+import { PropType } from 'vue'
+import { Schema } from './utils'
+
+defineProps({
+  schema: {} as PropType<Schema>,
+  modelValue: {} as PropType<{}>,
+  disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
+})
+
+defineEmits(['update:modelValue', 'visible-change'])
 
 </script>
 

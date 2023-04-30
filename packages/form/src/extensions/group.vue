@@ -1,6 +1,7 @@
 <template>
   <schema-base v-bind="$attrs">
-    <template #header><slot name="header"></slot></template>
+    <template #title><slot name="title"></slot></template>
+    <template #desc><slot name="desc"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
@@ -10,26 +11,24 @@
   <div class="k-schema-group">
     <template v-for="([key, _], index) in entries" :key="index">
       <template v-if="isObjectSchema(schema.inner)">
-        <schema-base @command="handleCommand($event, index)"
-          :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }" #header>
-          <schema-header>
-            <template #title v-if="schema.type === 'array'">
-              <span class="prefix">{{ prefix.slice(0, -1) }}</span>
-              <span>[{{ key }}]</span>
-            </template>
-            <template #title v-else>
-              <span class="prefix">{{ prefix }}</span>
-              <el-input v-model="entries[index][0]"></el-input>
-            </template>
-            <template #description>
-              <k-markdown :source="schema.inner.meta.description"></k-markdown>
-            </template>
-            <template #menu>
-              <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移</el-dropdown-item>
-              <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移</el-dropdown-item>
-              <el-dropdown-item @click="actions.delete(index)">删除</el-dropdown-item>
-            </template>
-          </schema-header>
+        <schema-base
+          :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }">
+          <template #title v-if="schema.type === 'array'">
+            <span class="prefix">{{ prefix.slice(0, -1) }}</span>
+            <span>[{{ key }}]</span>
+          </template>
+          <template #title v-else>
+            <span class="prefix">{{ prefix }}</span>
+            <el-input v-model="entries[index][0]"></el-input>
+          </template>
+          <template #desc>
+            <k-markdown :source="schema.inner.meta.description"></k-markdown>
+          </template>
+          <template #menu>
+            <el-dropdown-item divided :disabled="!index" @click="actions.up(index)">上移</el-dropdown-item>
+            <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移</el-dropdown-item>
+            <el-dropdown-item @click="actions.delete(index)">删除</el-dropdown-item>
+          </template>
         </schema-base>
 
         <div class="k-schema-group">
@@ -38,7 +37,8 @@
             :initial="initial?.[key]"
             :schema="{ ...schema.inner, meta: { ...schema.inner.meta, description: '' } }"
             :disabled="disabled"
-            :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'">
+            :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'"
+            #title>
             <span class="prefix">{{ prefix }}</span>
             <span>{{ key }}</span>
           </k-schema>
@@ -57,11 +57,11 @@
           <el-dropdown-item :disabled="index === entries.length - 1" @click="actions.down(index)">下移</el-dropdown-item>
           <el-dropdown-item @click="actions.delete(index)">删除</el-dropdown-item>
         </template>
-        <template #default v-if="schema.type === 'array'">
+        <template #title v-if="schema.type === 'array'">
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
           <span>[{{ key }}]</span>
         </template>
-        <template #default v-else>
+        <template #title v-else>
           <span class="prefix">{{ prefix }}</span>
           <el-input v-model="entries[index][0]"></el-input>
         </template>
@@ -75,14 +75,13 @@
 import { PropType, ref, watch, WatchStopHandle } from 'vue'
 import { getFallback, isObjectSchema, Schema } from '../utils'
 import SchemaBase from '../base.vue'
-import SchemaHeader from '../header.vue'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
-  modelValue: {} as PropType<{}>,
+  modelValue: {} as PropType<any>,
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
-  initial: {} as PropType<{}>,
+  initial: {} as PropType<any>,
 })
 
 const emit = defineEmits(['update:modelValue'])

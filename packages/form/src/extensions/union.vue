@@ -1,13 +1,15 @@
 <template>
   <k-schema
-    :modelValue="modelValue"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    v-model="config"
     :schema="active"
     :initial="initial"
     :disabled="disabled"
     :prefix="prefix"
   >
-    <template #header><slot name="header"></slot></template>
+    <template #title><slot name="title"></slot></template>
+    <template #desc>
+      <k-markdown :source="schema.meta.description"></k-markdown>
+    </template>
     <template #prefix>
       <el-select
         v-model="selectModel"
@@ -37,6 +39,7 @@ const props = defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
+  class: {} as PropType<any>,
 })
 
 const emit = defineEmits(['update:modelValue'])
