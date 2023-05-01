@@ -1,10 +1,14 @@
 <template>
-  <schema-base v-if="foldable">
+  <schema-base v-if="extra?.foldable" v-bind="$attrs">
     <template #title><slot name="title"></slot></template>
     <template #desc>
-      <k-markdown :source="schema.meta.description"></k-markdown>
+      <slot name="desc">
+        <k-markdown :source="schema?.meta.description"></k-markdown>
+      </slot>
     </template>
     <template #menu><slot name="menu"></slot></template>
+    <template #prefix><slot name="prefix"></slot></template>
+    <template #suffix><slot name="suffix"></slot></template>
   </schema-base>
   <h2 class="k-schema-header" v-else-if="schema.meta.description">
     {{ schema.meta.description }}
@@ -25,6 +29,14 @@
   </k-schema>
 </template>
 
+<script lang="ts">
+
+export default {
+  inheritAttrs: false,
+}
+
+</script>
+
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
@@ -37,8 +49,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
-  foldable: Boolean,
-  class: {} as PropType<any>,
+  extra: {} as PropType<any>,
 })
 
 defineEmits(['update:modelValue'])

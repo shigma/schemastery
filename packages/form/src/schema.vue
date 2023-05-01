@@ -1,17 +1,17 @@
 <template>
   <schema-component
-    v-if="!schema?.meta.hidden"
+    v-if="!schema?.meta.hidden && (extra?.foldable || (schema && schema.type !== 'const'))"
     :schema="schema"
     :prefix="prefix"
     :initial="initial"
     :disabled="disabled"
-    :foldable="foldable"
+    :extra="extra"
     :modelValue="modelValue"
     @update:modelValue="$emit('update:modelValue', $event)"
     :class="{
-      changed: !deepEqual(initial, modelValue),
+      changed: extra?.changed ?? !deepEqual(initial, modelValue),
       required: extra?.required ?? (schema?.meta.required && isNullable(schema?.meta.default) && isNullable(modelValue)),
-      invalid,
+      invalid: extra?.invalid,
     }"
   >
     <template #title><slot name="title"></slot></template>
@@ -28,7 +28,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <schema-primitive v-if="['string', 'number', 'boolean'].includes(schema?.type)"
+      <schema-primitive v-if="isPrimitive"
         :schema="schema"
         :disabled="disabled"
         :modelValue="modelValue"
@@ -49,21 +49,28 @@ import SchemaBase from './base.vue'
 const props = defineProps({
   schema: {} as PropType<Schema>,
   initial: {} as PropType<any>,
-  modelValue: {},
-  invalid: Boolean,
+  modelValue: {} as PropType<any>,
   extra: {} as PropType<any>,
   disabled: Boolean,
-  foldable: Boolean,
   branch: Boolean,
   prefix: { type: String, default: '' },
 })
 
 defineEmits(['update:modelValue'])
 
+const isPrimitive = computed(() => {
+  return ['string', 'number', 'boolean'].includes(props.schema?.type)
+    && (isNullable(props.modelValue) || typeof props.modelValue === props.schema.type)
+})
+
 const SchemaComponent = computed(() => {
   const candidates = [...form.extensions].map((ext) => {
     if (ext.type && props.schema?.type !== ext.type) return
     if (ext.role && props.schema?.meta.role !== ext.role) return
+    if (ext.validate) {
+      const valid = isNullable(props.modelValue) || ext.validate(props.modelValue, props.schema)
+      if (!valid) return
+    }
     return [ext.component, +!!ext.type + +!!ext.role] as const
   }).filter(Boolean).sort((a, b) => b[1] - a[1])
   candidates.push([SchemaBase, 0])

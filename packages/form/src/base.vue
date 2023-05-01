@@ -42,7 +42,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<{}>,
-  foldable: Boolean,
+  extra: {} as PropType<any>,
 })
 
 defineEmits(['update:modelValue', 'visible-change'])
@@ -67,10 +67,6 @@ defineEmits(['update:modelValue', 'visible-change'])
     .el-radio, .el-checkbox {
       height: 1.375rem;
     }
-  }
-
-  .el-button.ellipsis {
-    padding: 8px 10px;
   }
 
   .el-button + .el-button {

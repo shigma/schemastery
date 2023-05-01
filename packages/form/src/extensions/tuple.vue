@@ -30,7 +30,6 @@ const props = defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<{}>,
-  foldable: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue'])

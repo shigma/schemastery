@@ -6,7 +6,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button type="primary" @click="add()" :disabled="disabled">添加项</el-button>
+      <el-button type="primary" @click="add()" :disabled="disabled">添加项目</el-button>
     </template>
   </schema-base>
 
@@ -15,17 +15,20 @@
       v-for="([key, _], index) in entries"
       :key="index"
       v-model="entries[index][1]"
-      :invalid="entries.filter(e => e[0] === key).length > 1"
       :initial="(initial ?? schema.meta.default)[key]"
       :schema="schema.inner"
       :disabled="disabled"
       :prefix="schema.type === 'array' ? `${prefix.slice(0, -1)}[${key}].` : prefix + key + '.'"
-      foldable
+      :extra="{
+        foldable: true,
+        changed: key in (initial ?? schema.meta.default) ? undefined : true,
+        invalid: entries.filter(e => e[0] === key).length > 1,
+      }"
     >
       <template #menu>
-        <el-dropdown-item divided :disabled="!index" @click="up(index)">上移</el-dropdown-item>
-        <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">下移</el-dropdown-item>
-        <el-dropdown-item @click="del(index)">删除</el-dropdown-item>
+        <el-dropdown-item divided :disabled="!index" @click="up(index)">上移项目</el-dropdown-item>
+        <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">下移项目</el-dropdown-item>
+        <el-dropdown-item @click="del(index)">删除项目</el-dropdown-item>
       </template>
       <template #title>
         <span class="prefix">{{ prefix.slice(0, -1) }}</span>
@@ -56,7 +59,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
-  foldable: Boolean,
+  extra: {} as PropType<any>,
 })
 
 defineEmits(['update:modelValue'])

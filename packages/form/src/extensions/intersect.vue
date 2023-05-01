@@ -15,6 +15,14 @@
   </k-schema>
 </template>
 
+<script lang="ts">
+
+export default {
+  inheritAttrs: false,
+}
+
+</script>
+
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
@@ -26,8 +34,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
-  class: {} as PropType<any>,
-  foldable: Boolean,
+  extra: {} as PropType<any>,
 })
 
 defineEmits(['update:modelValue'])

@@ -6,6 +6,7 @@
     :disabled="disabled"
     :prefix="prefix"
     :extra="{
+      foldable: !!prefix,
       required: !!schema.meta.required && isNullable(schema.meta.default) && isNullable(modelValue),
     }"
   >
@@ -15,6 +16,7 @@
     </template>
     <template #prefix>
       <el-select
+        v-if="choices.length > 1"
         v-model="selectModel"
         filterable
         :disabled="disabled"
@@ -42,8 +44,7 @@ const props = defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
-  class: {} as PropType<any>,
-  foldable: Boolean,
+  extra: {} as PropType<any>,
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -57,7 +58,7 @@ let stop: WatchStopHandle
 const doWatch = () => watch(config, (value) => {
   const index = choices.value.indexOf(active.value)
   if (index >= 0) cache.value[index] = value
-  emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? undefined : value)
+  emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? null : value)
 }, { deep: true })
 
 watch(() => props.schema, (value) => {

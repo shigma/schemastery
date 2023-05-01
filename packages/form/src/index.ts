@@ -21,6 +21,7 @@ namespace form {
   export interface Extension {
     type: string
     role?: string
+    validate?: (value: any, schema: any) => boolean
     component: Component
   }
 
@@ -29,26 +30,31 @@ namespace form {
   extensions.add({
     type: 'bitset',
     component: Bitset,
+    validate: value => typeof value === 'number',
   })
 
   extensions.add({
     type: 'array',
     component: Group,
+    validate: value => Array.isArray(value),
   })
 
   extensions.add({
     type: 'dict',
     component: Group,
+    validate: value => typeof value === 'object',
   })
 
   extensions.add({
     type: 'object',
     component: Object,
+    validate: value => typeof value === 'object',
   })
 
   extensions.add({
     type: 'intersect',
     component: Intersect,
+    validate: value => typeof value === 'object',
   })
 
   extensions.add({
@@ -61,23 +67,27 @@ namespace form {
     type: 'array',
     role: 'table',
     component: Table,
+    validate: value => Array.isArray(value),
   })
 
   extensions.add({
     type: 'dict',
     role: 'table',
     component: Table,
+    validate: value => typeof value === 'object',
   })
 
   extensions.add({
     type: 'string',
     role: 'textarea',
     component: Textarea,
+    validate: value => typeof value === 'string',
   })
 
   extensions.add({
     type: 'tuple',
     component: Tuple,
+    validate: value => Array.isArray(value),
   })
 
   extensions.add({
