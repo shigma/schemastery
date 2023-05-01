@@ -1,4 +1,6 @@
 import { App, Component } from 'vue'
+import SchemaBase from './base.vue'
+import SchemaPrimitive from './primitive.vue'
 import Bitset from './extensions/bitset.vue'
 import Group from './extensions/group.vue'
 import Intersect from './extensions/intersect.vue'
@@ -9,6 +11,8 @@ import Textarea from './extensions/textarea.vue'
 import Tuple from './extensions/tuple.vue'
 import Union from './extensions/union.vue'
 import Schema from './schema.vue'
+
+export { SchemaBase, SchemaPrimitive }
 
 export * from './icons'
 export * from './utils'
