@@ -5,7 +5,9 @@
     :initial="initial"
     :disabled="disabled"
     :prefix="prefix"
-    :required="!!schema.meta.required && isNullable(schema.meta.default) && isNullable(modelValue)"
+    :extra="{
+      required: !!schema.meta.required && isNullable(schema.meta.default) && isNullable(modelValue),
+    }"
   >
     <template #title><slot name="title"></slot></template>
     <template #desc>
@@ -41,6 +43,7 @@ const props = defineProps({
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
   class: {} as PropType<any>,
+  foldable: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -68,6 +71,7 @@ watch(() => props.schema, (value) => {
 watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
   stop?.()
   config.value = value
+  value ??= schema.meta.default
   active.value = null
   for (const item of choices.value) {
     if (!check(item, value)) continue

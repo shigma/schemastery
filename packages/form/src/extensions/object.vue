@@ -1,7 +1,15 @@
 <template>
-  <h2 class="k-schema-header" v-if="schema.meta.description">
+  <schema-base v-if="foldable">
+    <template #title><slot name="title"></slot></template>
+    <template #desc>
+      <k-markdown :source="schema.meta.description"></k-markdown>
+    </template>
+    <template #menu><slot name="menu"></slot></template>
+  </schema-base>
+  <h2 class="k-schema-header" v-else-if="schema.meta.description">
     {{ schema.meta.description }}
   </h2>
+
   <k-schema
     v-for="(item, key) in schema.dict"
     :key="key"
@@ -21,6 +29,7 @@
 
 import { PropType } from 'vue'
 import { Schema, useConfig } from '../utils'
+import SchemaBase from '../base.vue'
 
 defineProps({
   schema: {} as PropType<Schema>,
@@ -28,6 +37,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
+  foldable: Boolean,
   class: {} as PropType<any>,
 })
 

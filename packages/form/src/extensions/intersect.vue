@@ -27,6 +27,7 @@ defineProps({
   prefix: {} as PropType<string>,
   initial: {} as PropType<any>,
   class: {} as PropType<any>,
+  foldable: Boolean,
 })
 
 defineEmits(['update:modelValue'])

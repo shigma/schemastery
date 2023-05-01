@@ -109,25 +109,30 @@ export function check(schema: any, value: any) {
 }
 
 interface ConfigOptions<T> {
+  strict?: boolean
   input(value: any): T
   output(value: T): any
 }
 
-export function useConfig<T = any>(handler?: ConfigOptions<T>) {
+export function useConfig<T = any>(options?: ConfigOptions<T>) {
   let stop: WatchStopHandle
   const config = ref<T>()
   const { props, emit } = getCurrentInstance() as any
 
   const doWatch = () => watch(config, (value) => {
-    if (handler) value = handler.output(value)
-    if (deepEqual(value, props.schema.meta.default)) value = undefined
+    try {
+      if (options) value = options.output(value)
+    } catch {
+      return
+    }
+    if (deepEqual(value, props.schema.meta.default, options?.strict)) value = null
     emit('update:modelValue', value)
   }, { deep: true })
 
   watch([() => props.modelValue, () => props.schema], ([value, schema]) => {
     stop?.()
     value ??= getFallback(schema)
-    if (handler) value = handler.input(value)
+    if (options) value = options.input(value)
     config.value = value
     stop = doWatch()
   }, { immediate: true })
@@ -139,6 +144,7 @@ export function useEntries() {
   const { props } = getCurrentInstance() as any
 
   const entries = useConfig<[string, any][]>({
+    strict: true,
     input: (config) => Object.entries(config),
     output: (config) => {
       if (props.schema.type === 'array') {
@@ -146,7 +152,7 @@ export function useEntries() {
       }
       const result: any = {}
       for (const [key, value] of config) {
-        if (key in result) return
+        if (key in result) throw new Error('duplicate entries')
         result[key] = value
       }
       return result
@@ -177,7 +183,7 @@ export function useEntries() {
       entries.value.splice(index, 1)
     },
     add() {
-      entries.value.push(['', getFallback(props.schema.inner)])
+      entries.value.push(['', null])
     },
   }
 }

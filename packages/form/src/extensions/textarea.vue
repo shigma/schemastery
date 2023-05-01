@@ -2,6 +2,7 @@
   <schema-base>
     <template #title><slot name="title"></slot></template>
     <template #desc><slot name="desc"></slot></template>
+    <template #menu><slot name="menu"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <div class="bottom">
@@ -26,6 +27,9 @@ const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<string>,
   disabled: {} as PropType<boolean>,
+  prefix: {} as PropType<string>,
+  initial: {} as PropType<{}>,
+  foldable: Boolean,
 })
 
 defineEmits(['update:modelValue'])

@@ -5,18 +5,19 @@
     :prefix="prefix"
     :initial="initial"
     :disabled="disabled"
+    :foldable="foldable"
     :modelValue="modelValue"
     @update:modelValue="$emit('update:modelValue', $event)"
     :class="{
       changed: !deepEqual(initial, modelValue),
-      required: required ?? (schema?.meta.required && isNullable(schema?.meta.default) && isNullable(modelValue)),
+      required: extra?.required ?? (schema?.meta.required && isNullable(schema?.meta.default) && isNullable(modelValue)),
       invalid,
     }"
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
       <el-dropdown-item @click="$emit('update:modelValue', clone(initial))">撤销更改</el-dropdown-item>
-      <el-dropdown-item @click="$emit('update:modelValue')">恢复默认值</el-dropdown-item>
+      <el-dropdown-item @click="$emit('update:modelValue', null)">恢复默认值</el-dropdown-item>
       <slot name="menu"></slot>
     </template>
     <template #desc>
@@ -50,8 +51,9 @@ const props = defineProps({
   initial: {} as PropType<any>,
   modelValue: {},
   invalid: Boolean,
-  required: Boolean,
+  extra: {} as PropType<any>,
   disabled: Boolean,
+  foldable: Boolean,
   branch: Boolean,
   prefix: { type: String, default: '' },
 })

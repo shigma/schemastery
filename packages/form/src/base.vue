@@ -42,6 +42,7 @@ defineProps({
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<{}>,
+  foldable: Boolean,
 })
 
 defineEmits(['update:modelValue', 'visible-change'])
