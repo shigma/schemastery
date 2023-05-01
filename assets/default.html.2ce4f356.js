@@ -1,0 +1,1 @@
+const e=JSON.parse(`{"key":"v-44b395ae","path":"/meta/default.html","title":".default()","lang":"en-US","frontmatter":{"example":true,"code":"Schema.object({\\n  foo: Schema.string().default('lol'),\\n  bar: Schema.number().default(2333),\\n}).description('\u914D\u7F6E\u9879')\\n"},"excerpt":"","headers":[],"filePathRelative":"meta/default.md"}`);export{e as data};
