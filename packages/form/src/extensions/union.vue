@@ -5,6 +5,7 @@
     :initial="initial"
     :disabled="disabled"
     :prefix="prefix"
+    :required="!!schema.meta.required && isNullable(schema.meta.default) && isNullable(modelValue)"
   >
     <template #title><slot name="title"></slot></template>
     <template #desc>
@@ -30,8 +31,8 @@
 
 <script lang="ts" setup>
 
-import { computed, PropType, ref, watch } from 'vue'
-import { check, deepEqual, getChoices, getFallback, Schema } from '../utils'
+import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
+import { check, deepEqual, getChoices, getFallback, isNullable, Schema } from '../utils'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -48,12 +49,15 @@ const config = ref()
 const choices = ref<Schema[]>()
 const cache = ref<any[]>()
 const active = ref<Schema>()
+let stop: WatchStopHandle
+
+const doWatch = () => watch(config, (value) => {
+  const index = choices.value.indexOf(active.value)
+  if (index >= 0) cache.value[index] = value
+  emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? undefined : value)
+}, { deep: true })
 
 watch(() => props.schema, (value) => {
-  if (!value?.list) {
-    choices.value = []
-    return
-  }
   choices.value = getChoices(props.schema)
   cache.value = choices.value.map((item) => {
     if (item.type === 'const') return item.value
@@ -62,28 +66,21 @@ watch(() => props.schema, (value) => {
 }, { immediate: true })
 
 watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
-  config.value = value ?? getFallback(schema)
-  active.value = schema
+  stop?.()
+  config.value = value
+  active.value = null
   for (const item of choices.value) {
-    if (!check(item, config.value)) continue
+    if (!check(item, value)) continue
     active.value = item
     break
   }
+  stop = doWatch()
 }, { immediate: true, deep: true })
-
-watch(config, (value) => {
-  if (!props.schema) return
-  if (deepEqual(value, props.schema.meta.default)) {
-    emit('update:modelValue', undefined)
-  } else {
-    emit('update:modelValue', value)
-  }
-}, { deep: true })
 
 const selectModel = computed({
   get() {
     if (active.value === props.schema) return
-    return active.value.meta.description || active.value.value
+    return active.value?.meta.description || active.value?.value
   },
   set(index) {
     if (active.value === choices.value[index]) return

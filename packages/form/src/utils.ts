@@ -108,47 +108,76 @@ export function check(schema: any, value: any) {
   }
 }
 
-export function useEntries() {
-  let stop: WatchStopHandle
-  const entries = ref<any[]>()
-  const { props, emit } = getCurrentInstance() as any
-
-  const doWatch = () => watch(entries, () => {
-    if (props.schema.type === 'dict') {
-      const result: any = {}
-      for (const [key, value] of entries.value) {
-        if (key in result) return
-        result[key] = value
-      }
-      emit('update:modelValue', result)
-    } else {
-      emit('update:modelValue', entries.value.map(([, value]) => value))
-    }
-  }, { deep: true })
-
-  watch(() => props.modelValue, (value) => {
-    stop?.()
-    entries.value = Object.entries(value || {})
-    stop = doWatch()
-  }, { immediate: true, deep: true })
-
-  return entries
+interface ConfigOptions<T> {
+  input(value: any): T
+  output(value: T): any
 }
 
-export function useConfig() {
-  const config = ref()
+export function useConfig<T = any>(handler?: ConfigOptions<T>) {
   let stop: WatchStopHandle
+  const config = ref<T>()
   const { props, emit } = getCurrentInstance() as any
 
   const doWatch = () => watch(config, (value) => {
-    emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? undefined : value)
+    if (handler) value = handler.output(value)
+    if (deepEqual(value, props.schema.meta.default)) value = undefined
+    emit('update:modelValue', value)
   }, { deep: true })
 
-  watch(() => [props.modelValue, props.schema], ([value, schema]) => {
+  watch([() => props.modelValue, () => props.schema], ([value, schema]) => {
     stop?.()
-    config.value = value ?? getFallback(schema)
+    value ??= getFallback(schema)
+    if (handler) value = handler.input(value)
+    config.value = value
     stop = doWatch()
-  }, { immediate: true, deep: true })
+  }, { immediate: true })
 
   return config
+}
+
+export function useEntries() {
+  const { props } = getCurrentInstance() as any
+
+  const entries = useConfig<[string, any][]>({
+    input: (config) => Object.entries(config),
+    output: (config) => {
+      if (props.schema.type === 'array') {
+        return config.map(([, value]) => value)
+      }
+      const result: any = {}
+      for (const [key, value] of config) {
+        if (key in result) return
+        result[key] = value
+      }
+      return result
+    },
+  })
+
+  return {
+    entries,
+    up(index: number) {
+      if (props.schema.type === 'dict') {
+        entries.value.splice(index - 1, 0, ...entries.value.splice(index, 1))
+      } else {
+        const temp = entries.value[index][1]
+        entries.value[index][1] = entries.value[index - 1][1]
+        entries.value[index - 1][1] = temp
+      }
+    },
+    down(index: number) {
+      if (props.schema.type === 'dict') {
+        entries.value.splice(index + 1, 0, ...entries.value.splice(index, 1))
+      } else {
+        const temp = entries.value[index][1]
+        entries.value[index][1] = entries.value[index + 1][1]
+        entries.value[index + 1][1] = temp
+      }
+    },
+    del(index: number) {
+      entries.value.splice(index, 1)
+    },
+    add() {
+      entries.value.push(['', getFallback(props.schema.inner)])
+    },
+  }
 }

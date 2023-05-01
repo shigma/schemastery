@@ -9,7 +9,7 @@
         <el-checkbox
           :disabled="disabled"
           :modelValue="!!(config & value)"
-          @update:modelValue="$emit('update:modelValue', config ^ value)"
+          @update:modelValue="config ^= value"
         >{{ key }}</el-checkbox>
       </li>
     </ul>

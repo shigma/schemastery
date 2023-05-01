@@ -5,7 +5,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button type="primary" @click="addEntry" :disabled="disabled">添加项</el-button>
+      <el-button type="primary" @click="add()" :disabled="disabled">添加项</el-button>
     </template>
     <table class="bottom schema-table" v-if="entries.length">
       <tr v-for="([key], index) in entries">
@@ -27,7 +27,7 @@
           ></el-input>
         </td>
         <td class="close">
-          <div class="inner" :class="{ disabled }" @click.stop="deleteEntry(index)">
+          <div class="inner" :class="{ disabled }" @click.stop="del(index)">
             <icon-close></icon-close>
           </div>
         </td>
@@ -38,12 +38,12 @@
 
 <script lang="ts" setup>
 
-import { PropType, ref, watch, WatchStopHandle } from 'vue'
+import { PropType } from 'vue'
 import { IconClose } from '../icons'
-import { getFallback, Schema, useEntries } from '../utils'
+import { Schema, useEntries } from '../utils'
 import SchemaBase from '../base.vue'
 
-const props = defineProps({
+defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
@@ -51,18 +51,9 @@ const props = defineProps({
   initial: {} as PropType<{}>,
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 
-const entries = useEntries()
-
-function addEntry() {
-  entries.value.push(['', getFallback(props.schema.inner, true)])
-}
-
-function deleteEntry(index: number) {
-  if (props.disabled) return
-  entries.value.splice(index, 1)
-}
+const { entries, add, del } = useEntries()
 
 </script>
 

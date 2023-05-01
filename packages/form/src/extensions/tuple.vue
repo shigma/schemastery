@@ -10,8 +10,7 @@
         :key="index"
         :schema="item"
         :disabled="disabled"
-        :modelValue="modelValue[index]"
-        @update:modelValue="updateValue(index, $event)"
+        v-model="config[index]"
       ></schema-primitive>
     </template>
   </schema-base>
@@ -20,7 +19,7 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { Schema } from '../utils'
+import { Schema, useConfig } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
 
@@ -34,10 +33,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-function updateValue(index: number, value: any) {
-  const copy = [...props.modelValue]
-  copy[index] = value
-  emit('update:modelValue', copy)
-}
+const config = useConfig()
 
 </script>

@@ -6,6 +6,7 @@
         <h3>
           <slot name="title"></slot>
           <el-dropdown
+            v-if="!disabled"
             placement="bottom"
             @visible-change="$emit('visible-change', $event)">
             <svg class="trigger" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
