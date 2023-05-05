@@ -57,7 +57,7 @@ describe('Intersect', () => {
     expect(() => validate({ c: '' })).to.throw()
   })
 
-  it('intersect (tagged)', () => {
+  it('intersect (tagged union)', () => {
     // https://github.com/shigma/schemastery/issues/31
     const validate = Schema.intersect([
       Schema.object({ e: Schema.boolean().default(true) }),
@@ -74,5 +74,19 @@ describe('Intersect', () => {
     ])
 
     expect(validate(null)).to.deep.equal({ e: true, x: 114 })
+  })
+
+  it('intersect (shared default)', () => {
+    // https://github.com/shigma/schemastery/issues/45
+    const validate = Schema.intersect([
+      Schema.object({ a: Schema.boolean().default(true) }),
+      Schema.union([
+        Schema.object({ b: Schema.const(true) }),
+        Schema.object({ b: Schema.const(false) }),
+      ]),
+    ])
+
+    expect(validate(null)).to.deep.equal({ a: true })
+    expect(validate({ a: null })).to.deep.equal({ a: true })
   })
 })

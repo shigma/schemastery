@@ -94,6 +94,7 @@ namespace Schema {
 }
 
 declare module globalThis {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   export let __schemastery_index__: number
 }
 
@@ -440,13 +441,13 @@ Schema.extend('object', (data, { dict }, strict) => {
   return [result]
 })
 
-Schema.extend('union', (data, { list, toString }) => {
-  const messages: string[] = []
+Schema.extend('union', (data, { list, toString }, strict) => {
+  const messages: any[] = []
   for (const inner of list!) {
     try {
-      return Schema.resolve(data, inner)
+      return Schema.resolve(data, inner, strict)
     } catch (error) {
-      // messages.push(error.message)
+      messages.push(error)
     }
   }
   throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
