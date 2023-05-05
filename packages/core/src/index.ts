@@ -343,15 +343,23 @@ Schema.extend('string', (data, { meta }) => {
   return [data]
 })
 
+function isMultipleOf(data: number, min: number, step: number) {
+  step = Math.abs(step)
+  if (!/^\d+\.\d+$/.test(step.toString())) {
+    return data % step === 0
+  }
+  const index = step.toString().indexOf('.')
+  const digits = step.toString().slice(index + 1).length
+  const multiple = Math.pow(10, digits)
+  return Math.abs(data * multiple - min * multiple) % (step * multiple) === 0
+}
+
 Schema.extend('number', (data, { meta }) => {
   if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
   checkWithinRange(data, meta, 'number')
   const { step } = meta
-  if (step) {
-    const quotient = Math.abs(data - (meta.min ?? 0)) % step
-    if (quotient >= Number.EPSILON && quotient < step - Number.EPSILON) {
-      throw new TypeError(`expected number multiple of ${step} but got ${data}`)
-    }
+  if (step && !isMultipleOf(data, meta.min ?? 0, step)) {
+    throw new TypeError(`expected number multiple of ${step} but got ${data}`)
   }
   return [data]
 })
