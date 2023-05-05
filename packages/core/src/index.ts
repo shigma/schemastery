@@ -346,7 +346,7 @@ Schema.extend('string', (data, { meta }) => {
 function isMultipleOf(data: number, min: number, step: number) {
   step = Math.abs(step)
   if (!/^\d+\.\d+$/.test(step.toString())) {
-    return data % step === 0
+    return (data - min) % step === 0
   }
   const index = step.toString().indexOf('.')
   const digits = step.toString().slice(index + 1).length
