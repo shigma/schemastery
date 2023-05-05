@@ -78,34 +78,3 @@ const SchemaComponent = computed(() => {
 })
 
 </script>
-
-<style lang="scss">
-
-.k-schema-header {
-  font-size: 1.25rem;
-
-  .el-button {
-    float: right;
-    transform: translateY(-2px);
-  }
-}
-
-.k-schema-group {
-  position: relative;
-  padding-left: 1rem;
-  border-bottom: 1px solid var(--el-border-color-light);
-
-  &:empty {
-    border-bottom: none;
-  }
-
-  > :first-child {
-    border-top: none;
-  }
-
-  > :last-child {
-    border-bottom: none;
-  }
-}
-
-</style>

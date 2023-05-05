@@ -85,7 +85,7 @@ function onClickExternal(value: string) {
 
 <style lang="scss">
 
-.schema-item {
+.k-schema-item {
   .el-input {
     .k-icon {
       color: var(--fg3);

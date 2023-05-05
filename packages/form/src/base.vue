@@ -1,5 +1,5 @@
 <template>
-  <div class="schema-item">
+  <div class="k-schema-item" v-bind="$attrs">
     <div class="actions"></div>
     <div class="header">
       <div class="left">
@@ -22,18 +22,29 @@
         <slot name="desc"></slot>
       </div>
       <div class="right">
-        <slot name="prefix"></slot>
-        <slot name="control"></slot>
-        <slot name="suffix"></slot>
+        <template v-if="!collapsed">
+          <slot name="prefix"></slot>
+          <slot name="control"></slot>
+          <slot name="suffix"></slot>
+        </template>
+        <template v-if="$slots.collapse">
+          <el-button v-if="!collapsed" @click="collapsed = true" :disabled="disabled">折叠</el-button>
+          <el-button v-else @click="collapsed = false" :disabled="disabled">展开以编辑</el-button>
+        </template>
       </div>
     </div>
     <slot></slot>
   </div>
+  <el-collapse-transition v-if="$slots.collapse">
+    <div class="k-schema-group" v-show="!collapsed">
+      <slot name="collapse"></slot>
+    </div>
+  </el-collapse-transition>
 </template>
 
 <script lang="ts" setup>
 
-import { PropType } from 'vue'
+import { PropType, ref } from 'vue'
 import { Schema } from './utils'
 
 defineProps({
@@ -47,11 +58,13 @@ defineProps({
 
 defineEmits(['update:modelValue', 'visible-change'])
 
+const collapsed = ref(false)
+
 </script>
 
 <style lang="scss">
 
-.schema-item {
+.k-schema-item {
   p {
     margin: 0;
     line-height: 1.7;
@@ -74,13 +87,13 @@ defineEmits(['update:modelValue', 'visible-change'])
   }
 }
 
-.schema-item {
+.k-schema-item {
   position: relative;
   padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--el-border-color-light);
   transition: var(--color-transition);
 
-  &:first-child, :not(.schema-item):not(.k-schema-group) + & {
+  &:first-child, :not(.k-schema-item):not(.k-schema-group) + & {
     border-top: 1px solid var(--el-border-color-light);
   }
 
@@ -177,6 +190,32 @@ defineEmits(['update:modelValue', 'visible-change'])
 
   &.invalid .actions {
     border-left-color: var(--el-color-warning);
+  }
+}
+
+.k-schema-header {
+  font-size: 1.25rem;
+  margin: 1rem 0;
+
+  &:not(:first-child) {
+    margin-top: 2rem;
+  }
+}
+
+.k-schema-group {
+  position: relative;
+  border-bottom: 1px solid var(--el-border-color-light);
+
+  &:empty {
+    border-bottom: none;
+  }
+
+  > :first-child {
+    border-top: none;
+  }
+
+  > :last-child {
+    border-bottom: none;
   }
 }
 
