@@ -4,13 +4,13 @@
     :key="index"
     :modelValue="modelValue"
     @update:modelValue="$emit('update:modelValue', $event)"
-    :branch="true"
     :schema="{ ...item, meta: { ...schema.meta, ...item.meta } }"
     :initial="initial"
     :disabled="disabled"
     :prefix="prefix"
   >
     <template #title><slot name="title"></slot></template>
+    <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
   </k-schema>
 </template>

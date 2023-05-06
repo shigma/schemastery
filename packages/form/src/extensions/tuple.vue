@@ -3,9 +3,13 @@
     <template #title><slot name="title"></slot></template>
     <template #desc><slot name="desc"></slot></template>
     <template #menu><slot name="menu"></slot></template>
-    <template #prefix><slot name="prefix"></slot></template>
-    <template #suffix><slot name="suffix"></slot></template>
-    <template #control>
+    <template #prefix v-if="valid">
+      <slot name="prefix"></slot>
+    </template>
+    <template #suffix v-if="valid">
+      <slot name="suffix"></slot>
+    </template>
+    <template #control v-if="valid">
       <schema-primitive
         v-for="(item, index) in schema.list"
         :key="index"
@@ -19,7 +23,7 @@
 
 <script lang="ts" setup>
 
-import { PropType } from 'vue'
+import { computed, PropType } from 'vue'
 import { Schema, useConfig } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
@@ -32,8 +36,12 @@ const props = defineProps({
   initial: {} as PropType<{}>,
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 
 const config = useConfig()
+
+const valid = computed(() => {
+  return props.schema.list.every(item => ['string', 'number', 'boolean'].includes(item.type))
+})
 
 </script>
