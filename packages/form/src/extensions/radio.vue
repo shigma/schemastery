@@ -11,7 +11,7 @@
           :label="item.value"
           :disabled="disabled"
           v-model="config"
-        >{{ item.meta.description || item.value }}</el-radio>
+        >{{ tt(item.meta.description) || item.value }}</el-radio>
       </li>
     </ul>
   </schema-base>
@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { getChoices, Schema, useConfig } from '../utils'
+import { getChoices, Schema, useConfig, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 
 defineProps({
@@ -32,6 +32,8 @@ defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const tt = useI18nText()
 
 const config = useConfig()
 

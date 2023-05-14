@@ -12,7 +12,7 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #desc>
-      <k-markdown :source="schema.meta.description"></k-markdown>
+      <k-markdown :source="tt(schema.meta.description)"></k-markdown>
     </template>
     <template #prefix>
       <el-select
@@ -25,7 +25,7 @@
           v-for="(item, index) in choices"
           :key="index"
           :value="index"
-          :label="item.meta.description || item.value"
+          :label="tt(item.meta.description) || item.value"
         ></el-option>
       </el-select>
     </template>
@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
-import { check, deepEqual, getChoices, getFallback, isNullable, Schema } from '../utils'
+import { check, deepEqual, getChoices, getFallback, isNullable, Schema, useI18nText } from '../utils'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -48,6 +48,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const tt = useI18nText()
 
 const config = ref()
 const choices = ref<Schema[]>()
@@ -85,7 +87,7 @@ watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
 const selectModel = computed({
   get() {
     if (active.value === props.schema) return
-    return active.value?.meta.description || active.value?.value
+    return tt(active.value?.meta.description) || active.value?.value
   },
   set(index) {
     if (active.value === choices.value[index]) return

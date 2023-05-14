@@ -3,15 +3,15 @@
     <template #title><slot name="title"></slot></template>
     <template #desc>
       <slot name="desc">
-        <k-markdown :source="schema?.meta.description"></k-markdown>
+        <k-markdown :source="description"></k-markdown>
       </slot>
     </template>
     <template #menu><slot name="menu"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
   </schema-base>
-  <h2 class="k-schema-header" v-else-if="schema.meta.description">
-    {{ schema.meta.description }}
+  <h2 class="k-schema-header" v-else-if="description">
+    {{ description }}
   </h2>
 
   <k-schema
@@ -39,11 +39,11 @@ export default {
 
 <script lang="ts" setup>
 
-import { PropType } from 'vue'
-import { Schema, useConfig } from '../utils'
+import { PropType, computed } from 'vue'
+import { Schema, useConfig, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 
-defineProps({
+const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<any>,
   disabled: {} as PropType<boolean>,
@@ -54,6 +54,10 @@ defineProps({
 
 defineEmits(['update:modelValue'])
 
+const tt = useI18nText()
+
 const config = useConfig()
+
+const description = computed(() => tt(props.schema.meta.description))
 
 </script>

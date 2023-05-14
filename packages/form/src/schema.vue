@@ -22,7 +22,7 @@
     </template>
     <template #desc>
       <slot name="desc">
-        <k-markdown :source="schema?.meta.description"></k-markdown>
+        <k-markdown :source="tt(schema?.meta.description)"></k-markdown>
       </slot>
     </template>
     <template #prefix><slot name="prefix"></slot></template>
@@ -41,7 +41,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType } from 'vue'
-import { clone, deepEqual, isNullable, Schema } from './utils'
+import { clone, deepEqual, isNullable, Schema, useI18nText } from './utils'
 import form from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
@@ -57,6 +57,8 @@ const props = defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const tt = useI18nText()
 
 const isPrimitive = computed(() => {
   return ['string', 'number', 'boolean'].includes(props.schema?.type)

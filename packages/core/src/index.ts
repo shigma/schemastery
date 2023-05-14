@@ -84,7 +84,7 @@ namespace Schema {
     role?: string
     extra?: any
     link?: string
-    description?: string
+    description?: string | Dict<string>
     comment?: string
     pattern?: { source: string; flags?: string }
     max?: number
@@ -145,6 +145,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   set(key: string, value: Schema): Schema<S, T>
   push(value: Schema): Schema<S, T>
   simplify(value?: any): any
+  i18n(messages: Dict): Schema<S, T>
 }
 
 Schema.prototype = Object.create(Function.prototype)
@@ -173,6 +174,23 @@ Schema.prototype.set = function set(key, value) {
 
 Schema.prototype.push = function push(value) {
   this.list!.push(value)
+  return this
+}
+
+Schema.prototype.i18n = function i18n(messages) {
+  this.meta.description = valueMap(messages, (data) => {
+    if (!data || typeof data === 'string') return data
+    return data.$description
+  })
+  if (this.type === 'object') {
+    for (const key in this.dict!) {
+      this.dict[key].i18n(valueMap(messages, (data) => data?.[key]))
+    }
+  } else if (['union', 'intersect'].includes(this.type)) {
+    for (const item of this.list!) {
+      item.i18n(messages)
+    }
+  }
   return this
 }
 
