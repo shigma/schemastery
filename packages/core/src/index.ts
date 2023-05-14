@@ -178,20 +178,24 @@ Schema.prototype.push = function push(value) {
 }
 
 Schema.prototype.i18n = function i18n(messages) {
-  this.meta.description = valueMap(messages, (data) => {
+  const schema = Schema(this)
+  schema.meta.description = valueMap(messages, (data) => {
     if (!data || typeof data === 'string') return data
     return data.$description
   })
-  if (this.type === 'object') {
-    for (const key in this.dict!) {
-      this.dict[key].i18n(valueMap(messages, (data) => data?.[key]))
+  if (schema.dict) {
+    for (const key in schema.dict!) {
+      schema.dict[key] = schema.dict[key].i18n(valueMap(messages, (data) => data?.[key]))
     }
-  } else if (['union', 'intersect'].includes(this.type)) {
-    for (const item of this.list!) {
-      item.i18n(messages)
-    }
+  } else if (schema.list) {
+    schema.list = schema.list!.map((item, index) => {
+      return item.i18n(valueMap(messages, (data) => {
+        if (!data) return data
+        return data[index] ?? Object.fromEntries(Object.entries(data).filter(([key]) => !key.startsWith('$')))
+      }))
+    })
   }
-  return this
+  return schema
 }
 
 for (const key of ['required', 'hidden']) {
@@ -247,7 +251,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
   return value
 }
 
-Schema.prototype.toString = function toString(this: Schema, inline?: boolean) {
+Schema.prototype.toString = function toString(inline?: boolean) {
   return formatters[this.type]?.(this, inline) ?? `Schema<${this.type}>`
 }
 
