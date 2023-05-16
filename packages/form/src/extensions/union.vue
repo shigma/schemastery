@@ -6,7 +6,7 @@
     :disabled="disabled"
     :prefix="prefix"
     :extra="{
-      foldable: !!prefix,
+      foldable: extra?.foldable ?? true,
       required: !!schema.meta.required && isNullable(schema.meta.default) && isNullable(modelValue),
     }"
   >
