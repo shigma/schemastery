@@ -493,7 +493,7 @@ Schema.extend('intersect', (data, { list, toString }, strict) => {
     } else if (typeof result !== typeof value) {
       throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
     } else if (typeof value === 'object') {
-      result = { ...result as any, ...value }
+      merge(result ??= {}, value)
     } else if (result !== value) {
       throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
     }

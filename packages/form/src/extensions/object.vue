@@ -17,7 +17,8 @@
   <k-schema
     v-for="(item, key) in schema.dict"
     :key="key"
-    v-model="config[key]"
+    :modelValue="config[key]"
+    @update:modelValue="config[key] = $event ?? undefined"
     :schema="item"
     :initial="initial?.[key]"
     :disabled="disabled"

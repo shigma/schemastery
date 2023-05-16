@@ -79,14 +79,18 @@ describe('Intersect', () => {
   it('intersect (shared default)', () => {
     // https://github.com/shigma/schemastery/issues/45
     const validate = Schema.intersect([
-      Schema.object({ a: Schema.boolean().default(true) }),
+      Schema.object({
+        a: Schema.boolean().default(true),
+        b: Schema.boolean().default(false),
+      }),
       Schema.union([
-        Schema.object({ b: Schema.const(true) }),
-        Schema.object({ b: Schema.const(false) }),
+        Schema.object({ a: Schema.const(true) }),
+        Schema.object({ a: Schema.const(false) }),
       ]),
     ])
 
-    expect(validate(null)).to.deep.equal({ a: true })
-    expect(validate({ a: null })).to.deep.equal({ a: true })
+    expect(validate(null)).to.deep.equal({ a: true, b: false })
+    expect(validate({ a: null })).to.deep.equal({ a: true, b: false })
+    expect(validate({ a: null, b: true })).to.deep.equal({ a: true, b: true })
   })
 })
