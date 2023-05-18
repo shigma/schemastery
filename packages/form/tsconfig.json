@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "jsx": "preserve",
+    "module": "esnext",
     "noImplicitAny": true,
     "strictNullChecks": false,
     "types": [
