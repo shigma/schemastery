@@ -6,7 +6,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="add()" :disabled="disabled">添加项目</el-button>
+      <el-button @click="add()" :disabled="disabled">{{ t('entry.add') }}</el-button>
     </template>
     <template #collapse>
       <k-schema
@@ -24,9 +24,9 @@
         }"
       >
         <template #menu>
-          <el-dropdown-item divided :disabled="!index" @click="up(index)">上移项目</el-dropdown-item>
-          <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">下移项目</el-dropdown-item>
-          <el-dropdown-item @click="del(index)">删除项目</el-dropdown-item>
+          <el-dropdown-item divided :disabled="!index" @click="up(index)">{{ t('entry.up') }}</el-dropdown-item>
+          <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">{{ t('entry.down') }}</el-dropdown-item>
+          <el-dropdown-item @click="del(index)">{{ t('entry.del') }}</el-dropdown-item>
         </template>
         <template #title>
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
@@ -49,8 +49,11 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Schema, useEntries } from '../utils'
 import SchemaBase from '../base.vue'
+import zhCN from '../locales/zh-CN.yml'
+import enUS from '../locales/en-US.yml'
 
 defineProps({
   schema: {} as PropType<Schema>,
@@ -64,6 +67,22 @@ defineProps({
 defineEmits(['update:modelValue'])
 
 const { entries, up, down, add, del } = useEntries()
+
+const { t, setLocaleMessage } = useI18n({
+  messages: {
+    'zh-CN': zhCN,
+    'en-US': enUS,
+  },
+})
+
+if (import.meta.hot) {
+  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
+    setLocaleMessage('zh-CN', module.default)
+  })
+  import.meta.hot.accept('../locales/en-US.yml', (module) => {
+    setLocaleMessage('en-US', module.default)
+  })
+}
 
 </script>
 

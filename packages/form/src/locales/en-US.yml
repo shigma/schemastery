@@ -1,0 +1,9 @@
+initial: Undo
+default: Restore to Default
+collapse: Collapse
+expand: Expand to Edit
+entry:
+  add: Add Item
+  up: Move Up
+  down: Move Down
+  del: Delete Item

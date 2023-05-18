@@ -16,8 +16,8 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
-      <el-dropdown-item @click="$emit('update:modelValue', clone(initial))">撤销更改</el-dropdown-item>
-      <el-dropdown-item @click="$emit('update:modelValue', null)">恢复默认值</el-dropdown-item>
+      <el-dropdown-item @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</el-dropdown-item>
+      <el-dropdown-item @click="$emit('update:modelValue', null)">{{ t('default') }}</el-dropdown-item>
       <slot name="menu"></slot>
     </template>
     <template #desc>
@@ -41,10 +41,13 @@
 <script lang="ts" setup>
 
 import { computed, PropType } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable, Schema, useI18nText } from './utils'
 import form from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
+import zhCN from './locales/zh-CN.yml'
+import enUS from './locales/en-US.yml'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -78,5 +81,21 @@ const SchemaComponent = computed(() => {
   candidates.push([SchemaBase, 0])
   return candidates[0][0]
 })
+
+const { t, setLocaleMessage } = useI18n({
+  messages: {
+    'zh-CN': zhCN,
+    'en-US': enUS,
+  },
+})
+
+if (import.meta.hot) {
+  import.meta.hot.accept('./locales/zh-CN.yml', (module) => {
+    setLocaleMessage('zh-CN', module.default)
+  })
+  import.meta.hot.accept('./locales/en-US.yml', (module) => {
+    setLocaleMessage('en-US', module.default)
+  })
+}
 
 </script>

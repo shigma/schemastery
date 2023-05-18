@@ -12,7 +12,9 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #desc>
-      <k-markdown :source="tt(schema.meta.description)"></k-markdown>
+      <slot name="desc">
+        <k-markdown :source="tt(schema.meta.description)"></k-markdown>
+      </slot>
     </template>
     <template #prefix>
       <el-select

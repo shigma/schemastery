@@ -28,8 +28,8 @@
           <slot name="suffix"></slot>
         </template>
         <template v-if="$slots.collapse">
-          <el-button v-if="!collapsed" @click="collapsed = true" :disabled="disabled">折叠</el-button>
-          <el-button v-else @click="collapsed = false" :disabled="disabled">展开以编辑</el-button>
+          <el-button v-if="!collapsed" @click="collapsed = true" :disabled="disabled">{{ t('collapse') }}</el-button>
+          <el-button v-else @click="collapsed = false" :disabled="disabled">{{ t('expand') }}</el-button>
         </template>
       </div>
     </div>
@@ -45,7 +45,10 @@
 <script lang="ts" setup>
 
 import { PropType, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Schema } from './utils'
+import zhCN from './locales/zh-CN.yml'
+import enUS from './locales/en-US.yml'
 
 defineProps({
   schema: {} as PropType<Schema>,
@@ -59,6 +62,22 @@ defineProps({
 defineEmits(['update:modelValue', 'visible-change'])
 
 const collapsed = ref(false)
+
+const { t, setLocaleMessage } = useI18n({
+  messages: {
+    'zh-CN': zhCN,
+    'en-US': enUS,
+  },
+})
+
+if (import.meta.hot) {
+  import.meta.hot.accept('./locales/zh-CN.yml', (module) => {
+    setLocaleMessage('zh-CN', module.default)
+  })
+  import.meta.hot.accept('./locales/en-US.yml', (module) => {
+    setLocaleMessage('en-US', module.default)
+  })
+}
 
 </script>
 
