@@ -14,12 +14,12 @@ declare global {
       : X extends Constructor<infer S> ? Schema<S>
       : never
 
-    type _TypeS<X> = X extends Schema<infer S, unknown> ? S : never
+    type TypeS1<X> = X extends Schema<infer S, unknown> ? S : never
     type Inverse<X> = X extends Schema<any, infer Y> ? (arg: Y) => void : never
 
-    export type TypeS<X> = _TypeS<From<X>>
+    export type TypeS<X> = TypeS1<From<X>>
     export type TypeT<X> = ReturnType<From<X>>
-    export type Resolve = (data: any, schema: Schema, strict?: boolean) => [any, any?]
+    export type Resolve = (data: any, schema: Schema, options?: Options, strict?: boolean) => [any, any?]
 
     export type IntersectS<X> = From<X> extends Schema<infer S, unknown> ? S : never
     export type IntersectT<X> = Inverse<From<X>> extends ((arg: infer T) => void) ? T : never
@@ -56,6 +56,10 @@ declare global {
       union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
       intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
       transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
+    }
+
+    interface Options {
+      autofix?: boolean
     }
   }
 }
@@ -101,8 +105,8 @@ declare module globalThis {
 globalThis.__schemastery_index__ ??= 0
 
 const Schema = function (options: Schema.Base) {
-  const schema = function (data: any) {
-    return Schema.resolve(data, schema)[0]
+  const schema = function (data: any, options?: Schemastery.Options) {
+    return Schema.resolve(data, schema, options)[0]
   } as Schema
 
   if (options.refs) {
@@ -127,8 +131,8 @@ const Schema = function (options: Schema.Base) {
 } as Schemastery.Static
 
 interface Schema<S = any, T = S> extends Schema.Base<T> {
-  (data?: S | null): T
-  new (data?: S | null): T
+  (data?: S | null, options?: Schemastery.Options): T
+  new (data?: S | null, options?: Schemastery.Options): T
   [kSchema]: true
   toJSON(): Schema.Base<T>
   required(value?: boolean): Schema<S, T>
@@ -185,7 +189,7 @@ Schema.prototype.i18n = function i18n(messages) {
   })
   if (schema.dict) {
     for (const key in schema.dict!) {
-      schema.dict[key] = schema.dict[key].i18n(valueMap(messages, (data) => data?.[key]))
+      schema.dict[key] = schema.dict[key]!.i18n(valueMap(messages, (data) => data?.[key]))
     }
   } else if (schema.list) {
     schema.list = schema.list!.map((item, index) => {
@@ -277,7 +281,7 @@ Schema.extend = function extend(type: string, resolve) {
   resolvers[type] = resolve
 }
 
-Schema.resolve = function resolve(data, schema, strict) {
+Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (!schema) return [data]
 
   if (isNullable(data)) {
@@ -293,7 +297,7 @@ Schema.resolve = function resolve(data, schema, strict) {
   }
 
   const callback = resolvers[schema.type]
-  if (callback) return callback(data, schema, strict)
+  if (callback) return callback(data, schema, options, strict)
   throw new TypeError(`unsupported type "${schema.type}"`)
 }
 
@@ -413,19 +417,25 @@ Schema.extend('is', (data, { callback }) => {
   throw new TypeError(`expected ${callback!.name} but got ${data}`)
 })
 
-function property(data: any, key: keyof any, schema: Schema) {
-  const [value, adapted] = Schema.resolve(data[key], schema)
-  if (!isNullable(adapted)) data[key] = adapted
-  return value
+function property(data: any, key: keyof any, schema: Schema, options?: Schemastery.Options) {
+  try {
+    const [value, adapted] = Schema.resolve(data[key], schema, options)
+    if (adapted !== undefined) data[key] = adapted
+    return value
+  } catch (e) {
+    if (!options?.autofix) throw e
+    delete data[key]
+    return schema.meta.default
+  }
 }
 
-Schema.extend('array', (data, { inner, meta }) => {
+Schema.extend('array', (data, { inner, meta }, options) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
   checkWithinRange(data.length, meta, 'array length')
-  return [data.map((_, index) => property(data, index, inner!))]
+  return [data.map((_, index) => property(data, index, inner!, options))]
 })
 
-Schema.extend('dict', (data, { inner, sKey }, strict) => {
+Schema.extend('dict', (data, { inner, sKey }, options, strict) => {
   if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result: any = {}
   for (const key in data) {
@@ -436,16 +446,16 @@ Schema.extend('dict', (data, { inner, sKey }, strict) => {
       if (strict) continue
       throw error
     }
-    result[rKey] = property(data, key, inner!)
+    result[rKey] = property(data, key, inner!, options)
     data[rKey] = data[key]
     if (key !== rKey) delete data[key]
   }
   return [result]
 })
 
-Schema.extend('tuple', (data, { list }, strict) => {
+Schema.extend('tuple', (data, { list }, options, strict) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  const result = list!.map((inner, index) => property(data, index, inner))
+  const result = list!.map((inner, index) => property(data, index, inner, options))
   if (strict) return [result]
   result.push(...data.slice(list!.length))
   return [result]
@@ -458,11 +468,11 @@ function merge(result: any, data: any) {
   }
 }
 
-Schema.extend('object', (data, { dict }, strict) => {
+Schema.extend('object', (data, { dict }, options, strict) => {
   if (!isPlainObject(data)) throw new TypeError(`expected object but got ${data}`)
   const result: any = {}
   for (const key in dict) {
-    const value = property(data, key, dict![key]!)
+    const value = property(data, key, dict![key]!, options)
     if (!isNullable(value) || key in data) {
       result[key] = value
     }
@@ -471,11 +481,11 @@ Schema.extend('object', (data, { dict }, strict) => {
   return [result]
 })
 
-Schema.extend('union', (data, { list, toString }, strict) => {
+Schema.extend('union', (data, { list, toString }, options, strict) => {
   const messages: any[] = []
   for (const inner of list!) {
     try {
-      return Schema.resolve(data, inner, strict)
+      return Schema.resolve(data, inner, options, strict)
     } catch (error) {
       messages.push(error)
     }
@@ -483,10 +493,10 @@ Schema.extend('union', (data, { list, toString }, strict) => {
   throw new TypeError(`expected ${toString()} but got ${JSON.stringify(data)}`)
 })
 
-Schema.extend('intersect', (data, { list, toString }, strict) => {
+Schema.extend('intersect', (data, { list, toString }, options, strict) => {
   let result
   for (const inner of list!) {
-    const value: any = Schema.resolve(data, inner, true)[0]
+    const value: any = Schema.resolve(data, inner, options, true)[0]
     if (isNullable(value)) continue
     if (isNullable(result)) {
       result = value
@@ -502,19 +512,19 @@ Schema.extend('intersect', (data, { list, toString }, strict) => {
   return [result]
 })
 
-Schema.extend('transform', (data, { inner, callback, preserve }) => {
-  const [result, adapted = data] = Schema.resolve(data, inner!, true)
-  if (isPlainObject(data)) {
-    const temp: any = {}
-    for (const key in result) {
-      if (!(key in data)) continue
-      temp[key] = data[key]
-      delete data[key]
-    }
-    Object.assign(data, callback!(temp))
+Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
+  const [result, adapted = data] = Schema.resolve(data, inner!, options, true)
+  if (preserve) {
     return [callback!(result)]
-  } else if (preserve) {
-    return [callback!(result)]
+  // } else if (isPlainObject(data)) {
+  //   const temp: any = {}
+  //   for (const key in result) {
+  //     if (!(key in data)) continue
+  //     temp[key] = data[key]
+  //     delete data[key]
+  //   }
+  //   Object.assign(data, callback!(temp))
+  //   return [callback!(result)]
   } else {
     return [callback!(result), callback!(adapted)]
   }

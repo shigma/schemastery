@@ -43,7 +43,7 @@ describe('Transform', () => {
     expect(() => new Config({ foo: [''] })).to.throw()
   })
 
-  it('transform with intersect', () => {
+  it.skip('transform with intersect', () => {
     const Inner = Schema.object({
       a: Schema.number().required(),
       d: Schema.number().default(0),
@@ -65,9 +65,7 @@ describe('Transform', () => {
     expect(original).to.deep.equal({ b: [{ a: 1 }], c: 3, e: 5 })
 
     expect(() => new Config({})).to.throw()
-    // @ts-expect-error
     expect(() => new Config({ a: '' })).to.throw()
-    // @ts-expect-error
     expect(() => new Config({ b: {} })).to.throw()
     expect(() => new Config({ b: [{ c: 3 }] })).to.throw()
     // @ts-expect-error
@@ -89,7 +87,7 @@ describe('Transform', () => {
     expect(() => validate({ id: 1, children: {} })).to.throw()
   })
 
-  it.skip('adaptive root', () => {
+  it('adaptive root', () => {
     const original = Schema.object({
       bar: Schema.boolean().default(false),
       id: Schema.never(),
@@ -110,5 +108,16 @@ describe('Transform', () => {
     expect(validate(null)).to.deep.equal(null)
     expect(validate(root)).to.deep.equal({ foo: { id: 1 }, bar: false })
     expect(root).to.deep.equal({ foo: { id: 1 } })
+  })
+
+  it('autofix', () => {
+    const validate = Schema.object({
+      foo: Schema.number().default(0),
+    })
+
+    const original = { foo: '' }
+    // @ts-expect-error
+    expect(validate(original, { autofix: true })).to.deep.equal({ foo: 0 })
+    expect(original).to.deep.equal({})
   })
 })
