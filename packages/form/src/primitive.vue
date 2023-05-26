@@ -32,7 +32,8 @@
 
 import { computed, PropType, ref } from 'vue'
 import { IconExternal, IconEye, IconEyeSlash } from './icons'
-import { isNullable, useConfig } from './utils'
+import { isNullable } from 'cosmokit'
+import { useModel } from './utils'
 import Schema from 'schemastery'
 
 const emit = defineEmits(['update:modelValue'])
@@ -45,7 +46,7 @@ const props = defineProps({
 
 const showPass = ref(false)
 
-const config = useConfig()
+const config = useModel()
 
 const nullable = computed(() => isNullable(config.value))
 

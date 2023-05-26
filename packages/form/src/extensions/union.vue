@@ -38,7 +38,8 @@
 <script lang="ts" setup>
 
 import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
-import { check, deepEqual, getChoices, getFallback, isNullable, Schema, useI18nText } from '../utils'
+import { deepEqual, isNullable } from 'cosmokit'
+import { check, getChoices, getFallback, Schema, useI18nText } from '../utils'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,

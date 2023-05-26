@@ -33,7 +33,7 @@
 <script lang="ts" setup>
 
 import { PropType, computed } from 'vue'
-import { Schema, useConfig, useI18nText } from '../utils'
+import { Schema, useModel, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 
 defineOptions({
@@ -53,7 +53,7 @@ defineEmits(['update:modelValue'])
 
 const tt = useI18nText()
 
-const config = useConfig()
+const config = useModel()
 
 const description = computed(() => tt(props.schema.meta.description))
 

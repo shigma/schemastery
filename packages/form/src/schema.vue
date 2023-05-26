@@ -42,7 +42,8 @@
 
 import { computed, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { clone, deepEqual, isNullable, Schema, useI18nText } from './utils'
+import { clone, deepEqual, isNullable } from 'cosmokit'
+import { Schema, useI18nText } from './utils'
 import form from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'

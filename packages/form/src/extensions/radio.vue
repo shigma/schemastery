@@ -20,7 +20,7 @@
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
-import { getChoices, Schema, useConfig, useI18nText } from '../utils'
+import { getChoices, Schema, useModel, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 
 defineProps({
@@ -35,6 +35,6 @@ defineEmits(['update:modelValue'])
 
 const tt = useI18nText()
 
-const config = useConfig()
+const config = useModel()
 
 </script>

@@ -1,103 +1,116 @@
 import { App, Component } from 'vue'
+import { useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
-import SchemaPrimitive from './primitive.vue'
-import Bitset from './extensions/bitset.vue'
-import Group from './extensions/group.vue'
-import Intersect from './extensions/intersect.vue'
-import Object from './extensions/object.vue'
-import Radio from './extensions/radio.vue'
-import Table from './extensions/table.vue'
-import Textarea from './extensions/textarea.vue'
-import Tuple from './extensions/tuple.vue'
-import Union from './extensions/union.vue'
-import Schema from './schema.vue'
+import Primitive from './primitive.vue'
+import SchemaBitset from './extensions/bitset.vue'
+import SchemaGroup from './extensions/group.vue'
+import SchemaIntersect from './extensions/intersect.vue'
+import SchemaObject from './extensions/object.vue'
+import SchemaRadio from './extensions/radio.vue'
+import SchemaTable from './extensions/table.vue'
+import SchemaTextarea from './extensions/textarea.vue'
+import SchemaTuple from './extensions/tuple.vue'
+import SchemaUnion from './extensions/union.vue'
+import KSchema from './schema.vue'
+import KForm from './form.vue'
 
-export { SchemaBase, SchemaPrimitive }
+export * from 'cosmokit'
+
+export { Primitive }
+export { Schema, useI18nText } from './utils'
 
 export * from './icons'
-export * from './utils'
 
-function form(app: App) {
-  app.component('k-schema', Schema)
+export const form = Object.assign(SchemaBase, {
+  useModel,
+  useEntries,
+  extensions: new Set(),
+  install(app: App) {
+    app.component('k-form', KForm)
+    app.component('k-schema', KSchema)
+  },
+}) as typeof SchemaBase & {
+  useModel: typeof useModel
+  useEntries: typeof useEntries
+  extensions: Set<form.Extension>
+  install: (app: App) => void
 }
 
-namespace form {
+export namespace form {
   export interface Extension {
     type: string
     role?: string
     validate?: (value: any, schema: any) => boolean
     component: Component
   }
-
-  export const extensions = new Set<Extension>()
-
-  extensions.add({
-    type: 'bitset',
-    component: Bitset,
-    validate: value => typeof value === 'number',
-  })
-
-  extensions.add({
-    type: 'array',
-    component: Group,
-    validate: value => Array.isArray(value),
-  })
-
-  extensions.add({
-    type: 'dict',
-    component: Group,
-    validate: value => typeof value === 'object',
-  })
-
-  extensions.add({
-    type: 'object',
-    component: Object,
-    validate: value => typeof value === 'object',
-  })
-
-  extensions.add({
-    type: 'intersect',
-    component: Intersect,
-    validate: value => typeof value === 'object',
-  })
-
-  extensions.add({
-    type: 'union',
-    role: 'radio',
-    component: Radio,
-  })
-
-  extensions.add({
-    type: 'array',
-    role: 'table',
-    component: Table,
-    validate: value => Array.isArray(value),
-  })
-
-  extensions.add({
-    type: 'dict',
-    role: 'table',
-    component: Table,
-    validate: value => typeof value === 'object',
-  })
-
-  extensions.add({
-    type: 'string',
-    role: 'textarea',
-    component: Textarea,
-    validate: value => typeof value === 'string',
-  })
-
-  extensions.add({
-    type: 'tuple',
-    component: Tuple,
-    validate: value => Array.isArray(value),
-  })
-
-  extensions.add({
-    type: 'union',
-    component: Union,
-  })
 }
+
+form.extensions.add({
+  type: 'bitset',
+  component: SchemaBitset,
+  validate: value => typeof value === 'number',
+})
+
+form.extensions.add({
+  type: 'array',
+  component: SchemaGroup,
+  validate: value => Array.isArray(value),
+})
+
+form.extensions.add({
+  type: 'dict',
+  component: SchemaGroup,
+  validate: value => typeof value === 'object',
+})
+
+form.extensions.add({
+  type: 'object',
+  component: SchemaObject,
+  validate: value => typeof value === 'object',
+})
+
+form.extensions.add({
+  type: 'intersect',
+  component: SchemaIntersect,
+  validate: value => typeof value === 'object',
+})
+
+form.extensions.add({
+  type: 'union',
+  role: 'radio',
+  component: SchemaRadio,
+})
+
+form.extensions.add({
+  type: 'array',
+  role: 'table',
+  component: SchemaTable,
+  validate: value => Array.isArray(value),
+})
+
+form.extensions.add({
+  type: 'dict',
+  role: 'table',
+  component: SchemaTable,
+  validate: value => typeof value === 'object',
+})
+
+form.extensions.add({
+  type: 'string',
+  role: 'textarea',
+  component: SchemaTextarea,
+  validate: value => typeof value === 'string',
+})
+
+form.extensions.add({
+  type: 'tuple',
+  component: SchemaTuple,
+  validate: value => Array.isArray(value),
+})
+
+form.extensions.add({
+  type: 'union',
+  component: SchemaUnion,
+})
 
 export default form

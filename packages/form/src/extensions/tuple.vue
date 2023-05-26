@@ -24,7 +24,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType } from 'vue'
-import { Schema, useConfig } from '../utils'
+import { Schema, useModel } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
 
@@ -38,7 +38,7 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
-const config = useConfig()
+const config = useModel()
 
 const valid = computed(() => {
   return props.schema.list.every(item => ['string', 'number', 'boolean'].includes(item.type))

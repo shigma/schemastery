@@ -4,7 +4,6 @@ import { getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
 
-export * from 'cosmokit'
 export { Schema }
 
 export function useI18nText() {
@@ -77,7 +76,7 @@ interface ConfigOptions<T> {
   output(value: T): any
 }
 
-export function useConfig<T = any>(options?: ConfigOptions<T>) {
+export function useModel<T = any>(options?: ConfigOptions<T>) {
   let stop: WatchStopHandle
   const config = ref<T>()
   const { props, emit } = getCurrentInstance() as any
@@ -106,7 +105,7 @@ export function useConfig<T = any>(options?: ConfigOptions<T>) {
 export function useEntries() {
   const { props } = getCurrentInstance() as any
 
-  const entries = useConfig<[string, any][]>({
+  const entries = useModel<[string, any][]>({
     strict: true,
     input: (config) => Object.entries(config),
     output: (config) => {
