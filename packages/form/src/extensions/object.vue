@@ -30,19 +30,15 @@
   </k-schema>
 </template>
 
-<script lang="ts">
-
-export default {
-  inheritAttrs: false,
-}
-
-</script>
-
 <script lang="ts" setup>
 
 import { PropType, computed } from 'vue'
 import { Schema, useConfig, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = defineProps({
   schema: {} as PropType<Schema>,

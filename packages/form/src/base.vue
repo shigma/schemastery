@@ -1,8 +1,8 @@
 <template>
   <div class="k-schema-item" v-bind="$attrs">
     <div class="actions"></div>
-    <div class="header">
-      <div class="left">
+    <div class="k-schema-main">
+      <div class="k-schema-left">
         <h3>
           <slot name="title"></slot>
           <el-dropdown
@@ -21,7 +21,7 @@
         </h3>
         <slot name="desc"></slot>
       </div>
-      <div class="right">
+      <div class="k-schema-right">
         <template v-if="!collapsed">
           <slot name="prefix"></slot>
           <slot name="control"></slot>
@@ -124,7 +124,7 @@ if (import.meta.hot) {
     background-color: var(--el-fill-color-light);
   }
 
-  .header {
+  .k-schema-main {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -154,7 +154,7 @@ if (import.meta.hot) {
     }
   }
 
-  .left {
+  .k-schema-left {
     .el-dropdown {
       margin-left: 0.5rem;
       margin-top: 2px;
@@ -168,7 +168,7 @@ if (import.meta.hot) {
     }
   }
 
-  .right {
+  .k-schema-right {
     display: flex;
     gap: 1rem;
     flex: 1;

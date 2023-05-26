@@ -112,7 +112,7 @@ if (import.meta.hot) {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: var(--fg3);
+      color: var(--k-text-light);
       transition: var(--color-transition);
       cursor: pointer;
     }
@@ -122,7 +122,7 @@ if (import.meta.hot) {
     }
 
     .inner:hover {
-      color: var(--fg1);
+      color: var(--k-text-dark);
     }
 
     .k-icon {

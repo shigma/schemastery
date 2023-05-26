@@ -11,7 +11,7 @@ export function useI18nText() {
   const composer = useI18n()
   const context: any = {}
   return (message: string | Dict<string>) => {
-    if (!message || typeof message === 'string') return message
+    if (!message || typeof message === 'string') return message as string
     const locales = fallbackWithLocaleChain(context, composer.fallbackLocale.value, composer.locale.value)
     for (const locale of locales) {
       if (locale in message) return message[locale]

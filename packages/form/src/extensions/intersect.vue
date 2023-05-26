@@ -16,18 +16,14 @@
   </k-schema>
 </template>
 
-<script lang="ts">
-
-export default {
-  inheritAttrs: false,
-}
-
-</script>
-
 <script lang="ts" setup>
 
 import { PropType } from 'vue'
 import { getChoices, Schema } from '../utils'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 defineProps({
   schema: {} as PropType<Schema>,

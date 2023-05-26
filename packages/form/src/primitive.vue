@@ -88,12 +88,12 @@ function onClickExternal(value: string) {
 .k-schema-item {
   .el-input {
     .k-icon {
-      color: var(--fg3);
+      color: var(--k-text-light);
       transition: var(--color-transition);
       cursor: pointer;
 
       &:hover {
-        color: var(--fg1);
+        color: var(--k-text-dark);
       }
     }
 
