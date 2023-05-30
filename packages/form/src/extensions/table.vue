@@ -6,18 +6,26 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="add()" :disabled="disabled">添加项目</el-button>
+      <el-button @click="add()" :disabled="disabled">{{ t('entry.add-row') }}</el-button>
     </template>
-    <div class="bottom k-schema-table-container">
-      <table class="k-schema-table" v-if="entries.length">
+    <div class="bottom k-schema-table-container" v-if="columns && entries.length">
+      <table class="k-schema-table">
+        <tr v-if="schema.type === 'dict' || columns[0][0] !== null">
+          <th v-if="schema.type === 'dict'">
+            {{ tt(schema.sKey?.meta.description) || t('entry.key') }}
+          </th>
+          <th v-for="([key, schema]) in columns" :key="key">
+            <span>{{ key === null ? t('entry.value') : tt(schema.meta.description) || key }}</span>
+          </th>
+          <th :colspan="3"></th>
+        </tr>
         <tr v-for="([key], index) in entries">
           <td
             v-if="schema.type === 'dict'"
             class="key"
             :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }"
             @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave"
-          >
+            @mouseleave="handleMouseLeave">
             <el-input
               v-model="entries[index][0]"
               :disabled="disabled"
@@ -26,37 +34,39 @@
             ></el-input>
           </td>
           <td
+            v-for="([key, schema]) in columns"
+            :key="key"
             @mouseenter="handleMouseEnter"
             @mouseleave="handleMouseLeave">
             <el-input
-              v-model="entries[index][1]"
+              :modelValue="key === null ? entries[index][1] : entries[index][1]?.[key]"
+              @update:modelValue="key === null ? entries[index][1] = $event : (entries[index][1] ||= {})[key] = $event"
               :disabled="disabled"
-              :type="schema.inner.type === 'number' ? 'number' : 'text'"
-              :max="schema.inner.meta.max"
-              :min="schema.inner.meta.min"
-              :step="schema.inner.meta.step"
+              :type="schema.type === 'number' ? 'number' : 'text'"
+              :max="schema.meta.max"
+              :min="schema.meta.min"
+              :step="schema.meta.step"
               @focus="handleFocus"
               @blur="handleBlur"
             ></el-input>
           </td>
-          <td class="button"
-            :class="{ disabled: disabled || !index }"
+          <td v-if="!disabled" class="button"
+            :class="{ disabled: !index }"
             @mouseenter="handleMouseEnter"
             @mouseleave="handleMouseLeave">
             <div class="inner" @click.stop="up(index)">
               <icon-arrow-up></icon-arrow-up>
             </div>
           </td>
-          <td class="button"
-            :class="{ disabled: disabled || index === entries.length - 1 }"
+          <td v-if="!disabled" class="button"
+            :class="{ disabled: index === entries.length - 1 }"
             @mouseenter="handleMouseEnter"
             @mouseleave="handleMouseLeave">
             <div class="inner" @click.stop="down(index)">
               <icon-arrow-down></icon-arrow-down>
             </div>
           </td>
-          <td class="button"
-            :class="{ disabled }"
+          <td v-if="!disabled" class="button"
             @mouseenter="handleMouseEnter"
             @mouseleave="handleMouseLeave">
             <div class="inner" @click.stop="del(index)">
@@ -83,15 +93,15 @@
 
 <script lang="ts" setup>
 
-import { ref, PropType } from 'vue'
+import { computed, ref, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconArrowUp, IconArrowDown, IconClose } from '../icons'
-import { Schema, useEntries } from '../utils'
+import { Schema, useEntries, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'
 
-defineProps({
+const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
@@ -100,6 +110,17 @@ defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const columns = computed<[string, Schema][]>(() => {
+  const { inner } = props.schema
+  if (['string', 'number', 'boolean'].includes(inner.type)) {
+    return [[null, inner]]
+  } else if (inner.type === 'tuple') {
+    return Object.entries(inner.list)
+  } else if (inner.type === 'object') {
+    return Object.entries(inner.dict)
+  }
+})
 
 const { entries, add, del, up, down } = useEntries()
 
@@ -127,6 +148,8 @@ function handleFocus(event: MouseEvent) {
 function handleBlur(event: MouseEvent) {
   focus.value = undefined
 }
+
+const tt = useI18nText()
 
 const { t, setLocaleMessage } = useI18n({
   messages: {
@@ -160,9 +183,17 @@ if (import.meta.hot) {
 }
 
 .k-schema-table {
+  td, th {
+    border: 1px solid var(--el-border-color);
+  }
+
+  th {
+    padding: 0.5rem 0;
+    line-height: 1rem;
+  }
+
   td {
     padding: 0;
-    border: 1px solid var(--el-border-color);
 
     &.invalid {
       background-color: var(--k-color-warning-fade);

@@ -4,7 +4,11 @@ default: Restore to Default
 collapse: Collapse
 expand: Expand to Edit
 entry:
-  add: Add Item
-  up: Move Up
-  down: Move Down
-  del: Delete Item
+  key: Key
+  value: Value
+  add-item: Add Item
+  del-item: Delete Item
+  add-row: Add Row
+  del-row: Delete Row
+  move-up: Move Up
+  move-down: Move Down

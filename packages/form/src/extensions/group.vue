@@ -6,7 +6,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="add()" :disabled="disabled">{{ t('entry.add') }}</el-button>
+      <el-button @click="add()" :disabled="disabled">{{ t('entry.add-item') }}</el-button>
     </template>
     <template #collapse>
       <k-schema
@@ -24,9 +24,9 @@
         }"
       >
         <template #menu>
-          <el-dropdown-item divided :disabled="!index" @click="up(index)">{{ t('entry.up') }}</el-dropdown-item>
-          <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">{{ t('entry.down') }}</el-dropdown-item>
-          <el-dropdown-item @click="del(index)">{{ t('entry.del') }}</el-dropdown-item>
+          <el-dropdown-item divided :disabled="!index" @click="up(index)">{{ t('entry.move-up') }}</el-dropdown-item>
+          <el-dropdown-item :disabled="index === entries.length - 1" @click="down(index)">{{ t('entry.move-down') }}</el-dropdown-item>
+          <el-dropdown-item @click="del(index)">{{ t('entry.del-item') }}</el-dropdown-item>
         </template>
         <template #title>
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
