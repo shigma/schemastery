@@ -78,6 +78,12 @@ if (import.meta.hot) {
 
 <style lang="scss">
 
+.k-form {
+  &:not(:first-child) {
+    margin-top: 2rem;
+  }
+}
+
 @media screen and (max-width: 480px) {
   .k-form {
     margin: 0 -1.5rem;
