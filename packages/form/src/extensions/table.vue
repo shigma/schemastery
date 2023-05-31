@@ -17,7 +17,7 @@
           <th v-for="([key, schema]) in columns" :key="key">
             <span>{{ key === null ? t('entry.value') : tt(schema.meta.description) || key }}</span>
           </th>
-          <th :colspan="3"></th>
+          <th colspan="3"></th>
         </tr>
         <tr v-for="([key], index) in entries">
           <td
@@ -36,19 +36,18 @@
           <td
             v-for="([key, schema]) in columns"
             :key="key"
+            :class="'k-schema-column-' + schema.type"
             @mouseenter="handleMouseEnter"
             @mouseleave="handleMouseLeave">
-            <el-input
+            <schema-primitive
+              minimal
+              :schema="schema"
+              :disabled="disabled"
               :modelValue="key === null ? entries[index][1] : entries[index][1]?.[key]"
               @update:modelValue="key === null ? entries[index][1] = $event : (entries[index][1] ||= {})[key] = $event"
-              :disabled="disabled"
-              :type="schema.type === 'number' ? 'number' : 'text'"
-              :max="schema.meta.max"
-              :min="schema.meta.min"
-              :step="schema.meta.step"
               @focus="handleFocus"
               @blur="handleBlur"
-            ></el-input>
+            ></schema-primitive>
           </td>
           <td v-if="!disabled" class="button"
             :class="{ disabled: !index }"
@@ -98,6 +97,7 @@ import { useI18n } from 'vue-i18n'
 import { IconArrowUp, IconArrowDown, IconClose } from '../icons'
 import { Schema, useEntries, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
+import SchemaPrimitive from '../primitive.vue'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'
 
@@ -111,14 +111,23 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
+function isPrimitive(schema: Schema): boolean {
+  if (['string', 'number', 'boolean'].includes(schema.type)) return true
+  if (schema.type === 'union') return schema.list.every(item => item.type === 'const')
+}
+
+function ensureColumns(entries: [string, Schema][]) {
+  if (entries.every(([, schema]) => isPrimitive(schema))) return entries
+}
+
 const columns = computed<[string, Schema][]>(() => {
   const { inner } = props.schema
-  if (['string', 'number', 'boolean'].includes(inner.type)) {
+  if (isPrimitive(inner)) {
     return [[null, inner]]
   } else if (inner.type === 'tuple') {
-    return Object.entries(inner.list)
+    return ensureColumns(Object.entries(inner.list))
   } else if (inner.type === 'object') {
-    return Object.entries(inner.dict)
+    return ensureColumns(Object.entries(inner.dict))
   }
 })
 
@@ -188,7 +197,7 @@ if (import.meta.hot) {
   }
 
   th {
-    padding: 0.5rem 0;
+    padding: 0.5rem 0.75rem;
     line-height: 1rem;
   }
 
@@ -199,9 +208,12 @@ if (import.meta.hot) {
       background-color: var(--k-color-warning-fade);
     }
 
-    .el-input__wrapper {
-      z-index: 1;
+    * .el-input__wrapper {
       box-shadow: none;
+    }
+
+    .el-select .el-input .el-input__wrapper {
+      box-shadow: none !important;
     }
   }
 
@@ -215,10 +227,6 @@ if (import.meta.hot) {
     &:hover {
       background-color: var(--k-button-hover-bg);
     }
-  }
-
-  td.key {
-    width: 30%;
   }
 
   td.button {
@@ -240,6 +248,15 @@ if (import.meta.hot) {
 
     .k-icon {
       height: 1rem;
+    }
+  }
+
+  .k-schema-column-number {
+    min-width: 8rem;
+    width: 10rem;
+
+    .el-input-number {
+      width: 100%;
     }
   }
 }

@@ -1,5 +1,8 @@
 <template>
-  <el-switch v-if="schema.type === 'boolean'" v-model="config" :class="{ nullable }" :disabled="disabled"></el-switch>
+  <template v-if="schema.type === 'boolean'">
+    <el-checkbox v-if="minimal" v-model="config" :class="{ nullable }" :disabled="disabled"></el-checkbox>
+    <el-switch v-else v-model="config" :class="{ nullable }" :disabled="disabled"></el-switch>
+  </template>
 
   <template v-else-if="schema.type === 'number'">
     <el-slider v-if="schema.meta.role === 'slider'" style="width: 200px"
@@ -7,15 +10,23 @@
     ></el-slider>
     <el-input-number v-else
       v-model="config" :disabled="disabled" :max="schema.meta.max" :min="schema.meta.min" :step="schema.meta.step"
+      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
     ></el-input-number>
   </template>
 
-  <template v-else>
+  <template v-else-if="schema.type === 'string'">
     <el-color-picker v-if="schema.meta.role === 'color'" v-model="config" show-alpha></el-color-picker>
-    <el-time-picker v-else-if="schema.meta.role === 'time'" v-model="date"></el-time-picker>
-    <el-date-picker v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"></el-date-picker>
+    <el-time-picker
+      v-else-if="schema.meta.role === 'time'" v-model="date"
+      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
+    ></el-time-picker>
+    <el-date-picker
+      v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"
+      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
+    ></el-date-picker>
     <el-input v-else v-model="config" :disabled="disabled" :class="{ nullable }"
-      :style="{ width: isLink ? '16rem' : '12rem' }" :type="type">
+      :style="{ width: minimal ? '100%' : isLink ? '16rem' : '12rem' }" :type="type"
+      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)">
       <template #prefix v-if="nullable"></template>
       <template #suffix v-if="isLink">
         <icon-external @click="onClickExternal(config)"></icon-external>
@@ -26,6 +37,22 @@
       </template>
     </el-input>
   </template>
+
+  <template v-else-if="schema.type === 'union'">
+    <el-select
+      v-model="selectModel"
+      filterable
+      :disabled="disabled"
+      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
+    >
+      <el-option
+        v-for="(item, index) in schema.list"
+        :key="index"
+        :value="index"
+        :label="tt(item.meta.description) || item.value"
+      ></el-option>
+    </el-select>
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -33,20 +60,23 @@
 import { computed, PropType, ref } from 'vue'
 import { IconExternal, IconEye, IconEyeSlash } from './icons'
 import { isNullable } from 'cosmokit'
-import { useModel } from './utils'
+import { useI18nText, useModel } from './utils'
 import Schema from 'schemastery'
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'focus', 'blur'])
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {},
   disabled: Boolean,
+  minimal: Boolean,
 })
 
 const showPass = ref(false)
 
 const config = useModel()
+
+const tt = useI18nText()
 
 const nullable = computed(() => isNullable(config.value))
 
@@ -74,6 +104,17 @@ const date = computed({
     } else if (props.schema.meta.role === 'time') {
       emit('update:modelValue', value.toLocaleTimeString())
     }
+  },
+})
+
+const selectModel = computed({
+  get() {
+    const item = props.schema.list.find(item => item.value === config.value)
+    if (!item) return
+    return tt(item.meta.description) || item.value
+  },
+  set(index) {
+    config.value = props.schema.list[index].value
   },
 })
 
