@@ -39,7 +39,7 @@ declare global {
       extend(type: string, resolve: Resolve): void
       any(): Schema<any>
       never(): Schema<never>
-      const<T>(value: T): Schema<T>
+      const<const T>(value: T): Schema<T>
       string(): Schema<string>
       number(): Schema<number>
       natural(): Schema<number>
@@ -85,6 +85,7 @@ namespace Schema {
     default?: T extends {} ? Partial<T> : T
     required?: boolean
     hidden?: boolean
+    loose?: boolean
     role?: string
     extra?: any
     link?: string
@@ -137,6 +138,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   toJSON(): Schema.Base<T>
   required(value?: boolean): Schema<S, T>
   hidden(value?: boolean): Schema<S, T>
+  loose(value?: boolean): Schema<S, T>
   role(text: string, extra?: any): Schema<S, T>
   link(link: string): Schema<S, T>
   default(value: T): Schema<S, T>
@@ -202,7 +204,7 @@ Schema.prototype.i18n = function i18n(messages) {
   return schema
 }
 
-for (const key of ['required', 'hidden']) {
+for (const key of ['required', 'hidden', 'loose']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value = true) {
       const schema = Schema(this)
@@ -297,8 +299,14 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   }
 
   const callback = resolvers[schema.type]
-  if (callback) return callback(data, schema, options, strict)
-  throw new TypeError(`unsupported type "${schema.type}"`)
+  if (!callback) throw new TypeError(`unsupported type "${schema.type}"`)
+
+  try {
+    return callback(data, schema, options, strict)
+  } catch (error) {
+    if (!schema.meta.loose) throw error
+    return [schema.meta.default]
+  }
 }
 
 Schema.from = function from(source: any) {

@@ -73,4 +73,14 @@ describe('Schema API', () => {
     // @ts-expect-error
     expect(() => config('1')).to.throw()
   })
+
+  it('loose', () => {
+    const config = Schema.object({
+      foo: Schema.union([1, 2, 3]).loose().default(1),
+      bar: Schema.union([1, 2, 3]),
+    })
+
+    expect(config({ foo: 0, bar: 2 })).to.deep.equal({ foo: 1, bar: 2 })
+    expect(() => config({ foo: 2, bar: 0 })).to.throw()
+  })
 })
