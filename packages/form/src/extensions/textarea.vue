@@ -8,10 +8,9 @@
     <div class="bottom">
       <el-input
         type="textarea"
+        v-model="config"
         :autosize="autosize"
         :disabled="disabled"
-        :modelValue="modelValue"
-        @update:modelValue="$emit('update:modelValue', $event)"
       ></el-input>
     </div>
   </schema-base>
@@ -20,7 +19,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType } from 'vue'
-import { Schema } from '../utils'
+import { Schema, useModel } from '../utils'
 import SchemaBase from '../base.vue'
 
 const props = defineProps({
@@ -32,6 +31,8 @@ const props = defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const config = useModel()
 
 const autosize = computed(() => {
   const { rows } = props.schema.meta.extra || {}

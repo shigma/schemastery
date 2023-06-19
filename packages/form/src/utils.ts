@@ -44,21 +44,23 @@ export function inferFallback(schema: Schema) {
 
 function optional(schema: Schema): Schema {
   if (schema.type === 'const') return schema
+  schema = new Schema(schema)
   if (schema.type === 'object') {
-    return Schema.object(valueMap(schema.dict, optional))
+    schema.dict = valueMap(schema.dict, optional)
   } else if (schema.type === 'tuple') {
-    return Schema.tuple(schema.list.map(optional))
+    schema.list = schema.list.map(optional)
   } else if (schema.type === 'intersect') {
-    return Schema.intersect(schema.list.map(optional))
+    schema.list = schema.list.map(optional)
   } else if (schema.type === 'union') {
-    return Schema.union(schema.list.map(optional))
+    schema.list = schema.list.map(optional)
   } else if (schema.type === 'dict') {
-    return Schema.dict(optional(schema.inner))
+    schema.inner = optional(schema.inner)
   } else if (schema.type === 'array') {
-    return Schema.array(optional(schema.inner))
+    schema.inner = optional(schema.inner)
   } else {
-    return Schema(schema).required(false)
+    schema.meta.required = false
   }
+  return schema
 }
 
 export function check(schema: any, value: any) {
