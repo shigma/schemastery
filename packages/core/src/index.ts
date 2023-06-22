@@ -385,7 +385,7 @@ function isMultipleOf(data: number, min: number, step: number) {
   const index = step.toString().indexOf('.')
   const digits = step.toString().slice(index + 1).length
   const multiple = Math.pow(10, digits)
-  return Math.abs(data * multiple - min * multiple) % (step * multiple) === 0
+  return Math.round(Math.abs(data * multiple - min * multiple)) % Math.round(step * multiple) === 0
 }
 
 Schema.extend('number', (data, { meta }) => {
