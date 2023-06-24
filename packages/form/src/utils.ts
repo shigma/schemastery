@@ -44,7 +44,7 @@ export function inferFallback(schema: Schema) {
 
 function optional(schema: Schema): Schema {
   if (schema.type === 'const') return schema
-  schema = new Schema(schema)
+  schema = new Schema(schema).required(false)
   if (schema.type === 'object') {
     schema.dict = valueMap(schema.dict, optional)
   } else if (schema.type === 'tuple') {
@@ -57,8 +57,6 @@ function optional(schema: Schema): Schema {
     schema.inner = optional(schema.inner)
   } else if (schema.type === 'array') {
     schema.inner = optional(schema.inner)
-  } else {
-    schema.meta.required = false
   }
   return schema
 }
