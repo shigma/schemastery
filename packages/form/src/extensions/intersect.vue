@@ -8,7 +8,7 @@
     :initial="initial"
     :disabled="disabled"
     :prefix="prefix"
-    :extra="{ foldable: false }"
+    :extra="{ foldable: false, ...extra }"
   >
     <template #title><slot name="title"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
