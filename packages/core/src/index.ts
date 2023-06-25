@@ -377,6 +377,17 @@ Schema.extend('string', (data, { meta }) => {
   return [data]
 })
 
+function decimalShift(data: number, digits: number) {
+  const str = data.toString()
+  if (str.includes('e')) return data * Math.pow(10, digits)
+  const index = str.indexOf('.')
+  if (index === -1) return data * Math.pow(10, digits)
+  const frac = str.slice(index + 1)
+  const integer = str.slice(0, index)
+  if (frac.length <= digits) return +(integer + frac.padEnd(digits, '0'))
+  return +(integer + frac.slice(0, digits) + '.' + frac.slice(digits))
+}
+
 function isMultipleOf(data: number, min: number, step: number) {
   step = Math.abs(step)
   if (!/^\d+\.\d+$/.test(step.toString())) {
@@ -384,8 +395,7 @@ function isMultipleOf(data: number, min: number, step: number) {
   }
   const index = step.toString().indexOf('.')
   const digits = step.toString().slice(index + 1).length
-  const multiple = Math.pow(10, digits)
-  return Math.abs(data * multiple - min * multiple) % (step * multiple) === 0
+  return Math.abs(decimalShift(data, digits) - decimalShift(min, digits)) % decimalShift(step, digits) === 0
 }
 
 Schema.extend('number', (data, { meta }) => {

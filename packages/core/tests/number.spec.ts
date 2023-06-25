@@ -24,4 +24,10 @@ describe('Number', () => {
     expect(() => config(0.5)).to.throw()
     expect(() => config(2.718)).to.throw()
   })
+
+  it('number (decimal)', () => {
+    // https://github.com/shigma/schemastery/issues/44
+    const config = Schema.number().min(-1).max(0).step(0.01)
+    expect(config(-0.55)).to.equal(-0.55)
+  })
 })
