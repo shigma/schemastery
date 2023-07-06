@@ -8,7 +8,7 @@
     <template #control>
       <el-button @click="add()" :disabled="disabled">{{ t('entry.add-row') }}</el-button>
     </template>
-    <div class="bottom k-schema-table-container" v-if="columns && entries.length">
+    <div class="bottom k-schema-table-container" ref="container" v-if="columns && entries.length">
       <table class="k-schema-table">
         <tr v-if="schema.type === 'dict' || columns[0][0] !== null">
           <th v-if="schema.type === 'dict'">
@@ -19,56 +19,64 @@
           </th>
           <th colspan="3"></th>
         </tr>
-        <tr v-for="([key], index) in entries">
+        <tr v-for="(_, i) in entries">
           <td
             v-if="schema.type === 'dict'"
             class="key"
-            :class="{ invalid: entries.filter(e => e[0] === key).length > 1 }"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
+            @mouseenter="handleMouseEnter($event, i, -1)"
+            @mouseleave="handleMouseLeave($event, i, -1)">
             <el-input
-              v-model="entries[index][0]"
+              v-model="entries[i][0]"
               :disabled="disabled"
-              @focus="handleFocus"
-              @blur="handleBlur"
-            ></el-input>
+              @focus="handleFocus($event, i, -1)"
+              @blur="handleBlur($event, i, -1)"
+              #suffix
+            >
+              <template v-if="validateCell(i, -1)">
+                <el-tooltip :content="t(...validateCell(i, -1))">
+                  <span class="suffix-icon">
+                    <icon-invalid class="invalid"></icon-invalid>
+                  </span>
+                </el-tooltip>
+              </template>
+            </el-input>
           </td>
           <td
-            v-for="([key, schema]) in columns"
+            v-for="([key, schema], j) in columns"
             :key="key"
             :class="'k-schema-column-' + schema.type"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
+            @mouseenter="handleMouseEnter($event, i, j)"
+            @mouseleave="handleMouseLeave($event, i, j)">
             <schema-primitive
               minimal
               :schema="schema"
               :disabled="disabled"
-              :modelValue="key === null ? entries[index][1] : entries[index][1]?.[key]"
-              @update:modelValue="key === null ? entries[index][1] = $event : (entries[index][1] ||= {})[key] = $event"
-              @focus="handleFocus"
-              @blur="handleBlur"
+              :modelValue="key === null ? entries[i][1] : entries[i][1]?.[key]"
+              @update:modelValue="key === null ? entries[i][1] = $event : (entries[i][1] ||= {})[key] = $event"
+              @focus="handleFocus($event, i, j)"
+              @blur="handleBlur($event, i, j)"
             ></schema-primitive>
           </td>
           <td v-if="!disabled" class="button"
-            :class="{ disabled: !index }"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
-            <div class="inner" @click.stop="up(index)">
+            :class="{ disabled: !i }"
+            @mouseenter="handleMouseEnter($event, null)"
+            @mouseleave="handleMouseLeave($event, null)">
+            <div class="inner" @click.stop="up(i)">
               <icon-arrow-up></icon-arrow-up>
             </div>
           </td>
           <td v-if="!disabled" class="button"
-            :class="{ disabled: index === entries.length - 1 }"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
-            <div class="inner" @click.stop="down(index)">
+            :class="{ disabled: i === entries.length - 1 }"
+            @mouseenter="handleMouseEnter($event, null)"
+            @mouseleave="handleMouseLeave($event, null)">
+            <div class="inner" @click.stop="down(i)">
               <icon-arrow-down></icon-arrow-down>
             </div>
           </td>
           <td v-if="!disabled" class="button"
-            @mouseenter="handleMouseEnter"
-            @mouseleave="handleMouseLeave">
-            <div class="inner" @click.stop="del(index)">
+            @mouseenter="handleMouseEnter($event, null)"
+            @mouseleave="handleMouseLeave($event, null)">
+            <div class="inner" @click.stop="del(i)">
               <icon-close></icon-close>
             </div>
           </td>
@@ -77,7 +85,7 @@
       <template v-for="rect in { hover, focus }">
         <div
           v-if="rect"
-          class="outline"
+          :class="['outline', { invalid: rect.invalid }]"
           :style="{
             top: rect.top + 'px',
             left: rect.left + 'px',
@@ -94,8 +102,8 @@
 
 import { computed, ref, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconArrowUp, IconArrowDown, IconClose } from '../icons'
-import { Schema, useEntries, useI18nText } from '../utils'
+import { IconArrowUp, IconArrowDown, IconClose, IconInvalid } from '../icons'
+import { Schema, useEntries, useI18nText, explain } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
 import zhCN from '../locales/zh-CN.yml'
@@ -133,28 +141,62 @@ const columns = computed<[string, Schema][]>(() => {
 
 const { entries, add, del, up, down } = useEntries()
 
-const hover = ref<DOMRect>()
-const focus = ref<DOMRect>()
-
-function handleMouseEnter(event: MouseEvent) {
-  const el = event.target as HTMLElement
-  hover.value = el.getBoundingClientRect()
+interface Rect {
+  el: HTMLElement
+  top: number
+  left: number
+  width: number
+  height: number
+  invalid: boolean
 }
 
-function handleMouseLeave(event: MouseEvent) {
+const container = ref<HTMLElement>()
+const hover = ref<Rect>()
+const focus = ref<Rect>()
+
+function getRelative(el: HTMLElement, invalid: any) {
+  const target = el.getBoundingClientRect()
+  const reference = container.value.getBoundingClientRect()
+  return {
+    el,
+    invalid: !!invalid,
+    top: target.top - reference.top,
+    left: target.left - reference.left,
+    width: target.width,
+    height: target.height,
+  }
+}
+
+function validateCell(i?: number, j?: number) {
+  if (i === null) return
+  if (j >= 0) return explain(columns.value[j][1], entries.value[i][1])
+  const result = explain(props.schema.sKey, entries.value[i][0])
+  if (result) return result
+  if (j === -1 && entries.value.filter(([key]) => key === entries.value[i][0]).length > 1) {
+    return ['errors.duplicate-key'] as const
+  }
+}
+
+function handleMouseEnter(event: MouseEvent, i?: number, j?: number) {
+  const el = event.target as HTMLElement
+  if (el === hover.value?.el) return
+  hover.value = getRelative(el, validateCell(i, j))
+}
+
+function handleMouseLeave(event: MouseEvent, i?: number, j?: number) {
   hover.value = undefined
 }
 
-function handleFocus(event: MouseEvent) {
+function handleFocus(event: MouseEvent, i?: number, j?: number) {
   let el = event.target as HTMLElement
   while (el && el.tagName !== 'TD') {
     el = el.parentElement
   }
-  if (!el) return
-  focus.value = el.getBoundingClientRect()
+  if (!el || el === focus.value?.el) return
+  focus.value = getRelative(el, validateCell(i, j))
 }
 
-function handleBlur(event: MouseEvent) {
+function handleBlur(event: MouseEvent, i?: number, j?: number) {
   focus.value = undefined
 }
 
@@ -184,10 +226,14 @@ if (import.meta.hot) {
   position: relative;
 
   .outline {
-    position: fixed;
+    position: absolute;
     box-sizing: border-box;
     border: 1px solid var(--k-color-active);
     pointer-events: none;
+
+    &.invalid {
+      border-color: var(--k-color-danger);
+    }
   }
 }
 
@@ -203,10 +249,6 @@ if (import.meta.hot) {
 
   td {
     padding: 0;
-
-    &.invalid {
-      background-color: var(--k-color-warning-fade);
-    }
 
     * .el-input__wrapper {
       box-shadow: none;

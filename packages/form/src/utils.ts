@@ -1,5 +1,5 @@
 import Schema from 'schemastery'
-import { clone, deepEqual, Dict, valueMap } from 'cosmokit'
+import { clone, deepEqual, Dict, isNullable, valueMap } from 'cosmokit'
 import { getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
@@ -67,6 +67,18 @@ export function check(schema: any, value: any) {
     return true
   } catch {
     return false
+  }
+}
+
+export function explain(schema: Schema, value: any): readonly [string, any[]?] {
+  if (isNullable(value)) return
+  if (schema.type !== 'string') return
+  if (schema.meta.pattern) {
+    const { source, flags } = schema.meta.pattern
+    const regexp = new RegExp(source, flags)
+    if (!regexp.test(value)) {
+      return ['errors.regexp-not-matched', [regexp.toString()]]
+    }
   }
 }
 
