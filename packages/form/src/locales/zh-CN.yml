@@ -12,3 +12,6 @@ entry:
   del-row: 删除行
   move-up: 上移
   move-down: 下移
+errors:
+  duplicate-key: 键名重复
+  regexp-not-matched: 未能匹配正则表达式 {0}
