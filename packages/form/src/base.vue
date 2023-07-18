@@ -28,8 +28,8 @@
           <slot name="suffix"></slot>
         </template>
         <template v-if="$slots.collapse">
-          <el-button v-if="!collapsed" @click="collapsed = true" :disabled="disabled">{{ t('collapse') }}</el-button>
-          <el-button v-else @click="collapsed = false" :disabled="disabled">{{ t('expand') }}</el-button>
+          <el-button v-if="!collapsed" @click="collapsed = true">{{ t('collapse') }}</el-button>
+          <el-button v-else @click="collapsed = false">{{ t('expand') }}</el-button>
         </template>
       </div>
     </div>

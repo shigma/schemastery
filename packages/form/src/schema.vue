@@ -16,8 +16,8 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
-      <el-dropdown-item @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</el-dropdown-item>
-      <el-dropdown-item @click="$emit('update:modelValue', null)">{{ t('default') }}</el-dropdown-item>
+      <el-dropdown-item :disabled="!disabled" @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</el-dropdown-item>
+      <el-dropdown-item :disabled="!disabled" @click="$emit('update:modelValue', null)">{{ t('default') }}</el-dropdown-item>
       <slot name="menu"></slot>
     </template>
     <template #desc>
@@ -63,6 +63,10 @@ const props = defineProps({
 defineEmits(['update:modelValue'])
 
 const tt = useI18nText()
+
+const disabled = computed(() => {
+  return props.disabled || props.schema?.meta.disabled
+})
 
 const isPrimitive = computed(() => {
   return ['string', 'number', 'boolean'].includes(props.schema?.type)

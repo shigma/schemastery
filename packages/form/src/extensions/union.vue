@@ -27,6 +27,7 @@
           v-for="(item, index) in choices"
           :key="index"
           :value="index"
+          :disabled="item.meta.disabled"
           :label="tt(item.meta.description) || item.value"
         ></el-option>
       </el-select>

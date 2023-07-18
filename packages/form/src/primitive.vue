@@ -15,16 +15,23 @@
   </template>
 
   <template v-else-if="schema.type === 'string'">
-    <el-color-picker v-if="schema.meta.role === 'color'" v-model="config" show-alpha></el-color-picker>
+    <el-color-picker
+      v-if="schema.meta.role === 'color'"
+      :disabled="disabled" v-model="config" show-alpha
+    ></el-color-picker>
     <el-time-picker
-      v-else-if="schema.meta.role === 'time'" v-model="date"
+      v-else-if="schema.meta.role === 'time'"
+      :disabled="disabled" v-model="date"
       @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
     ></el-time-picker>
     <el-date-picker
-      v-else-if="['date', 'datetime'].includes(schema.meta.role)" :type="schema.meta.role" v-model="date"
+      v-else-if="['date', 'datetime'].includes(schema.meta.role)"
+      :disabled="disabled" :type="schema.meta.role" v-model="date"
       @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
     ></el-date-picker>
-    <el-input v-else v-model="config" :disabled="disabled" :class="{ minimal, nullable, invalid }"
+    <el-input
+      v-else
+      v-model="config" :disabled="disabled" :class="{ minimal, nullable, invalid }"
       :style="{ width: minimal ? '100%' : isLink ? '16rem' : '12rem' }" :type="type"
       @focus="$emit('focus', $event)" @blur="$emit('blur', $event)">
       <template #prefix v-if="nullable"></template>
@@ -50,12 +57,14 @@
       v-model="selectModel"
       filterable
       :disabled="disabled"
-      @focus="$emit('focus', $event)" @blur="$emit('blur', $event)"
+      @focus="$emit('focus', $event)"
+      @blur="$emit('blur', $event)"
     >
       <el-option
         v-for="(item, index) in schema.list"
         :key="index"
         :value="index"
+        :disabled="item.meta.disabled"
         :label="tt(item.meta.description) || item.value"
       ></el-option>
     </el-select>
@@ -192,8 +201,10 @@ if (import.meta.hot) {
       padding-right: 9px;
     }
 
-    &:not(.minimal).invalid .el-input__wrapper {
-      box-shadow: 0 0 0 1px var(--k-color-danger) inset;
+    &:not(.minimal).invalid {
+      .el-input__wrapper:hover, .el-input__wrapper.is-focus {
+        box-shadow: 0 0 0 1px var(--k-color-danger) inset;
+      }
     }
   }
 

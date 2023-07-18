@@ -1,6 +1,6 @@
 import Schema from 'schemastery'
 import { clone, deepEqual, Dict, isNullable, valueMap } from 'cosmokit'
-import { getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
+import { computed, getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
 
@@ -80,6 +80,11 @@ export function explain(schema: Schema, value: any): readonly [string, any[]?] {
       return ['errors.regexp-not-matched', [regexp.toString()]]
     }
   }
+}
+
+export function useDisabled() {
+  const { props } = getCurrentInstance() as any
+  return computed(() => props.disabled || props.schema?.meta?.disabled)
 }
 
 interface ConfigOptions<T> {

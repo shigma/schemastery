@@ -84,6 +84,7 @@ namespace Schema {
   export interface Meta<T = any> {
     default?: T extends {} ? Partial<T> : T
     required?: boolean
+    disabled?: boolean
     hidden?: boolean
     loose?: boolean
     role?: string
@@ -229,7 +230,7 @@ Schema.prototype.i18n = function i18n(messages) {
   return schema
 }
 
-for (const key of ['required', 'hidden', 'loose']) {
+for (const key of ['required', 'disabled', 'hidden', 'loose']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value = true) {
       const schema = Schema(this)

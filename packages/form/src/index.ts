@@ -1,5 +1,5 @@
 import { App, Component } from 'vue'
-import { useEntries, useModel } from './utils'
+import { useDisabled, useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
 import Primitive from './primitive.vue'
 import SchemaBitset from './extensions/bitset.vue'
@@ -24,6 +24,7 @@ export * from './icons'
 export const form = Object.assign(SchemaBase, {
   useModel,
   useEntries,
+  useDisabled,
   extensions: new Set(),
   install(app: App) {
     app.component('k-form', KForm)
@@ -32,6 +33,7 @@ export const form = Object.assign(SchemaBase, {
 }) as typeof SchemaBase & {
   useModel: typeof useModel
   useEntries: typeof useEntries
+  useDisabled: typeof useDisabled
   extensions: Set<form.Extension>
   install: (app: App) => void
 }

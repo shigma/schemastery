@@ -9,7 +9,7 @@
       <li v-for="item in getChoices(schema)" :key="item.value">
         <el-radio
           :label="item.value"
-          :disabled="disabled"
+          :disabled="disabled || item.meta.disabled"
           v-model="config"
         >{{ tt(item.meta.description) || item.value }}</el-radio>
       </li>
