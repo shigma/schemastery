@@ -183,23 +183,48 @@ Schema.prototype.push = function push(value) {
   return this
 }
 
+function mergeDesc(original: undefined | string | Dict<string>, messages: Dict) {
+  const result: Dict<string> = typeof original === 'string' ? { '': original } : { ...original }
+  for (const locale in messages) {
+    const value = messages[locale]
+    if (value?.$description) {
+      result[locale] = value.$description
+    } else if (typeof value === 'string') {
+      result[locale] = value
+    }
+  }
+  return result
+}
+
+function extractKeys(data: any) {
+  return Object.fromEntries(Object.entries(data ?? {}).filter(([key]) => !key.startsWith('$')))
+}
+
 Schema.prototype.i18n = function i18n(messages) {
   const schema = Schema(this)
-  schema.meta.description = valueMap(messages, (data) => {
-    if (!data || typeof data === 'string') return data
-    return data.$description
-  })
+  schema.meta.description = mergeDesc(schema.meta.description, messages)
   if (schema.dict) {
-    for (const key in schema.dict!) {
-      schema.dict[key] = schema.dict[key]!.i18n(valueMap(messages, (data) => data?.[key]))
-    }
-  } else if (schema.list) {
-    schema.list = schema.list!.map((item, index) => {
-      return item.i18n(valueMap(messages, (data) => {
-        if (!data) return data
-        return data[index] ?? Object.fromEntries(Object.entries(data).filter(([key]) => !key.startsWith('$')))
+    schema.dict = valueMap(schema.dict, (inner, key) => {
+      return inner.i18n(valueMap(messages, (data) => data?.$value?.[key] ?? data?.[key]))
+    })
+  }
+  if (schema.list) {
+    schema.list = schema.list!.map((inner, index) => {
+      return inner.i18n(valueMap(messages, (data = {}) => {
+        if (Array.isArray(data?.$value)) return data.$value[index]
+        if (Array.isArray(data)) return data[index]
+        return extractKeys(data)
       }))
     })
+  }
+  if (schema.inner) {
+    schema.inner = schema.inner.i18n(valueMap(messages, (data) => {
+      if (data?.$value) return data.$value
+      return extractKeys(data)
+    }))
+  }
+  if (schema.sKey) {
+    schema.sKey = schema.sKey.i18n(valueMap(messages, (data) => data?.$key))
   }
   return schema
 }
@@ -279,7 +304,7 @@ for (const key of ['default', 'link', 'comment', 'description', 'max', 'min', 's
 
 const resolvers: Dict<Schemastery.Resolve> = {}
 
-Schema.extend = function extend(type: string, resolve) {
+Schema.extend = function extend(type, resolve) {
   resolvers[type] = resolve
 }
 
