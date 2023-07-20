@@ -145,6 +145,7 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   default(value: T): Schema<S, T>
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
+  disabled(): Schema<S, T>
   pattern(regexp: RegExp): Schema<S, T>
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
