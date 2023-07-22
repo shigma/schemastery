@@ -1,7 +1,7 @@
 {
   "name": "schemastery",
   "description": "Type driven schema validator",
-  "version": "3.10.2",
+  "version": "3.11.1",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "typings": "lib/index.d.ts",
@@ -20,6 +20,6 @@
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "cosmokit": "^1.4.2"
+    "cosmokit": "^1.4.3"
   }
 }
