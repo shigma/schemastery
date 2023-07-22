@@ -208,6 +208,10 @@ if (import.meta.hot) {
     }
   }
 
+  .el-input-number .el-input__wrapper {
+    padding-right: 42px;
+  }
+
   .el-switch.nullable {
     .el-switch__core {
       background-color: transparent;
