@@ -1,7 +1,7 @@
 <template>
   <form class="k-form">
     <slot name="prolog"></slot>
-    <h2 class="k-schema-header" v-if="showHeader || !hasTitle(resolved)">
+    <h2 class="k-schema-header" v-if="showHeader || !hasTitle(resolved)[0]">
       <slot name="title">{{ t('title') }}</slot>
     </h2>
     <k-schema
@@ -34,20 +34,30 @@ const resolved = computed(() => {
   return props.schema && new Schema(props.schema)
 })
 
-function hasTitle(schema: Schema): boolean {
-  if (!schema) return true
+function hasTitleInList(list: Schema[]): [isTitled: boolean, isEmpty: boolean] {
+  for (const item of list) {
+    const [isTitled, isEmpty] = hasTitle(item)
+    if (!isTitled) return [false, false]
+    if (!isEmpty) return [true, false]
+  }
+  return [true, true]
+}
+
+function hasTitle(schema: Schema): [isTitled: boolean, isEmpty: boolean] {
+  if (!schema) return [true, true]
+  if (schema.meta.hidden) return [true, true]
   if (schema.type === 'object') {
-    if (schema.meta.description) return true
-    const entries = Object.entries(schema.dict).filter(([, value]) => !value.meta.hidden)
-    if (!entries.length) return true
-    return hasTitle(schema.dict[entries[0][0]])
+    if (schema.meta.description) return [true, false]
+    return hasTitleInList(Object.entries(schema.dict)
+      .filter(([, value]) => !value.meta.hidden)
+      .map(([, value]) => value))
   } else if (schema.type === 'intersect') {
-    return hasTitle(schema.list[0])
+    return hasTitleInList(schema.list)
   } else if (schema.type === 'union') {
     const choices = getChoices(schema)
-    return choices.length === 1 ? hasTitle(choices[0]) : false
+    return choices.length === 1 ? hasTitle(choices[0]) : [false, false]
   } else {
-    return false
+    return [false, false]
   }
 }
 
