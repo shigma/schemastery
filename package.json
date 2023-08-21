@@ -36,7 +36,7 @@
     "serve": "^13.0.4",
     "shx": "^0.3.4",
     "typescript": "^5.1.6",
-    "vitepress": "1.0.0-alpha.73",
+    "vitepress": "1.0.0-beta.7",
     "yakumo": "^0.3.13",
     "yakumo-esbuild": "^0.3.25",
     "yakumo-mocha": "^0.3.1",
