@@ -14,9 +14,8 @@
           <slot name="control"></slot>
           <slot name="suffix"></slot>
         </template>
-        <template v-if="$slots.collapse">
-          <el-button v-if="!collapsed" @click="collapsed = true">{{ t('collapse') }}</el-button>
-          <el-button v-else @click="collapsed = false">{{ t('expand') }}</el-button>
+        <template v-if="collapsible">
+          <el-button v-if="collapsed" @click="collapsed = false">{{ t('expand') }}</el-button>
         </template>
         <el-tooltip ref="tooltip" placement="bottom-end" popper-class="k-menu" effect="light">
           <el-button class="ellipsis">
@@ -25,6 +24,10 @@
           <template #content>
             <div @click="tooltip.hide()">
               <slot name="menu"></slot>
+              <template v-if="collapsible && !collapsed">
+                <div class="k-menu-separator"></div>
+                <div class="k-menu-item" @click="collapsed = true">{{ t('collapse') }}</div>
+              </template>
             </div>
           </template>
         </el-tooltip>
@@ -32,8 +35,10 @@
     </div>
     <slot></slot>
   </div>
-  <el-collapse-transition v-if="$slots.collapse">
-    <div class="k-schema-group" v-show="!collapsed">
+
+  <slot name="collapse" v-if="!collapsible"></slot>
+  <el-collapse-transition v-else>
+    <div class="k-schema-group" :class="{ collapsed }" v-show="!collapsed">
       <slot name="collapse"></slot>
     </div>
   </el-collapse-transition>
@@ -48,18 +53,19 @@ import { IconEllipsis } from './icons'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 
-defineProps({
+const props = defineProps({
   schema: {} as PropType<Schema>,
   modelValue: {} as PropType<{}>,
   disabled: {} as PropType<boolean>,
   prefix: {} as PropType<string>,
   initial: {} as PropType<{}>,
   extra: {} as PropType<any>,
+  collapsible: {} as PropType<{ initial: boolean }>,
 })
 
 defineEmits(['update:modelValue', 'visible-change'])
 
-const collapsed = ref(false)
+const collapsed = ref(props.collapsible?.initial)
 const tooltip = ref(null)
 
 const { t, setLocaleMessage } = useI18n({
@@ -230,7 +236,6 @@ if (import.meta.hot) {
 
 .k-schema-group {
   position: relative;
-  border-bottom: 1px solid var(--el-border-color-light);
 
   &:empty {
     border-bottom: none;
@@ -238,10 +243,6 @@ if (import.meta.hot) {
 
   > :first-child {
     border-top: none;
-  }
-
-  > :last-child {
-    border-bottom: none;
   }
 }
 
