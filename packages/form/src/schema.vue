@@ -16,8 +16,8 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
-      <el-dropdown-item :disabled="disabled" @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</el-dropdown-item>
-      <el-dropdown-item :disabled="disabled" @click="$emit('update:modelValue', null)">{{ t('default') }}</el-dropdown-item>
+      <div class="k-menu-item" :disabled="disabled" @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</div>
+      <div class="k-menu-item" :disabled="disabled" @click="$emit('update:modelValue', null)">{{ t('default') }}</div>
       <slot name="menu"></slot>
     </template>
     <template #desc>

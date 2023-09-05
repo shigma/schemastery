@@ -14,6 +14,8 @@ import SchemaUnion from './extensions/union.vue'
 import KSchema from './schema.vue'
 import KForm from './form.vue'
 
+import './styles/menu.scss'
+
 export * from 'cosmokit'
 
 export { Primitive }

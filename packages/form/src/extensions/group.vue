@@ -24,9 +24,10 @@
         }"
       >
         <template #menu>
-          <el-dropdown-item divided :disabled="disabled || !index" @click="up(index)">{{ t('entry.move-up') }}</el-dropdown-item>
-          <el-dropdown-item :disabled="disabled || index === entries.length - 1" @click="down(index)">{{ t('entry.move-down') }}</el-dropdown-item>
-          <el-dropdown-item :disabled="disabled" @click="del(index)">{{ t('entry.del-item') }}</el-dropdown-item>
+          <div class="k-menu-separator"></div>
+          <div class="k-menu-item" :disabled="disabled || !index" @click="up(index)">{{ t('entry.move-up') }}</div>
+          <div class="k-menu-item" :disabled="disabled || index === entries.length - 1" @click="down(index)">{{ t('entry.move-down') }}</div>
+          <div class="k-menu-item" :disabled="disabled" @click="del(index)">{{ t('entry.del-item') }}</div>
         </template>
         <template #title>
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>

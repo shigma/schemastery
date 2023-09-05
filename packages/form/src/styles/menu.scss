@@ -1,0 +1,45 @@
+$menu-padding-x: 0.375rem;
+$menu-padding-y: 0.375rem;
+
+// override el-popper styles
+.k-menu, .k-menu.el-popper.is-light {
+  position: absolute;
+  z-index: 1000;
+  min-width: 12rem;
+  padding: $menu-padding-y 0;
+  border-radius: 6px;
+  background-color: var(--el-bg-color-overlay);
+  box-shadow: var(--k-menu-shadow);
+  font-size: 14px;
+}
+
+.k-menu-separator {
+  margin: $menu-padding-y 0;
+  border-top: 1px solid var(--el-border-color-light);
+
+  &:first-child, &:last-child {
+    display: none;
+  }
+
+  & + & {
+    display: none;
+  }
+}
+
+.k-menu-item {
+  user-select: none;
+  margin: 0 $menu-padding-x;
+  padding: 0.375rem 1.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--color-transition);
+
+  &.disabled {
+    color: var(--k-text-light);
+    pointer-events: none;
+  }
+
+  &:not(.disabled):hover {
+    background-color: var(--k-hover-bg);
+  }
+}

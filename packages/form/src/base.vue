@@ -5,19 +5,6 @@
       <div class="k-schema-left">
         <h3>
           <slot name="title"></slot>
-          <el-dropdown
-            v-if="!disabled"
-            placement="bottom"
-            @visible-change="$emit('visible-change', $event)">
-            <svg class="trigger" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-              <path fill="currentColor" d="m192 384 320 384 320-384z"></path>
-            </svg>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <slot name="menu"></slot>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
         </h3>
         <slot name="desc"></slot>
       </div>
@@ -31,6 +18,16 @@
           <el-button v-if="!collapsed" @click="collapsed = true">{{ t('collapse') }}</el-button>
           <el-button v-else @click="collapsed = false">{{ t('expand') }}</el-button>
         </template>
+        <el-tooltip ref="tooltip" placement="bottom-end" popper-class="k-menu" effect="light">
+          <el-button class="ellipsis">
+            <icon-ellipsis></icon-ellipsis>
+          </el-button>
+          <template #content>
+            <div @click="tooltip.hide()">
+              <slot name="menu"></slot>
+            </div>
+          </template>
+        </el-tooltip>
       </div>
     </div>
     <slot></slot>
@@ -47,6 +44,7 @@
 import { PropType, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Schema } from './utils'
+import { IconEllipsis } from './icons'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 
@@ -62,6 +60,7 @@ defineProps({
 defineEmits(['update:modelValue', 'visible-change'])
 
 const collapsed = ref(false)
+const tooltip = ref(null)
 
 const { t, setLocaleMessage } = useI18n({
   messages: {
@@ -173,6 +172,14 @@ if (import.meta.hot) {
     gap: 1rem;
     flex: 1;
     justify-content: flex-end;
+
+    .el-button.ellipsis {
+      padding: 8px 10px;
+
+      .k-icon {
+        width: 12px;
+      }
+    }
   }
 
   .bottom {
