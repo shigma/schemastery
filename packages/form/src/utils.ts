@@ -44,6 +44,7 @@ export function inferFallback(schema: Schema) {
 
 function optional(schema: Schema): Schema {
   if (schema.type === 'const') return schema
+  if (schema.type === 'transform') return optional(schema.inner)
   schema = new Schema(schema).required(false)
   if (schema.type === 'object') {
     schema.dict = valueMap(schema.dict, optional)

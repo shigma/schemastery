@@ -125,6 +125,12 @@ const Schema = function (options: Schema.Base) {
   }
 
   Object.assign(schema, options)
+  if (typeof schema.callback === 'string') {
+    try {
+      // eslint-disable-next-line no-new-func
+      schema.callback = new Function('return ' + schema.callback)()
+    } catch {}
+  }
   Object.defineProperty(schema, 'uid', { value: globalThis.__schemastery_index__++ })
   Object.setPrototypeOf(schema, Schema.prototype)
   schema.meta ||= {}
@@ -595,6 +601,11 @@ function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatt
               if (typeof args[index][key] !== 'number') continue
               schema.bits[key] = args[index][key]
             }
+            break
+          }
+          case 'callback': {
+            schema.callback = args[index]
+            ;(schema.callback as any)['toJSON'] ||= () => schema.callback!.toString()
             break
           }
           default: schema[key] = args[index] as never

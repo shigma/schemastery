@@ -80,10 +80,28 @@ watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
   config.value = value
   value ??= schema.meta.default
   active.value = null
-  for (const item of choices.value) {
-    if (!check(item, value)) continue
-    active.value = item
-    break
+  let hasTransform = true, depth = 0
+  while (!active.value && hasTransform && ++depth < 10) {
+    hasTransform = false
+    for (const item of schema.list) {
+      if (item.meta.hidden) continue
+      if (!check(item, value)) continue
+      if (item.type === 'transform') {
+        if (!item.callback) continue
+        try {
+          value = item.callback(value)
+        } catch (error) {
+          console.error(error)
+          continue
+        }
+        hasTransform = true
+        config.value = value
+        value ??= schema.meta.default
+      } else {
+        active.value = item
+      }
+      break
+    }
   }
   stop = doWatch()
 }, { immediate: true, deep: true })
