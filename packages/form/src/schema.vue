@@ -16,8 +16,14 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
-      <div class="k-menu-item" :disabled="disabled" @click="$emit('update:modelValue', clone(initial))">{{ t('initial') }}</div>
-      <div class="k-menu-item" :disabled="disabled" @click="$emit('update:modelValue', null)">{{ t('default') }}</div>
+      <div class="k-menu-item" :class="{ disabled }" @click="$emit('update:modelValue', clone(initial))">
+        <span class="k-menu-icon"><icon-undo></icon-undo></span>
+        {{ t('initial') }}
+      </div>
+      <div class="k-menu-item" :class="{ disabled }" @click="$emit('update:modelValue', null)">
+        <span class="k-menu-icon"><icon-reset></icon-reset></span>
+        {{ t('default') }}
+      </div>
       <slot name="menu"></slot>
     </template>
     <template #desc>
@@ -25,6 +31,7 @@
         <k-markdown :source="tt(schema?.meta.description)"></k-markdown>
       </slot>
     </template>
+    <template #collapse><slot name="collapse"></slot></template>
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
@@ -44,7 +51,7 @@ import { computed, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable } from 'cosmokit'
 import { Schema, useI18nText } from './utils'
-import form from '.'
+import form, { IconUndo, IconReset } from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
 import zhCN from './locales/zh-CN.yml'

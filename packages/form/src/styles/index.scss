@@ -1,0 +1,41 @@
+@import './menu.scss';
+
+.k-schema-item {
+  position: relative;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--el-border-color-light);
+  transition: var(--color-transition);
+
+  &:first-child, :not(.k-schema-item):not(.k-schema-group) + & {
+    border-top: 1px solid var(--el-border-color-light);
+  }
+
+  & + h2 {
+    margin-top: 2rem;
+  }
+
+  &:hover {
+    background-color: var(--el-fill-color-light);
+  }
+}
+
+.k-schema-header {
+  font-size: 1.25rem;
+  margin: 1rem 0;
+
+  &:not(:first-child) {
+    margin-top: 2rem;
+  }
+}
+
+.k-schema-group {
+  position: relative;
+
+  &:empty {
+    border-bottom: none;
+  }
+
+  > :first-child {
+    border-top: none;
+  }
+}

@@ -25,9 +25,18 @@
       >
         <template #menu>
           <div class="k-menu-separator"></div>
-          <div class="k-menu-item" :disabled="disabled || !index" @click="up(index)">{{ t('entry.move-up') }}</div>
-          <div class="k-menu-item" :disabled="disabled || index === entries.length - 1" @click="down(index)">{{ t('entry.move-down') }}</div>
-          <div class="k-menu-item" :disabled="disabled" @click="del(index)">{{ t('entry.del-item') }}</div>
+          <div class="k-menu-item" :class="{ disabled: disabled || !index }" @click="up(index)">
+            <span class="k-menu-icon"><icon-arrow-up></icon-arrow-up></span>
+            {{ t('entry.move-up') }}
+          </div>
+          <div class="k-menu-item" :class="{ disabled: disabled || index === entries.length - 1 }" @click="down(index)">
+            <span class="k-menu-icon"><icon-arrow-down></icon-arrow-down></span>
+            {{ t('entry.move-down') }}
+          </div>
+          <div class="k-menu-item" :class="{ disabled }" @click="del(index)">
+            <span class="k-menu-icon"><icon-delete></icon-delete></span>
+            {{ t('entry.del-item') }}
+          </div>
         </template>
         <template #title>
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
@@ -52,6 +61,7 @@
 import { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Schema, useEntries } from '../utils'
+import { IconArrowUp, IconArrowDown, IconDelete } from '../icons'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'

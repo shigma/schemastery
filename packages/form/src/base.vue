@@ -22,11 +22,18 @@
             <icon-ellipsis></icon-ellipsis>
           </el-button>
           <template #content>
-            <div @click="tooltip.hide()">
+            <div @click="tooltip?.hide()">
               <slot name="menu"></slot>
-              <template v-if="collapsible && !collapsed">
+              <template v-if="collapsible">
                 <div class="k-menu-separator"></div>
-                <div class="k-menu-item" @click="collapsed = true">{{ t('collapse') }}</div>
+                <div v-if="collapsed" class="k-menu-item" @click="collapsed = false">
+                  <span class="k-menu-icon"><icon-expand></icon-expand></span>
+                  {{ t('expand') }}
+                </div>
+                <div v-else class="k-menu-item" @click="collapsed = true">
+                  <span class="k-menu-icon"><icon-collapse></icon-collapse></span>
+                  {{ t('collapse') }}
+                </div>
               </template>
             </div>
           </template>
@@ -49,7 +56,7 @@
 import { PropType, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Schema } from './utils'
-import { IconEllipsis } from './icons'
+import { IconCollapse, IconEllipsis, IconExpand } from './icons'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 
@@ -63,7 +70,7 @@ const props = defineProps({
   collapsible: {} as PropType<{ initial: boolean }>,
 })
 
-defineEmits(['update:modelValue', 'visible-change'])
+defineEmits(['update:modelValue'])
 
 const collapsed = ref(props.collapsible?.initial)
 const tooltip = ref(null)
@@ -112,23 +119,6 @@ if (import.meta.hot) {
 }
 
 .k-schema-item {
-  position: relative;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--el-border-color-light);
-  transition: var(--color-transition);
-
-  &:first-child, :not(.k-schema-item):not(.k-schema-group) + & {
-    border-top: 1px solid var(--el-border-color-light);
-  }
-
-  & + h2 {
-    margin-top: 2rem;
-  }
-
-  &:hover {
-    background-color: var(--el-fill-color-light);
-  }
-
   .k-schema-main {
     display: flex;
     flex-direction: row;
@@ -222,27 +212,6 @@ if (import.meta.hot) {
 
   &.invalid .actions {
     border-left-color: var(--el-color-warning);
-  }
-}
-
-.k-schema-header {
-  font-size: 1.25rem;
-  margin: 1rem 0;
-
-  &:not(:first-child) {
-    margin-top: 2rem;
-  }
-}
-
-.k-schema-group {
-  position: relative;
-
-  &:empty {
-    border-bottom: none;
-  }
-
-  > :first-child {
-    border-top: none;
   }
 }
 

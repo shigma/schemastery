@@ -1,7 +1,7 @@
 title: 基础设置
 initial: 撤销更改
 default: 恢复默认值
-collapse: 折叠
+collapse: 折叠子项
 expand: 展开以编辑
 badge:
   deprecated: 已废弃

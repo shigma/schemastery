@@ -15,7 +15,7 @@ import KBadge from './badge.vue'
 import KSchema from './schema.vue'
 import KForm from './form.vue'
 
-import './styles/menu.scss'
+import './styles/index.scss'
 
 export * from 'cosmokit'
 
