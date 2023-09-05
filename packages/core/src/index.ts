@@ -85,6 +85,8 @@ namespace Schema {
     default?: T extends {} ? Partial<T> : T
     required?: boolean
     disabled?: boolean
+    collapse?: boolean
+    badges?: { text: string; type: string }[]
     hidden?: boolean
     loose?: boolean
     role?: string
@@ -152,6 +154,9 @@ interface Schema<S = any, T = S> extends Schema.Base<T> {
   comment(text: string): Schema<S, T>
   description(text: string): Schema<S, T>
   disabled(): Schema<S, T>
+  collapse(): Schema<S, T>
+  deprecated(): Schema<S, T>
+  experimental(): Schema<S, T>
   pattern(regexp: RegExp): Schema<S, T>
   max(value: number): Schema<S, T>
   min(value: number): Schema<S, T>
@@ -237,7 +242,7 @@ Schema.prototype.i18n = function i18n(messages) {
   return schema
 }
 
-for (const key of ['required', 'disabled', 'hidden', 'loose']) {
+for (const key of ['required', 'disabled', 'collapse', 'hidden', 'loose']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value = true) {
       const schema = Schema(this)
@@ -245,6 +250,20 @@ for (const key of ['required', 'disabled', 'hidden', 'loose']) {
       return schema
     },
   })
+}
+
+Schema.prototype.deprecated = function deprecated() {
+  const schema = Schema(this)
+  schema.meta.badges ||= []
+  schema.meta.badges.push({ text: 'deprecated', type: 'danger' })
+  return schema
+}
+
+Schema.prototype.experimental = function experimental() {
+  const schema = Schema(this)
+  schema.meta.badges ||= []
+  schema.meta.badges.push({ text: 'experimental', type: 'warning' })
+  return schema
 }
 
 Schema.prototype.pattern = function pattern(regexp) {

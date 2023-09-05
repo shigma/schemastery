@@ -27,9 +27,12 @@
           v-for="(item, index) in choices"
           :key="index"
           :value="index"
-          :disabled="item.meta.disabled"
-          :label="tt(item.meta.description) || item.value"
-        ></el-option>
+          :disabled="item.meta.disabled">
+          {{ tt(item.meta.description) || item.value }}
+          <k-badge :type="type" v-for="{ text, type } in item.meta.badges || []">
+            {{ t('badge.' + text) }}
+          </k-badge>
+        </el-option>
       </el-select>
     </template>
     <template #suffix><slot name="suffix"></slot></template>
@@ -40,7 +43,10 @@
 
 import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
 import { deepEqual, isNullable } from 'cosmokit'
+import { useI18n } from 'vue-i18n'
 import { check, getChoices, getFallback, Schema, useI18nText } from '../utils'
+import zhCN from '../locales/zh-CN.yml'
+import enUS from '../locales/en-US.yml'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -117,5 +123,21 @@ const selectModel = computed({
     active.value = choices.value[index]
   },
 })
+
+const { t, setLocaleMessage } = useI18n({
+  messages: {
+    'zh-CN': zhCN,
+    'en-US': enUS,
+  },
+})
+
+if (import.meta.hot) {
+  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
+    setLocaleMessage('zh-CN', module.default)
+  })
+  import.meta.hot.accept('../locales/en-US.yml', (module) => {
+    setLocaleMessage('en-US', module.default)
+  })
+}
 
 </script>

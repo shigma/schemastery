@@ -3,6 +3,9 @@ initial: 撤销更改
 default: 恢复默认值
 collapse: 折叠
 expand: 展开以编辑
+badge:
+  deprecated: 已废弃
+  experimental: 实验性
 entry:
   key: 键
   value: 值

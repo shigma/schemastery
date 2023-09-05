@@ -11,6 +11,7 @@ import SchemaTable from './extensions/table.vue'
 import SchemaTextarea from './extensions/textarea.vue'
 import SchemaTuple from './extensions/tuple.vue'
 import SchemaUnion from './extensions/union.vue'
+import KBadge from './badge.vue'
 import KSchema from './schema.vue'
 import KForm from './form.vue'
 
@@ -24,15 +25,22 @@ export { Schema, useI18nText } from './utils'
 export * from './icons'
 
 export const form = Object.assign(SchemaBase, {
+  Form: KForm,
+  Badge: KBadge,
+  Schema: KSchema,
   useModel,
   useEntries,
   useDisabled,
   extensions: new Set(),
   install(app: App) {
     app.component('k-form', KForm)
+    app.component('k-badge', KBadge)
     app.component('k-schema', KSchema)
   },
 }) as typeof SchemaBase & {
+  Form: typeof KForm
+  Badge: typeof KBadge
+  Schema: typeof KSchema
   useModel: typeof useModel
   useEntries: typeof useEntries
   useDisabled: typeof useDisabled
