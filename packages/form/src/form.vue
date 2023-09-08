@@ -106,12 +106,15 @@ if (import.meta.hot) {
       padding: 0.5rem 1.5rem;
 
       .k-schema-main {
-        display: block;
         min-height: unset;
+        grid-template-columns: auto 2rem;
+        grid-template-rows: auto auto;
       }
 
       .k-schema-right {
         display: block;
+        grid-column: 1 / 2;
+        grid-row: 2;
 
         > :first-child {
           margin-top: 0.25rem;

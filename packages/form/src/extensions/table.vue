@@ -262,10 +262,6 @@ if (import.meta.hot) {
   td {
     transition: var(--color-transition);
 
-    &.disabled {
-      pointer-events: none;
-    }
-
     &:hover {
       background-color: var(--k-button-hover-bg);
     }
@@ -290,6 +286,11 @@ if (import.meta.hot) {
 
     .k-icon {
       height: 1rem;
+    }
+
+    &.disabled {
+      color: var(--k-color-disabled);
+      pointer-events: none;
     }
   }
 

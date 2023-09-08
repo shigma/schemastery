@@ -13,8 +13,8 @@ entry:
   del-item: 删除项目
   add-row: 添加行
   del-row: 删除行
-  move-up: 上移
-  move-down: 下移
+  move-up: 上移项目
+  move-down: 下移项目
 errors:
   duplicate-key: 键名重复
   regexp-not-matched: 未能匹配正则表达式 {0}

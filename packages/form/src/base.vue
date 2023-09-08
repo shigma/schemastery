@@ -17,6 +17,8 @@
         <template v-if="collapsible">
           <el-button v-if="collapsed" @click="collapsed = false">{{ t('expand') }}</el-button>
         </template>
+      </div>
+      <div class="k-schema-menu">
         <el-tooltip ref="tooltip" placement="bottom-end" popper-class="k-menu" effect="light">
           <el-button class="ellipsis">
             <icon-ellipsis></icon-ellipsis>
@@ -120,11 +122,12 @@ if (import.meta.hot) {
 
 .k-schema-item {
   .k-schema-main {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr auto 2rem;
     justify-content: space-between;
     align-items: center;
     column-gap: 1rem;
+    row-gap: 0.25rem;
     min-height: 3rem;
   }
 
@@ -149,32 +152,18 @@ if (import.meta.hot) {
     }
   }
 
-  .k-schema-left {
-    .el-dropdown {
-      margin-left: 0.5rem;
-      margin-top: 2px;
-    }
-
-    .trigger {
-      height: 1rem;
-      cursor: pointer;
-      opacity: 0;
-      transition: var(--color-transition);
-    }
-  }
-
   .k-schema-right {
     display: flex;
     gap: 1rem;
     flex: 1;
     justify-content: flex-end;
+  }
 
-    .el-button.ellipsis {
-      padding: 8px 10px;
+  .el-button.ellipsis {
+    padding: 8px 9px;
 
-      .k-icon {
-        width: 12px;
-      }
+    .k-icon {
+      width: 12px;
     }
   }
 
@@ -192,14 +181,6 @@ if (import.meta.hot) {
     width: $actions-width;
     border-left: 2px solid transparent;
     transition: var(--color-transition);
-  }
-
-  &:hover .trigger {
-    opacity: 0.75;
-  }
-
-  &.visible .trigger {
-    opacity: 1;
   }
 
   &.changed .actions {
