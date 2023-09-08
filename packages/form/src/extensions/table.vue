@@ -6,7 +6,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="add()" :disabled="disabled">{{ t('entry.add-row') }}</el-button>
+      <el-button @click="insert(entries.length)" :disabled="disabled">{{ t('entry.add-row') }}</el-button>
     </template>
     <div class="bottom k-schema-table-container" ref="container" v-if="columns && entries.length">
       <table class="k-schema-table">
@@ -77,7 +77,7 @@
             @mouseenter="handleMouseEnter($event, null)"
             @mouseleave="handleMouseLeave($event, null)">
             <div class="inner" @click.stop="del(i)">
-              <icon-close></icon-close>
+              <icon-delete></icon-delete>
             </div>
           </td>
         </tr>
@@ -102,7 +102,7 @@
 
 import { computed, ref, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconArrowUp, IconArrowDown, IconClose, IconInvalid } from '../icons'
+import { IconArrowUp, IconArrowDown, IconDelete, IconInvalid } from '../icons'
 import { Schema, useEntries, useI18nText, explain } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
@@ -139,7 +139,7 @@ const columns = computed<[string, Schema][]>(() => {
   }
 })
 
-const { entries, add, del, up, down } = useEntries()
+const { entries, insert, del, up, down } = useEntries()
 
 interface Rect {
   el: HTMLElement

@@ -9,6 +9,8 @@ import IconExpand from './expand.vue'
 import IconExternal from './external.vue'
 import IconEyeSlash from './eye-slash.vue'
 import IconEye from './eye.vue'
+import IconInsertAfter from './insert-after.vue'
+import IconInsertBefore from './insert-before.vue'
 import IconInvalid from './invalid.vue'
 import IconRedo from './redo.vue'
 import IconReset from './reset.vue'
@@ -26,6 +28,8 @@ export {
   IconExternal,
   IconEyeSlash,
   IconEye,
+  IconInsertAfter,
+  IconInsertBefore,
   IconInvalid,
   IconRedo,
   IconReset,

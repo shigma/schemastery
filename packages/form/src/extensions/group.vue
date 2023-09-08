@@ -6,7 +6,7 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="add()" :disabled="disabled">{{ t('entry.add-item') }}</el-button>
+      <el-button @click="insert(entries.length)" :disabled="disabled">{{ t('entry.add-item') }}</el-button>
     </template>
     <template #collapse>
       <k-schema
@@ -37,6 +37,14 @@
             <span class="k-menu-icon"><icon-delete></icon-delete></span>
             {{ t('entry.del-item') }}
           </div>
+          <div class="k-menu-item" :class="{ disabled }" @click="insert(index)">
+            <span class="k-menu-icon"><icon-insert-before></icon-insert-before></span>
+            {{ t('entry.insert-before') }}
+          </div>
+          <div class="k-menu-item" :class="{ disabled }" @click="insert(index + 1)">
+            <span class="k-menu-icon"><icon-insert-after></icon-insert-after></span>
+            {{ t('entry.insert-after') }}
+          </div>
         </template>
         <template #title>
           <span class="prefix">{{ prefix.slice(0, -1) }}</span>
@@ -61,7 +69,7 @@
 import { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Schema, useEntries } from '../utils'
-import { IconArrowUp, IconArrowDown, IconDelete } from '../icons'
+import { IconArrowUp, IconArrowDown, IconDelete, IconInsertAfter, IconInsertBefore } from '../icons'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'
@@ -77,7 +85,7 @@ defineProps({
 
 defineEmits(['update:modelValue'])
 
-const { entries, up, down, add, del } = useEntries()
+const { entries, up, down, insert, del } = useEntries()
 
 const { t, setLocaleMessage } = useI18n({
   messages: {

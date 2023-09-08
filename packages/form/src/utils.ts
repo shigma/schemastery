@@ -162,8 +162,8 @@ export function useEntries() {
     del(index: number) {
       entries.value.splice(index, 1)
     },
-    add() {
-      entries.value.push(['', null])
+    insert(index: number) {
+      entries.value.splice(index, 0, ['', null])
     },
   }
 }
