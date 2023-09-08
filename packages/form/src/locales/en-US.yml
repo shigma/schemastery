@@ -3,6 +3,9 @@ initial: Undo
 default: Restore to Default
 collapse: Collapse
 expand: Expand to Edit
+badge:
+  deprecated: deprecated
+  experimental: experimental
 entry:
   key: Key
   value: Value
@@ -12,3 +15,11 @@ entry:
   del-row: Delete Row
   move-up: Move Up
   move-down: Move Down
+  insert-before: Insert Before
+  insert-after: Insert After
+select:
+  all: Select All
+  none: Clear Selection
+errors:
+  duplicate-key: Duplicate key
+  regexp-not-matched: Not matched with regexp {0}

@@ -14,6 +14,8 @@ import IconInsertBefore from './insert-before.vue'
 import IconInvalid from './invalid.vue'
 import IconRedo from './redo.vue'
 import IconReset from './reset.vue'
+import IconSquareCheck from './square-check.vue'
+import IconSquareEmpty from './square-empty.vue'
 import IconUndo from './undo.vue'
 
 export {
@@ -33,5 +35,7 @@ export {
   IconInvalid,
   IconRedo,
   IconReset,
+  IconSquareCheck,
+  IconSquareEmpty,
   IconUndo,
 }
