@@ -36,13 +36,13 @@
     "serve": "^13.0.4",
     "shx": "^0.3.4",
     "typescript": "^5.1.6",
-    "vitepress": "1.0.0-beta.7",
+    "vitepress": "1.0.0-rc.4",
     "yakumo": "^0.3.13",
     "yakumo-esbuild": "^0.3.25",
     "yakumo-mocha": "^0.3.1",
     "yakumo-publish": "^0.3.4",
     "yakumo-tsc": "^0.3.12",
-    "yakumo-upgrade": "^0.3.3",
+    "yakumo-upgrade": "^0.3.4",
     "yakumo-version": "^0.3.4"
   }
 }

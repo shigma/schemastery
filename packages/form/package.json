@@ -1,7 +1,7 @@
 {
   "name": "schemastery-vue",
   "description": "Type driven schema validator",
-  "version": "6.2.3",
+  "version": "7.0.1",
   "main": "src/index.ts",
   "repository": {
     "type": "git",
@@ -15,10 +15,11 @@
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
+    "@vueuse/core": ">=10",
     "element-plus": "^2",
     "vue": "^3"
   },
   "dependencies": {
-    "schemastery": "^3.11.1"
+    "schemastery": "^3.13.0"
   }
 }
