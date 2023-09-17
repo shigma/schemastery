@@ -31,8 +31,8 @@ declare global {
     type Constructor<T = any> = new (...args: any[]) => T
 
     export interface Static {
-      <T = any>(options: Partial<Schema.Base<T>>): Schema<T>
-      new <T = any>(options: Partial<Schema.Base<T>>): Schema<T>
+      <T = any>(options: Partial<Schema<T>>): Schema<T>
+      new <T = any>(options: Partial<Schema<T>>): Schema<T>
       prototype: Schema
       resolve: Resolve
       from<X = any>(source?: X): From<X>
@@ -61,13 +61,33 @@ declare global {
     interface Options {
       autofix?: boolean
     }
-  }
-}
 
-namespace Schema {
-  export interface Base<T = any> {
+    export interface Meta<T = any> {
+      default?: T extends {} ? Partial<T> : T
+      required?: boolean
+      disabled?: boolean
+      collapse?: boolean
+      badges?: { text: string; type: string }[]
+      hidden?: boolean
+      loose?: boolean
+      role?: string
+      extra?: any
+      link?: string
+      description?: string | Dict<string>
+      comment?: string
+      pattern?: { source: string; flags?: string }
+      max?: number
+      min?: number
+      step?: number
+    }
+  }
+
+  interface Schemastery<S = any, T = S> {
+    (data?: S | null, options?: Schemastery.Options): T
+    new (data?: S | null, options?: Schemastery.Options): T
+    [kSchema]: true
     uid: number
-    meta: Meta<T>
+    meta: Schemastery.Meta<T>
     type: string
     sKey?: Schema
     inner?: Schema
@@ -79,25 +99,28 @@ namespace Schema {
     refs?: Dict<Schema>
     preserve?: boolean
     toString(inline?: boolean): string
-  }
-
-  export interface Meta<T = any> {
-    default?: T extends {} ? Partial<T> : T
-    required?: boolean
-    disabled?: boolean
-    collapse?: boolean
-    badges?: { text: string; type: string }[]
-    hidden?: boolean
-    loose?: boolean
-    role?: string
-    extra?: any
-    link?: string
-    description?: string | Dict<string>
-    comment?: string
-    pattern?: { source: string; flags?: string }
-    max?: number
-    min?: number
-    step?: number
+    toJSON(): Schema<S, T>
+    required(value?: boolean): Schema<S, T>
+    hidden(value?: boolean): Schema<S, T>
+    loose(value?: boolean): Schema<S, T>
+    role(text: string, extra?: any): Schema<S, T>
+    link(link: string): Schema<S, T>
+    default(value: T): Schema<S, T>
+    comment(text: string): Schema<S, T>
+    description(text: string): Schema<S, T>
+    disabled(): Schema<S, T>
+    collapse(): Schema<S, T>
+    deprecated(): Schema<S, T>
+    experimental(): Schema<S, T>
+    pattern(regexp: RegExp): Schema<S, T>
+    max(value: number): Schema<S, T>
+    min(value: number): Schema<S, T>
+    step(value: number): Schema<S, T>
+    set(key: string, value: Schema): Schema<S, T>
+    push(value: Schema): Schema<S, T>
+    simplify(value?: any): any
+    i18n(messages: Dict): Schema<S, T>
+    extra<K extends keyof Schemastery.Meta>(key: K, value: Schemastery.Meta[K]): Schema<S, T>
   }
 }
 
@@ -108,7 +131,9 @@ declare module globalThis {
 
 globalThis.__schemastery_index__ ??= 0
 
-const Schema = function (options: Schema.Base) {
+type Schema<S = any, T = S> = Schemastery<S, T>
+
+const Schema = function (options: Schema) {
   const schema = function (data: any, options?: Schemastery.Options) {
     return Schema.resolve(data, schema, options)[0]
   } as Schema
@@ -139,33 +164,6 @@ const Schema = function (options: Schema.Base) {
   schema.toString = schema.toString.bind(schema)
   return schema
 } as Schemastery.Static
-
-interface Schema<S = any, T = S> extends Schema.Base<T> {
-  (data?: S | null, options?: Schemastery.Options): T
-  new (data?: S | null, options?: Schemastery.Options): T
-  [kSchema]: true
-  toJSON(): Schema.Base<T>
-  required(value?: boolean): Schema<S, T>
-  hidden(value?: boolean): Schema<S, T>
-  loose(value?: boolean): Schema<S, T>
-  role(text: string, extra?: any): Schema<S, T>
-  link(link: string): Schema<S, T>
-  default(value: T): Schema<S, T>
-  comment(text: string): Schema<S, T>
-  description(text: string): Schema<S, T>
-  disabled(): Schema<S, T>
-  collapse(): Schema<S, T>
-  deprecated(): Schema<S, T>
-  experimental(): Schema<S, T>
-  pattern(regexp: RegExp): Schema<S, T>
-  max(value: number): Schema<S, T>
-  min(value: number): Schema<S, T>
-  step(value: number): Schema<S, T>
-  set(key: string, value: Schema): Schema<S, T>
-  push(value: Schema): Schema<S, T>
-  simplify(value?: any): any
-  i18n(messages: Dict): Schema<S, T>
-}
 
 Schema.prototype = Object.create(Function.prototype)
 
@@ -239,6 +237,12 @@ Schema.prototype.i18n = function i18n(messages) {
   if (schema.sKey) {
     schema.sKey = schema.sKey.i18n(valueMap(messages, (data) => data?.$key))
   }
+  return schema
+}
+
+Schema.prototype.extra = function extra(key, value) {
+  const schema = Schema(this)
+  schema.meta = { ...schema.meta, [key]: value }
   return schema
 }
 
@@ -413,7 +417,7 @@ Schema.extend('const', (data, { value }) => {
   throw new TypeError(`expected ${value} but got ${data}`)
 })
 
-function checkWithinRange(data: number, meta: Schema.Meta<any>, description: string) {
+function checkWithinRange(data: number, meta: Schemastery.Meta<any>, description: string) {
   const { max = Infinity, min = -Infinity } = meta
   if (data > max) throw new TypeError(`expected ${description} <= ${max} but got ${data}`)
   if (data < min) throw new TypeError(`expected ${description} >= ${min} but got ${data}`)
@@ -603,11 +607,11 @@ Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
 type Formatter = (schema: Schema, inline?: boolean) => string
 const formatters: Dict<Formatter> = {}
 
-function defineMethod(name: string, keys: (keyof Schema.Base)[], format: Formatter) {
+function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
   formatters[name] = format
   Object.assign(Schema, {
     [name](...args: any[]) {
-      const schema = new Schema({ type: name } as Schema.Base)
+      const schema = new Schema({ type: name } as Schema)
       keys.forEach((key, index) => {
         switch (key) {
           case 'sKey': schema.sKey = args[index] ?? Schema.string(); break
