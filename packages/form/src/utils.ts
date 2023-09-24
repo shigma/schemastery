@@ -90,8 +90,8 @@ export function useDisabled() {
 
 interface ConfigOptions<T> {
   strict?: boolean
-  input(value: any): T
-  output(value: T): any
+  input?(value: any): T
+  output?(value: T): any
 }
 
 export function useModel<T = any>(options?: ConfigOptions<T>) {
@@ -101,7 +101,7 @@ export function useModel<T = any>(options?: ConfigOptions<T>) {
 
   const doWatch = () => watch(config, (value) => {
     try {
-      if (options) value = options.output(value)
+      if (options?.output) value = options.output(value)
     } catch {
       return
     }
@@ -109,13 +109,13 @@ export function useModel<T = any>(options?: ConfigOptions<T>) {
     emit('update:modelValue', value)
   }, { deep: true })
 
-  watch([() => props.modelValue, () => props.schema], ([value, schema]) => {
+  watch(() => [props.modelValue, props.schema], ([value, schema]) => {
     stop?.()
     value ??= getFallback(schema)
-    if (options) value = options.input(value)
+    if (options?.input) value = options.input(value)
     config.value = value
     stop = doWatch()
-  }, { immediate: true })
+  }, { deep: true, immediate: true })
 
   return config
 }

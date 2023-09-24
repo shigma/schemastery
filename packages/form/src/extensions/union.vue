@@ -44,7 +44,7 @@
 import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
 import { deepEqual, isNullable } from 'cosmokit'
 import { useI18n } from 'vue-i18n'
-import { check, getChoices, getFallback, Schema, useI18nText } from '../utils'
+import { check, getChoices, getFallback, Schema, useModel, useI18nText } from '../utils'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'
 
@@ -57,21 +57,13 @@ const props = defineProps({
   extra: {} as PropType<any>,
 })
 
-const emit = defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue'])
 
 const tt = useI18nText()
 
-const config = ref()
 const choices = ref<Schema[]>()
 const cache = ref<any[]>()
 const active = ref<Schema>()
-let stop: WatchStopHandle
-
-const doWatch = () => watch(config, (value) => {
-  const index = choices.value.indexOf(active.value)
-  if (index >= 0) cache.value[index] = value
-  emit('update:modelValue', deepEqual(value, props.schema.meta.default) ? null : value)
-}, { deep: true })
 
 watch(() => props.schema, (value) => {
   choices.value = getChoices(props.schema)
@@ -81,36 +73,35 @@ watch(() => props.schema, (value) => {
   })
 }, { immediate: true })
 
-watch(() => [props.modelValue, props.schema] as const, ([value, schema]) => {
-  stop?.()
-  config.value = value
-  value ??= schema.meta.default
-  active.value = null
-  let hasTransform = true, depth = 0
-  while (!active.value && hasTransform && ++depth < 10) {
-    hasTransform = false
-    for (const item of schema.list) {
-      if (item.meta.hidden) continue
-      if (!check(item, value)) continue
-      if (item.type === 'transform') {
-        if (!item.callback) continue
-        try {
-          value = item.callback(value)
-        } catch (error) {
-          console.error(error)
-          continue
+const config = useModel({
+  input(value) {
+    active.value = null
+    let hasTransform = true, depth = 0
+    while (!active.value && hasTransform && ++depth < 10) {
+      hasTransform = false
+      for (const [index, item] of props.schema.list.entries()) {
+        if (item.meta.hidden) continue
+        if (!check(item, value)) continue
+        if (item.type === 'transform') {
+          if (!item.callback) continue
+          try {
+            value = item.callback(value)
+          } catch (error) {
+            console.error(error)
+            continue
+          }
+          hasTransform = true
+          value ??= getFallback(props.schema)
+        } else {
+          active.value = item
+          cache.value[index] = value
         }
-        hasTransform = true
-        config.value = value
-        value ??= schema.meta.default
-      } else {
-        active.value = item
+        break
       }
-      break
     }
-  }
-  stop = doWatch()
-}, { immediate: true, deep: true })
+    return value
+  },
+})
 
 const selectModel = computed({
   get() {
