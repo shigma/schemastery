@@ -7,7 +7,7 @@ describe('Tuple', () => {
       Schema.string().required(),
       Schema.number().default(123),
       Schema.boolean(),
-    ] as const)
+    ])
     expect(Config.toString()).to.equal('[string, number, boolean]')
 
     expect(new Config(['foo'])).to.deep.equal(['foo', 123, undefined])

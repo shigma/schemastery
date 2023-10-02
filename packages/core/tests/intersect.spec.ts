@@ -3,7 +3,7 @@ import Schema from 'schemastery'
 
 describe('Intersect', () => {
   it('intersect (primitive 1)', () => {
-    const validate = Schema.intersect([String, Number] as const)
+    const validate = Schema.intersect([String, Number])
     expect(validate.toString()).to.equal('string & number')
 
     expect(validate(null)).to.equal(null)
@@ -14,7 +14,7 @@ describe('Intersect', () => {
   })
 
   it('intersect (primitive 2)', () => {
-    const validate = Schema.intersect([String, 'foo'] as const)
+    const validate = Schema.intersect([String, 'foo'])
     expect(validate.toString()).to.equal('string & "foo"')
 
     expect(validate(null)).to.equal(null)

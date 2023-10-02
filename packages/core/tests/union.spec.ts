@@ -3,7 +3,7 @@ import Schema from 'schemastery'
 
 describe('Union', () => {
   it('primitive', () => {
-    const config = Schema.union([1, 2] as const)
+    const config = Schema.union([1, 2])
     expect(config.toString()).to.equal('1 | 2')
 
     expect(config(null)).to.equal(null)
@@ -17,7 +17,7 @@ describe('Union', () => {
     const validate = Schema.union([
       Schema.object({ a: 'foo', b: Schema.number() }),
       Schema.object({ a: 'bar', c: Schema.string() }),
-    ] as const)
+    ])
     expect(validate.toString()).to.equal('{ a: "foo", b?: number } | { a: "bar", c?: string }')
 
     expect(validate(null)).to.equal(null)

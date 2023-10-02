@@ -99,6 +99,7 @@ const config = useModel({
         break
       }
     }
+    if (deepEqual(value, getFallback(props.schema))) value = null
     return value
   },
 })

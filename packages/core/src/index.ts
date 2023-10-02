@@ -26,7 +26,7 @@ declare global {
 
     type TupleS<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeS<L>?, ...TupleS<R>] : any[]
     type TupleT<X extends readonly any[]> = X extends readonly [infer L, ...infer R] ? [TypeT<L>?, ...TupleT<R>] : any[]
-    type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> } & Dict
+    type ObjectS<X extends Dict> = { [K in keyof X]?: TypeS<X[K]> | null } & Dict
     type ObjectT<X extends Dict> = { [K in keyof X]: TypeT<X[K]> } & Dict
     type Constructor<T = any> = new (...args: any[]) => T
 
@@ -51,10 +51,10 @@ declare global {
       is<T>(constructor: Constructor<T>): Schema<T>
       array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
       dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
-      tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
-      object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
-      union<X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
-      intersect<X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
+      tuple<const X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
+      object<const X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
+      union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
+      intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
       transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
     }
 
