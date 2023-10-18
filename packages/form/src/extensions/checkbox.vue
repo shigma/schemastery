@@ -17,11 +17,11 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <ul class="bottom">
-      <li v-for="(value, key) in schema.bits" :key="value">
+      <li v-for="key in keys" :key="key">
         <el-checkbox
           :disabled="disabled"
-          :modelValue="!!(config & value)"
-          @update:modelValue="config ^= value"
+          :modelValue="config.includes(key)"
+          @update:modelValue="toggle(key)"
         >{{ key }}</el-checkbox>
       </li>
     </ul>
@@ -30,8 +30,9 @@
 
 <script lang="ts" setup>
 
-import { PropType } from 'vue'
+import { PropType, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { difference, union } from 'cosmokit'
 import { Schema, useModel } from '../utils'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'
@@ -48,14 +49,52 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
-const config = useModel<number>()
+const keys = computed(() => {
+  if (props.schema.type === 'bitset') {
+    return Object.keys(props.schema.bits)
+  } else if (props.schema.type === 'array') {
+    return props.schema.inner.list.map(item => item.value)
+  } else {
+    // should be unreachable
+    return []
+  }
+})
+
+// force mutate array
+function toggle(key: string) {
+  if (config.value.includes(key)) {
+    config.value = config.value.filter(k => k !== key)
+  } else {
+    config.value = [...config.value, key]
+  }
+}
+
+const config = useModel<string[]>({
+  input(value) {
+    if (Array.isArray(value)) return value
+    return Object.entries(props.schema.bits)
+      .filter(([key, bit]) => value & bit)
+      .map(([key]) => key)
+  },
+  output(value) {
+    return value.sort((a, b) => {
+      const indexA = keys.value.indexOf(a)
+      const indexB = keys.value.indexOf(b)
+      if (indexA < 0) {
+        return indexB < 0 ? 0 : 1
+      } else {
+        return indexB < 0 ? -1 : indexA - indexB
+      }
+    })
+  },
+})
 
 function selectAll() {
-  config.value = Object.values(props.schema.bits).reduce((a, b) => a | b, config.value)
+  config.value = union(config.value, keys.value)
 }
 
 function selectNone() {
-  config.value = Object.values(props.schema.bits).reduce((a, b) => a & ~b, config.value)
+  config.value = difference(config.value, keys.value)
 }
 
 const { t, setLocaleMessage } = useI18n({

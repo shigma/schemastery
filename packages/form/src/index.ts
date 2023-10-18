@@ -1,8 +1,8 @@
 import { App, Component } from 'vue'
-import { useDisabled, useEntries, useModel } from './utils'
+import { Schema, useDisabled, useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
 import Primitive from './primitive.vue'
-import SchemaBitset from './extensions/bitset.vue'
+import SchemaCheckBox from './extensions/checkbox.vue'
 import SchemaGroup from './extensions/group.vue'
 import SchemaIntersect from './extensions/intersect.vue'
 import SchemaObject from './extensions/object.vue'
@@ -52,15 +52,22 @@ export namespace form {
   export interface Extension {
     type: string
     role?: string
-    validate?: (value: any, schema: any) => boolean
+    validate?: (value: any, schema: Schema) => boolean
     component: Component
   }
 }
 
 form.extensions.add({
   type: 'bitset',
-  component: SchemaBitset,
-  validate: value => typeof value === 'number',
+  component: SchemaCheckBox,
+  validate: value => typeof value === 'number' || Array.isArray(value) && value.every(v => typeof v === 'string'),
+})
+
+form.extensions.add({
+  type: 'array',
+  role: 'checkbox',
+  component: SchemaCheckBox,
+  validate: value => Array.isArray(value) && value.every(v => typeof v === 'string'),
 })
 
 form.extensions.add({

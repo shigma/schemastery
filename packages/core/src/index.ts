@@ -469,7 +469,7 @@ Schema.extend('boolean', (data) => {
   throw new TypeError(`expected boolean but got ${data}`)
 })
 
-Schema.extend('bitset', (data, { bits }) => {
+Schema.extend('bitset', (data, { bits, meta }) => {
   let value = 0, keys: string[] = []
   if (typeof data === 'number') {
     value = data
@@ -487,6 +487,7 @@ Schema.extend('bitset', (data, { bits }) => {
   } else {
     throw new TypeError(`expected number or array but got ${data}`)
   }
+  if (value === meta.default) return [value]
   return [value, keys]
 })
 

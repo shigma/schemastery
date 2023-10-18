@@ -105,7 +105,7 @@ export function useModel<T = any>(options?: ConfigOptions<T>) {
     } catch {
       return
     }
-    if (deepEqual(value, props.schema.meta.default, options?.strict)) value = null
+    if (deepEqual(Schema(props.schema)(value), props.schema.meta.default, options?.strict)) value = null
     emit('update:modelValue', value)
   }, { deep: true })
 
