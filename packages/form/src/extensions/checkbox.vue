@@ -17,12 +17,17 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <ul class="bottom">
-      <li v-for="key in keys" :key="key">
+      <li v-for="item in list" :key="item.value">
         <el-checkbox
-          :disabled="disabled"
-          :modelValue="config.includes(key)"
-          @update:modelValue="toggle(key)"
-        >{{ key }}</el-checkbox>
+          :disabled="disabled || item.meta.disabled"
+          :modelValue="config.includes(item.value)"
+          @update:modelValue="toggle(item.value)"
+        >
+          {{ tt(item.meta.description) || item.value }}
+          <k-badge :type="type" v-for="{ text, type } in item.meta.badges || []">
+            {{ t('badge.' + text) }}
+          </k-badge>
+        </el-checkbox>
       </li>
     </ul>
   </schema-base>
@@ -33,7 +38,7 @@
 import { PropType, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { difference, union } from 'cosmokit'
-import { Schema, useModel } from '../utils'
+import { Schema, useI18nText, useModel } from '../utils'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'
 import enUS from '../locales/en-US.yml'
@@ -49,14 +54,21 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
+const tt = useI18nText()
+
 const keys = computed(() => {
   if (props.schema.type === 'bitset') {
     return Object.keys(props.schema.bits)
   } else if (props.schema.type === 'array') {
     return props.schema.inner.list.map(item => item.value)
-  } else {
-    // should be unreachable
-    return []
+  }
+})
+
+const list = computed(() => {
+  if (props.schema.type === 'bitset') {
+    return Object.keys(props.schema.bits).map(key => Schema.const(key))
+  } else if (props.schema.type === 'array') {
+    return props.schema.inner.list
   }
 })
 
