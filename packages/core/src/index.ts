@@ -470,15 +470,24 @@ Schema.extend('boolean', (data) => {
 })
 
 Schema.extend('bitset', (data, { bits }) => {
-  if (typeof data === 'number') return [data]
-  if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  let result = 0
-  for (const value of data) {
-    if (typeof value !== 'string') throw new TypeError(`expected string but got ${value}`)
-    if (!(value in bits!)) throw new TypeError(`unknown value ${value}`)
-    result |= bits![value]!
+  let value = 0, keys: string[] = []
+  if (typeof data === 'number') {
+    value = data
+    for (const key in bits!) {
+      if (data & bits![key]!) {
+        keys.push(key)
+      }
+    }
+  } else if (Array.isArray(data)) {
+    keys = data
+    for (const key of keys) {
+      if (typeof key !== 'string') throw new TypeError(`expected string but got ${key}`)
+      if (key in bits!) value |= bits![key]!
+    }
+  } else {
+    throw new TypeError(`expected number or array but got ${data}`)
   }
-  return [result, result]
+  return [value, keys]
 })
 
 Schema.extend('function', (data) => {
