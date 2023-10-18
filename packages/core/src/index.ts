@@ -47,6 +47,7 @@ declare global {
       boolean(): Schema<boolean>
       date(): Schema<string | Date, Date>
       bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
+      bitset<K extends string>(bits: Partial<Record<K, bigint>>): Schema<bigint | readonly K[], bigint>
       function(): Schema<Function, (...args: any[]) => any>
       is<T>(constructor: Constructor<T>): Schema<T>
       array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
@@ -469,9 +470,11 @@ Schema.extend('boolean', (data) => {
   throw new TypeError(`expected boolean but got ${data}`)
 })
 
-Schema.extend('bitset', (data, { bits }) => {
-  let value = 0, keys: string[] = []
-  if (typeof data === 'number') {
+Schema.extend('bitset', (data, { bits, meta }) => {
+  const type = typeof meta.default
+  let value: any = type === 'bigint' ? 0n : 0
+  let keys: string[] = []
+  if (typeof data === type) {
     value = data
     for (const key in bits!) {
       if (data & bits![key]!) {
@@ -485,7 +488,7 @@ Schema.extend('bitset', (data, { bits }) => {
       if (key in bits!) value |= bits![key]!
     }
   } else {
-    throw new TypeError(`expected number or array but got ${data}`)
+    throw new TypeError(`expected ${type} or array but got ${data}`)
   }
   return [value, keys]
 })
@@ -621,6 +624,7 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
   Object.assign(Schema, {
     [name](...args: any[]) {
       const schema = new Schema({ type: name } as Schema)
+      let bitsetDefault: any
       keys.forEach((key, index) => {
         switch (key) {
           case 'sKey': schema.sKey = args[index] ?? Schema.string(); break
@@ -630,8 +634,18 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
           case 'bits': {
             schema.bits = {}
             for (const key in args[index]) {
-              if (typeof args[index][key] !== 'number') continue
+              const type = typeof args[index][key]
+              if (!['number', 'bigint'].includes(type)) {
+                continue // TypeScript enum
+              } else if (bitsetDefault === undefined) {
+                bitsetDefault = type === 'number' ? 0 : 0n
+              } else if (typeof bitsetDefault !== type) {
+                throw new TypeError(`inconsistent bitset type`)
+              }
               schema.bits[key] = args[index][key]
+            }
+            if (bitsetDefault === undefined) {
+              throw new TypeError(`missing bitset value`)
             }
             break
           }
@@ -648,7 +662,7 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
       } else if (name === 'array' || name === 'tuple') {
         schema.meta.default = []
       } else if (name === 'bitset') {
-        schema.meta.default = 0
+        schema.meta.default = bitsetDefault
       }
       return schema
     },
