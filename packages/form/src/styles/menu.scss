@@ -1,11 +1,11 @@
 $menu-margin-x: 0.375rem;
 $menu-margin-y: 0.375rem;
 $menu-padding-y: 0.375rem;
-$menu-padding-left: 2.25rem;
+$menu-padding-left: 2.5rem;
 
 // override el-popper styles
 .k-menu, .k-menu.el-popper.is-light {
-  position: absolute;
+  position: fixed;
   z-index: 1000;
   min-width: 12rem;
   padding: $menu-margin-y 0;
@@ -43,7 +43,29 @@ $menu-padding-left: 2.25rem;
   }
 
   &:not(.disabled):hover {
+    color: inherit;
     background-color: var(--k-hover-bg);
+  }
+
+  &.primary {
+    color: var(--el-color-primary);
+    &:not(.disabled):hover {
+      background-color: var(--el-color-primary);
+    }
+  }
+
+  &.danger {
+    color: var(--el-color-error);
+    &:not(.disabled):hover {
+      background-color: var(--el-color-error);
+    }
+  }
+
+  &.warning {
+    color: var(--el-color-warning);
+    &:not(.disabled):hover {
+      background-color: var(--el-color-warning);
+    }
   }
 }
 

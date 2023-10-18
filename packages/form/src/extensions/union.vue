@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
 
-import { computed, PropType, ref, watch, WatchStopHandle } from 'vue'
+import { computed, PropType, ref, watch } from 'vue'
 import { deepEqual, isNullable } from 'cosmokit'
 import { useI18n } from 'vue-i18n'
 import { check, getChoices, getFallback, Schema, useModel, useI18nText } from '../utils'
