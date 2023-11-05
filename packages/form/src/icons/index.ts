@@ -1,3 +1,4 @@
+import IconAdd from './add.vue'
 import IconArrowDown from './arrow-down.vue'
 import IconArrowUp from './arrow-up.vue'
 import IconBranch from './branch.vue'
@@ -19,6 +20,7 @@ import IconSquareEmpty from './square-empty.vue'
 import IconUndo from './undo.vue'
 
 export {
+  IconAdd,
   IconArrowDown,
   IconArrowUp,
   IconBranch,
