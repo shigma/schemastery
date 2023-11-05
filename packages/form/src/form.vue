@@ -18,7 +18,7 @@
 
 import { computed, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getChoices, Schema } from './utils'
+import { getChoices, Schema, useI18nText } from './utils'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
 
@@ -29,6 +29,8 @@ const props = defineProps({
   disabled: Boolean,
   showHeader: Boolean,
 })
+
+const tt = useI18nText()
 
 const resolved = computed(() => {
   return props.schema && new Schema(props.schema)
@@ -47,7 +49,7 @@ function hasTitle(schema: Schema): [isTitled: boolean, isEmpty: boolean] {
   if (!schema) return [true, true]
   if (schema.meta.hidden) return [true, true]
   if (schema.type === 'object') {
-    if (schema.meta.description) return [true, false]
+    if (tt(schema.meta.description)) return [true, false]
     return hasTitleInList(Object.entries(schema.dict)
       .filter(([, value]) => !value.meta.hidden)
       .map(([, value]) => value))

@@ -1,8 +1,11 @@
 {
   "name": "schemastery-vue",
   "description": "Type driven schema validator",
-  "version": "7.1.0",
+  "version": "7.1.2",
   "main": "src/index.ts",
+  "files": [
+    "src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shigma/schemastery.git",

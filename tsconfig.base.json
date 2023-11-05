@@ -3,6 +3,7 @@
     "strict": true,
     "target": "es2022",
     "module": "commonjs",
+    "sourceMap": true,
     "declaration": true,
     "emitDeclarationOnly": true,
     "composite": true,
