@@ -108,8 +108,8 @@ declare global {
     default(value: T): Schema<S, T>
     comment(text: string): Schema<S, T>
     description(text: string): Schema<S, T>
-    disabled(): Schema<S, T>
-    collapse(): Schema<S, T>
+    disabled(value?: boolean): Schema<S, T>
+    collapse(value?: boolean): Schema<S, T>
     deprecated(): Schema<S, T>
     experimental(): Schema<S, T>
     pattern(regexp: RegExp): Schema<S, T>
@@ -290,11 +290,11 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
     return result
   } else if (this.type === 'array' || this.type === 'tuple') {
     const result: any[] = []
-    for (const key of value) {
-      const schema = this.type === 'array' ? this.inner : this.list![key]
-      const item = schema ? schema.simplify(value[key]) : value[key]
+    ;(value as any[]).forEach((value, index) => {
+      const schema = this.type === 'array' ? this.inner : this.list![index]
+      const item = schema ? schema.simplify(value) : value
       result.push(item)
-    }
+    })
     return result
   } else if (this.type === 'intersect') {
     const result: Dict = {}
