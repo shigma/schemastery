@@ -1,5 +1,5 @@
 import { App, Component } from 'vue'
-import { Schema, useDisabled, useEntries, useModel } from './utils'
+import extensions, { Schema, useDisabled, useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
 import Primitive from './primitive.vue'
 import SchemaCheckbox from './extensions/checkbox.vue'
@@ -31,7 +31,7 @@ export const form = Object.assign(SchemaBase, {
   useModel,
   useEntries,
   useDisabled,
-  extensions: new Set(),
+  extensions,
   install(app: App) {
     app.component('k-form', KForm)
     app.component('k-badge', KBadge)

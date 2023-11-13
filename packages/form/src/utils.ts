@@ -3,8 +3,12 @@ import { clone, deepEqual, Dict, isNullable, valueMap } from 'cosmokit'
 import { computed, getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
+import form from '.'
 
 export { Schema }
+
+const extensions = new Set<form.Extension>()
+export default extensions
 
 export function useI18nText() {
   const composer = useI18n()
@@ -102,10 +106,11 @@ export function useModel<T = any>(options?: ConfigOptions<T>) {
   const doWatch = () => watch(config, (value) => {
     try {
       if (options?.output) value = options.output(value)
+      const schema = optional(Schema(props.schema))
+      if (deepEqual(schema(value), props.schema.meta.default, options?.strict)) value = null
     } catch {
       return
     }
-    if (deepEqual(Schema(props.schema)(value), props.schema.meta.default, options?.strict)) value = null
     emit('update:modelValue', value)
   }, { deep: true })
 

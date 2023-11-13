@@ -50,8 +50,8 @@
 import { computed, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable } from 'cosmokit'
-import { Schema, useI18nText } from './utils'
-import form, { IconUndo, IconReset } from '.'
+import extensions, { Schema, useI18nText } from './utils'
+import { IconUndo, IconReset } from './icons'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
 import zhCN from './locales/zh-CN.yml'
@@ -81,7 +81,7 @@ const isPrimitive = computed(() => {
 })
 
 const SchemaComponent = computed(() => {
-  const candidates = [...form.extensions].map((ext) => {
+  const candidates = [...extensions].map((ext) => {
     if (ext.type && props.schema?.type !== ext.type) return
     if (ext.role && props.schema?.meta.role !== ext.role) return
     if (ext.validate) {
