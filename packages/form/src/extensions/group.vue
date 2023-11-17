@@ -1,5 +1,5 @@
 <template>
-  <schema-base v-bind="$attrs" :collapsible="{ initial: false }">
+  <schema-base v-bind="$attrs" :collapsible="{ initial: schema.meta.collapse }">
     <template #title><slot name="title"></slot></template>
     <template #desc><slot name="desc"></slot></template>
     <template #menu><slot name="menu"></slot></template>
