@@ -16,11 +16,17 @@
   >
     <template #title><slot name="title"></slot></template>
     <template #menu>
-      <div class="k-menu-item" :class="{ disabled }" @click="$emit('update:modelValue', clone(initial))">
+      <div
+        class="k-menu-item"
+        :class="{ disabled: disabled || deepEqual(initial, modelValue) }"
+        @click="$emit('update:modelValue', clone(initial))">
         <span class="k-menu-icon"><icon-undo></icon-undo></span>
         {{ t('initial') }}
       </div>
-      <div class="k-menu-item" :class="{ disabled }" @click="$emit('update:modelValue', null)">
+      <div
+        class="k-menu-item"
+        :class="{ disabled: disabled || isNullable(modelValue) }"
+        @click="$emit('update:modelValue', null)">
         <span class="k-menu-icon"><icon-reset></icon-reset></span>
         {{ t('default') }}
       </div>
