@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Array', () => {
-  it('array', () => {
+  test('array', () => {
     const Config = Schema.array(String)
     expect(Config.toString()).to.equal('string[]')
 
@@ -17,7 +18,7 @@ describe('Array', () => {
     expect(() => new Config([0])).to.throw()
   })
 
-  it('array (length)', () => {
+  test('array (length)', () => {
     const Config = Schema.array(String).min(2).max(3)
 
     expect(new Config(['dress', 'skirt'])).to.deep.equal(['dress', 'skirt'])

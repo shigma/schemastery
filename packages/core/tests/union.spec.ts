@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Union', () => {
-  it('primitive', () => {
+  test('primitive', () => {
     const config = Schema.union([1, 2])
     expect(config.toString()).to.equal('1 | 2')
 
@@ -13,7 +14,7 @@ describe('Union', () => {
     expect(() => config('1')).to.throw()
   })
 
-  it('object', () => {
+  test('object', () => {
     const validate = Schema.union([
       Schema.object({ a: 'foo', b: Schema.number() }),
       Schema.object({ a: 'bar', c: Schema.string() }),
@@ -29,7 +30,7 @@ describe('Union', () => {
     expect(() => validate({ c: 'x' })).to.throw()
   })
 
-  it('default', () => {
+  test('default', () => {
     const validate = Schema.union([
       Schema.object({ a: 'foo', b: Schema.number().default(123) }),
       Schema.object({ a: 'bar', b: Schema.number().default(456) }),

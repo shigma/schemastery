@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Simplify', () => {
-  it('basic support', () => {
+  test('basic support', () => {
     const schema = Schema.intersect([
       Schema.object({
         a: Schema.string().default('a'),

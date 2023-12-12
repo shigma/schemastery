@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Transform', () => {
-  it('transform with array', () => {
+  test('transform with array', () => {
     const Config = Schema.array(Schema.union([
       String,
       Schema.transform(Number, data => data.toString()),
@@ -20,7 +21,7 @@ describe('Transform', () => {
     expect(() => new Config([{}])).to.throw()
   })
 
-  it('transform with object', () => {
+  test('transform with object', () => {
     const Config = Schema.object({
       foo: Schema.union([
         Schema.array(Number),
@@ -43,7 +44,7 @@ describe('Transform', () => {
     expect(() => new Config({ foo: [''] })).to.throw()
   })
 
-  it.skip('transform with intersect', () => {
+  test.skip('transform with intersect', () => {
     const Inner = Schema.object({
       a: Schema.number().required(),
       d: Schema.number().default(0),
@@ -72,7 +73,7 @@ describe('Transform', () => {
     expect(() => new Config({ a: 1, c: 'foo' })).to.throw()
   })
 
-  it('recursive adaptive structure', () => {
+  test('recursive adaptive structure', () => {
     const original = Schema.object({ id: Number })
     const validate = Schema.union([
       original,
@@ -87,7 +88,7 @@ describe('Transform', () => {
     expect(() => validate({ id: 1, children: {} })).to.throw()
   })
 
-  it('adaptive root', () => {
+  test('adaptive root', () => {
     const original = Schema.object({
       bar: Schema.boolean().default(false),
       id: Schema.never(),
@@ -110,7 +111,7 @@ describe('Transform', () => {
     expect(root).to.deep.equal({ foo: { id: 1 } })
   })
 
-  it('autofix', () => {
+  test('autofix', () => {
     const validate = Schema.object({
       foo: Schema.number().default(0),
     })

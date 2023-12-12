@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('I18n', () => {
-  it('basic support', () => {
+  test('basic support', () => {
     const schema = Schema.intersect([
       Schema.object({
         enabled: Schema.boolean().default(false),

@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('String', () => {
-  it('string', () => {
+  test('string', () => {
     const config = Schema.string().default('bar')
     expect(config.toString()).to.equal('string')
 
@@ -14,7 +15,7 @@ describe('String', () => {
     expect(() => config(123)).to.throw()
   })
 
-  it('string (length)', () => {
+  test('string (length)', () => {
     const config = Schema.string().min(5).max(6)
     expect(config('dress')).to.equal('dress')
 
@@ -22,7 +23,7 @@ describe('String', () => {
     expect(() => config('uniform')).to.throw()
   })
 
-  it('string (pattern)', () => {
+  test('string (pattern)', () => {
     const config = Schema.string().pattern(/^[a-z]+$/i)
     expect(config('dress')).to.equal('dress')
     expect(config('SKIRT')).to.equal('SKIRT')

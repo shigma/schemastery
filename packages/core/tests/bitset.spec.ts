@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Bitset', () => {
-  it('basic usage', () => {
+  test('basic usage', () => {
     const validate = Schema.bitset({ a: 1, b: 2, c: 4 })
 
     expect(validate()).to.equal(0)
@@ -17,7 +18,7 @@ describe('Bitset', () => {
     expect(() => validate('a')).to.throw()
   })
 
-  it('enumeration support', () => {
+  test('enumeration support', () => {
     enum Foo {
       a = 1,
       b = 2,
@@ -34,7 +35,7 @@ describe('Bitset', () => {
     expect(() => validate('a')).to.throw()
   })
 
-  it('transform', () => {
+  test('transform', () => {
     const validate = Schema.object({
       foo: Schema.bitset({ a: 1, b: 2, c: 4 }),
     })

@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Object', () => {
-  it('basic support', () => {
+  test('basic support', () => {
     const Config = Schema.object({
       a: Schema.string().required(),
       b: Schema.number().default(123),

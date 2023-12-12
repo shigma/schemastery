@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Number', () => {
-  it('number', () => {
+  test('number', () => {
     const config = Schema.number().default(42)
     expect(config.toString()).to.equal('number')
 
@@ -14,7 +15,7 @@ describe('Number', () => {
     expect(() => config('42')).to.throw()
   })
 
-  it('number (range)', () => {
+  test('number (range)', () => {
     // https://github.com/shigma/schemastery/issues/44
     const config = Schema.number().min(1).max(3).step(0.1)
     expect(config(1)).to.equal(1)
@@ -25,7 +26,7 @@ describe('Number', () => {
     expect(() => config(2.718)).to.throw()
   })
 
-  it('number (decimal)', () => {
+  test('number (decimal)', () => {
     // https://github.com/shigma/schemastery/issues/44
     const config = Schema.number().min(-1).max(0).step(0.01)
     expect(config(-0.55)).to.equal(-0.55)

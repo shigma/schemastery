@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Dictionary', () => {
-  it('dict (basic)', () => {
+  test('dict (basic)', () => {
     const Config = Schema.dict(RegExp)
     expect(Config.toString()).to.equal('{ [key: string]: RegExp }')
 
@@ -19,7 +20,7 @@ describe('Dictionary', () => {
     expect(() => new Config({ a: '' })).to.throw()
   })
 
-  it('dict (key schema)', () => {
+  test('dict (key schema)', () => {
     const validate = Schema.dict(Number, Schema.union([
       'foo' as const,
       Schema.transform('bar' as const, () => 'foo' as const),

@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Intersect', () => {
-  it('intersect (primitive 1)', () => {
+  test('intersect (primitive 1)', () => {
     const validate = Schema.intersect([String, Number])
     expect(validate.toString()).to.equal('string & number')
 
@@ -13,7 +14,7 @@ describe('Intersect', () => {
     expect(() => validate(123)).to.throw()
   })
 
-  it('intersect (primitive 2)', () => {
+  test('intersect (primitive 2)', () => {
     const validate = Schema.intersect([String, 'foo'])
     expect(validate.toString()).to.equal('string & "foo"')
 
@@ -23,7 +24,7 @@ describe('Intersect', () => {
     expect(() => validate('bar')).to.throw()
   })
 
-  it('intersect (object)', () => {
+  test('intersect (object)', () => {
     const validate = Schema.intersect([
       Schema.object({ a: Schema.string().default('foo') }),
       Schema.object({ b: Schema.number().required() }),
@@ -38,7 +39,7 @@ describe('Intersect', () => {
     expect(() => validate({ b: '' })).to.throw()
   })
 
-  it('intersect (nested)', () => {
+  test('intersect (nested)', () => {
     const validate = Schema.intersect([
       Schema.intersect([
         Schema.object({ a: Schema.string() }),
@@ -57,7 +58,7 @@ describe('Intersect', () => {
     expect(() => validate({ c: '' })).to.throw()
   })
 
-  it('intersect (tagged union)', () => {
+  test('intersect (tagged union)', () => {
     // https://github.com/shigma/schemastery/issues/31
     const validate = Schema.intersect([
       Schema.object({ e: Schema.boolean().default(true) }),
@@ -76,7 +77,7 @@ describe('Intersect', () => {
     expect(validate(null)).to.deep.equal({ e: true, x: 114 })
   })
 
-  it('intersect (shared default)', () => {
+  test('intersect (shared default)', () => {
     // https://github.com/shigma/schemastery/issues/45
     const validate = Schema.intersect([
       Schema.object({

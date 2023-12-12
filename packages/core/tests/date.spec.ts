@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Date', () => {
-  it('date', () => {
+  test('date', () => {
     const Config = Schema.object({
       date: Schema.date(),
     })

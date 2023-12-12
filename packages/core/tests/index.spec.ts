@@ -1,15 +1,16 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Schema API', () => {
-  it('unknown', () => {
+  test('unknown', () => {
     const validate1 = new Schema({ type: 'unknown' })
     expect(() => validate1(0)).to.throw()
 
     expect(() => Schema.array(Symbol('unknown'))).to.throw()
   })
 
-  it('any', () => {
+  test('any', () => {
     const config = Schema.any()
     expect(config.toString()).to.equal('any')
 
@@ -17,7 +18,7 @@ describe('Schema API', () => {
     expect(config(null)).to.equal(null)
   })
 
-  it('never', () => {
+  test('never', () => {
     const config = Schema.never()
     expect(config.toString()).to.equal('never')
 
@@ -26,7 +27,7 @@ describe('Schema API', () => {
     expect(() => config(123)).to.throw()
   })
 
-  it('number', () => {
+  test('number', () => {
     const config = Schema.number().min(1).step(2).default(123)
     expect(config.toString()).to.equal('number')
 
@@ -39,7 +40,7 @@ describe('Schema API', () => {
     expect(() => config(456)).to.throw()
   })
 
-  it('boolean', () => {
+  test('boolean', () => {
     const config = Schema.boolean().default(true)
     expect(config.toString()).to.equal('boolean')
 
@@ -51,7 +52,7 @@ describe('Schema API', () => {
     expect(() => config(1)).to.throw()
   })
 
-  it('function', () => {
+  test('function', () => {
     const config = Schema.function()
     expect(config.toString()).to.equal('function')
 
@@ -62,7 +63,7 @@ describe('Schema API', () => {
     expect(() => config(1)).to.throw()
   })
 
-  it('is', () => {
+  test('is', () => {
     const config = Schema.is(RegExp)
     expect(config.toString()).to.equal('RegExp')
 
@@ -74,7 +75,7 @@ describe('Schema API', () => {
     expect(() => config('1')).to.throw()
   })
 
-  it('loose', () => {
+  test('loose', () => {
     const config = Schema.object({
       foo: Schema.union([1, 2, 3]).loose().default(1),
       bar: Schema.union([1, 2, 3]),

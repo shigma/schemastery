@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Miscellaneous', () => {
-  it('serialization (basic)', () => {
+  test('serialization (basic)', () => {
     const Number = Schema.number()
     const validate = new Schema(JSON.parse(JSON.stringify(Number)))
 
@@ -11,7 +12,7 @@ describe('Miscellaneous', () => {
     expect(() => validate('0')).to.throw()
   })
 
-  it('serialization (recursive)', () => {
+  test('serialization (recursive)', () => {
     const Node = Schema.object({ id: Number })
     Node.set('children', Schema.array(Node))
     const validate = new Schema(JSON.parse(JSON.stringify(Node)))

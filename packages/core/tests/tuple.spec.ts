@@ -1,8 +1,9 @@
+import { describe, test } from 'node:test'
 import { expect } from 'chai'
 import Schema from 'schemastery'
 
 describe('Tuple', () => {
-  it('basic support', () => {
+  test('basic support', () => {
     const Config = Schema.tuple([
       Schema.string().required(),
       Schema.number().default(123),
