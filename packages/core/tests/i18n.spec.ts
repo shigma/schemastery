@@ -20,19 +20,19 @@ describe('I18n', () => {
     ]).i18n({
       en: [
         {
-          $description: 'Feature 1',
+          $desc: 'Feature 1',
           enabled: 'Enabled',
         },
         {
           foo: 'Property 1',
         },
         {
-          $description: 'Feature 2',
+          $desc: 'Feature 2',
           bar: 'Property 2',
         },
       ],
       zh: {
-        $description: '配置项',
+        $desc: '配置项',
         enabled: '启用',
         foo: '属性 1',
         bar: '属性 2',

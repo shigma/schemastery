@@ -198,13 +198,17 @@ function mergeDesc(original: undefined | string | Dict<string>, messages: Dict) 
   const result: Dict<string> = typeof original === 'string' ? { '': original } : { ...original }
   for (const locale in messages) {
     const value = messages[locale]
-    if (value?.$description) {
-      result[locale] = value.$description
+    if (value?.$description || value?.$desc) {
+      result[locale] = value.$description || value.$desc
     } else if (typeof value === 'string') {
       result[locale] = value
     }
   }
   return result
+}
+
+function getInner(value: any) {
+  return value?.$value ?? value?.$inner
 }
 
 function extractKeys(data: any) {
@@ -216,13 +220,13 @@ Schema.prototype.i18n = function i18n(messages) {
   schema.meta.description = mergeDesc(schema.meta.description, messages)
   if (schema.dict) {
     schema.dict = valueMap(schema.dict, (inner, key) => {
-      return inner.i18n(valueMap(messages, (data) => data?.$value?.[key] ?? data?.[key]))
+      return inner.i18n(valueMap(messages, (data) => getInner(data)?.[key] ?? data?.[key]))
     })
   }
   if (schema.list) {
     schema.list = schema.list!.map((inner, index) => {
       return inner.i18n(valueMap(messages, (data = {}) => {
-        if (Array.isArray(data?.$value)) return data.$value[index]
+        if (Array.isArray(getInner(data))) return getInner(data)[index]
         if (Array.isArray(data)) return data[index]
         return extractKeys(data)
       }))
@@ -230,7 +234,7 @@ Schema.prototype.i18n = function i18n(messages) {
   }
   if (schema.inner) {
     schema.inner = schema.inner.i18n(valueMap(messages, (data) => {
-      if (data?.$value) return data.$value
+      if (getInner(data)) return getInner(data)
       return extractKeys(data)
     }))
   }
