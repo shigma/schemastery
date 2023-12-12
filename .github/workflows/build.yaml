@@ -1,4 +1,4 @@
-name: Test
+name: Build
 
 on:
   push:
@@ -6,6 +6,19 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+      - name: Install
+        run: yarn --no-immutable
+      - name: Build
+        run: yarn build
+
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,9 +34,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install
-        run: yarn
-      - name: Build
-        run: yarn build
+        run: yarn --no-immutable
       - name: Unit Test
         run: yarn test:json
       - name: Report Coverage
@@ -32,27 +43,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
           name: codecov
-
-  deploy:
-    if: ${{ false }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
-      - name: Install
-        run: yarn
-      - name: Build source
-        run: yarn build
-      - name: Build docs
-        run: yarn build:docs
-      - name: Deploy
-        if: ${{ github.repository == 'shigma/schemastery' && github.ref == 'refs/heads/master' }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/.vuepress/dist/schemastery
-          publish_branch: pages
-          force_orphan: true
