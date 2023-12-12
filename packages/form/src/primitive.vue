@@ -64,9 +64,31 @@
         v-for="(item, index) in schema.list"
         :key="index"
         :value="index"
-        :disabled="item.meta.disabled"
-        :label="tt(item.meta.description) || item.value"
-      ></el-option>
+        :disabled="item.meta.disabled">
+        {{ tt(item.meta.description) || item.value }}
+        <k-badge :type="type" v-for="{ text, type } in item.meta.badges || []">
+          {{ t('badge.' + text) }}
+        </k-badge>
+      </el-option>
+    </el-select>
+  </template>
+
+  <template v-else-if="schema.type === 'array' || schema.type === 'bitset'">
+    <el-select
+      multiple
+      collapse-tags
+      v-model="values"
+      :disabled="disabled">
+      <el-option
+        v-for="item in items"
+        :key="item.value"
+        :value="item.value"
+        :disabled="item.meta.disabled">
+        {{ tt(item.meta.description) || item.value }}
+        <k-badge :type="type" v-for="{ text, type } in item.meta.badges || []">
+          {{ t('badge.' + text) }}
+        </k-badge>
+      </el-option>
     </el-select>
   </template>
 </template>
@@ -77,7 +99,7 @@ import { computed, PropType, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconExternal, IconEye, IconEyeSlash, IconInvalid } from './icons'
 import { isNullable } from 'cosmokit'
-import { explain, useI18nText, useModel } from './utils'
+import { explain, useI18nText, useModel, useMultiSelect } from './utils'
 import Schema from 'schemastery'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
@@ -94,6 +116,7 @@ const props = defineProps({
 const showPass = ref(false)
 
 const config = useModel()
+const { values, items } = useMultiSelect()
 
 const tt = useI18nText()
 

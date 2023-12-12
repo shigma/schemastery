@@ -1,5 +1,5 @@
 import { App, Component } from 'vue'
-import extensions, { Schema, useDisabled, useEntries, useModel } from './utils'
+import extensions, { Schema, toColumns, useDisabled, useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
 import Primitive from './primitive.vue'
 import SchemaCheckbox from './extensions/checkbox.vue'
@@ -119,14 +119,14 @@ form.extensions.add({
   type: 'array',
   role: 'table',
   component: SchemaTable,
-  validate: value => Array.isArray(value),
+  validate: (value, schema) => Array.isArray(value) && !!toColumns(schema.inner),
 })
 
 form.extensions.add({
   type: 'dict',
   role: 'table',
   component: SchemaTable,
-  validate: value => typeof value === 'object',
+  validate: (value, schema) => typeof value === 'object' && !!toColumns(schema.inner),
 })
 
 form.extensions.add({

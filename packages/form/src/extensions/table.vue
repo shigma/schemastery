@@ -103,7 +103,7 @@
 import { computed, ref, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconArrowUp, IconArrowDown, IconDelete, IconInvalid } from '../icons'
-import { Schema, useEntries, useI18nText, explain } from '../utils'
+import { Schema, useEntries, useI18nText, explain, toColumns } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
 import zhCN from '../locales/zh-CN.yml'
@@ -119,25 +119,7 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
-function isPrimitive(schema: Schema): boolean {
-  if (['string', 'number', 'boolean'].includes(schema.type)) return true
-  if (schema.type === 'union') return schema.list.every(item => item.type === 'const')
-}
-
-function ensureColumns(entries: [string, Schema][]) {
-  if (entries.every(([, schema]) => isPrimitive(schema))) return entries
-}
-
-const columns = computed<[string, Schema][]>(() => {
-  const { inner } = props.schema
-  if (isPrimitive(inner)) {
-    return [[null, inner]]
-  } else if (inner.type === 'tuple') {
-    return ensureColumns(Object.entries(inner.list))
-  } else if (inner.type === 'object') {
-    return ensureColumns(Object.entries(inner.dict))
-  }
-})
+const columns = computed(() => toColumns(props.schema.inner))
 
 const { entries, insert, del, up, down } = useEntries()
 

@@ -1,5 +1,5 @@
 import Schema from 'schemastery'
-import { clone, deepEqual, Dict, isNullable, valueMap } from 'cosmokit'
+import { clone, deepEqual, Dict, difference, isNullable, union, valueMap } from 'cosmokit'
 import { computed, getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
@@ -170,5 +170,95 @@ export function useEntries() {
     insert(index: number) {
       entries.value.splice(index, 0, ['', null])
     },
+  }
+}
+
+function isConstUnion(schema: Schema) {
+  return schema.type === 'union' && schema.list.every(item => item.type === 'const')
+}
+
+export function isMultiSelect(schema: Schema) {
+  if (schema.type === 'bitset') return true
+  if (schema.type === 'array') return isConstUnion(schema.inner)
+}
+
+export function useMultiSelect() {
+  const { props } = getCurrentInstance() as any
+
+  const keys = computed(() => {
+    if (props.schema.type === 'bitset') {
+      return Object.keys(props.schema.bits)
+    } else if (props.schema.type === 'array') {
+      return props.schema.inner.list.map((item: any) => item.value)
+    }
+  })
+
+  const items = computed(() => {
+    if (props.schema.type === 'bitset') {
+      return Object.keys(props.schema.bits).map(key => Schema.const(key))
+    } else if (props.schema.type === 'array') {
+      return props.schema.inner.list
+    }
+  })
+
+  const values = useModel<string[]>({
+    input(value) {
+      if (!isMultiSelect(props.schema)) return value
+      if (isNullable(value)) return []
+      if (Array.isArray(value)) return value
+      return Object.entries(props.schema.bits)
+        .filter(([key, bit]) => value & bit as any)
+        .map(([key]) => key)
+    },
+    output(value) {
+      if (!isMultiSelect(props.schema)) return value
+      return value.sort((a, b) => {
+        const indexA = keys.value.indexOf(a)
+        const indexB = keys.value.indexOf(b)
+        if (indexA < 0) {
+          return indexB < 0 ? 0 : 1
+        } else {
+          return indexB < 0 ? -1 : indexA - indexB
+        }
+      })
+    },
+  })
+
+  return {
+    values,
+    items,
+    selectAll() {
+      values.value = union(values.value, keys.value)
+    },
+    selectNone() {
+      values.value = difference(values.value, keys.value)
+    },
+    toggle(key: string) {
+      if (values.value.includes(key)) {
+        values.value = values.value.filter(k => k !== key)
+      } else {
+        values.value = [...values.value, key]
+      }
+    },
+  }
+}
+
+function isValidColumn(schema: Schema): boolean {
+  return ['string', 'number', 'boolean'].includes(schema.type)
+    || isConstUnion(schema)
+    || isMultiSelect(schema)
+}
+
+function ensureColumns(entries: [string, Schema][]) {
+  if (entries.every(([, schema]) => isValidColumn(schema))) return entries
+}
+
+export function toColumns(schema: Schema): [string, Schema][] {
+  if (isValidColumn(schema)) {
+    return [[null, schema]]
+  } else if (schema.type === 'tuple') {
+    return ensureColumns(Object.entries(schema.list))
+  } else if (schema.type === 'object') {
+    return ensureColumns(Object.entries(schema.dict))
   }
 }
