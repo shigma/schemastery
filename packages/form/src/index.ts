@@ -7,6 +7,7 @@ import SchemaGroup from './extensions/group.vue'
 import SchemaIntersect from './extensions/intersect.vue'
 import SchemaObject from './extensions/object.vue'
 import SchemaRadio from './extensions/radio.vue'
+import SchemaMultiSelect from './extensions/multiselect.vue'
 import SchemaTable from './extensions/table.vue'
 import SchemaTextarea from './extensions/textarea.vue'
 import SchemaTuple from './extensions/tuple.vue'
@@ -56,6 +57,20 @@ export namespace form {
     component: Component
   }
 }
+
+form.extensions.add({
+  type: 'bitset',
+  role: 'select',
+  component: SchemaMultiSelect,
+  validate: value => typeof value === 'number' || Array.isArray(value) && value.every(v => typeof v === 'string'),
+})
+
+form.extensions.add({
+  type: 'array',
+  role: 'select',
+  component: SchemaMultiSelect,
+  validate: value => Array.isArray(value) && value.every(v => typeof v === 'string'),
+})
 
 form.extensions.add({
   type: 'bitset',
