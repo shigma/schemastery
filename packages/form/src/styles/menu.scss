@@ -42,29 +42,31 @@ $menu-padding-left: 2.5rem;
     pointer-events: none;
   }
 
-  &:not(.disabled):hover {
-    color: inherit;
-    background-color: var(--k-hover-bg);
-  }
-
-  &.primary {
-    color: var(--el-color-primary);
-    &:not(.disabled):hover {
-      background-color: var(--el-color-primary);
+  &:not(.disabled) {
+    &:hover {
+      color: inherit !important;
+      background-color: var(--k-hover-bg);
     }
-  }
 
-  &.danger {
-    color: var(--el-color-error);
-    &:not(.disabled):hover {
-      background-color: var(--el-color-error);
+    &.primary {
+      color: var(--el-color-primary);
+      &:hover {
+        background-color: var(--el-color-primary);
+      }
     }
-  }
-
-  &.warning {
-    color: var(--el-color-warning);
-    &:not(.disabled):hover {
-      background-color: var(--el-color-warning);
+  
+    &.danger {
+      color: var(--el-color-error);
+      &:hover {
+        background-color: var(--el-color-error);
+      }
+    }
+  
+    &.warning {
+      color: var(--el-color-warning);
+      &:hover {
+        background-color: var(--el-color-warning);
+      }
     }
   }
 }
