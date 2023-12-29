@@ -16,6 +16,9 @@
           </th>
           <th v-for="([key, schema]) in columns" :key="key">
             <span>{{ key === null ? t('entry.value') : tt(schema.meta.description) || key }}</span>
+            <k-badge :type="type" v-for="{ text, type } in schema.meta.badges || []">
+              {{ t('badge.' + text) }}
+            </k-badge>
           </th>
           <th colspan="3"></th>
         </tr>
@@ -50,7 +53,7 @@
             <schema-primitive
               minimal
               :schema="schema"
-              :disabled="disabled"
+              :disabled="disabled || schema.meta.disabled"
               :modelValue="key === null ? entries[i][1] : entries[i][1]?.[key]"
               @update:modelValue="key === null ? entries[i][1] = $event : (entries[i][1] ||= {})[key] = $event"
               @focus="handleFocus($event, i, j)"
@@ -162,6 +165,7 @@ function validateCell(i?: number, j?: number) {
 function handleMouseEnter(event: MouseEvent, i?: number, j?: number) {
   const el = event.target as HTMLElement
   if (el === hover.value?.el) return
+  if (columns.value[j]?.[1].meta.disabled) return
   hover.value = getRelative(el, validateCell(i, j))
 }
 
@@ -226,16 +230,17 @@ if (import.meta.hot) {
 
   th {
     padding: 0.5rem 0.75rem;
-    line-height: 1rem;
+    line-height: 1.25rem;
   }
 
   td {
     padding: 0;
 
-    * .el-input__wrapper {
-      box-shadow: none;
+    .el-input .el-input__wrapper {
+      box-shadow: none !important;
     }
 
+    // override el-select !important rule
     .el-select .el-input .el-input__wrapper {
       box-shadow: none !important;
     }

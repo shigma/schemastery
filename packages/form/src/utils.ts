@@ -250,6 +250,7 @@ function isValidColumn(schema: Schema): boolean {
 }
 
 function ensureColumns(entries: [string, Schema][]) {
+  entries = entries.filter(([, schema]) => !schema.meta.hidden)
   if (entries.every(([, schema]) => isValidColumn(schema))) return entries
 }
 
