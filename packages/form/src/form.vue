@@ -1,16 +1,16 @@
 <template>
   <form class="k-form">
-    <slot name="prolog"></slot>
     <h2 class="k-schema-header" v-if="showHeader || !hasTitle(resolved)[0]">
       <slot name="title">{{ t('title') }}</slot>
     </h2>
+    <slot name="before"></slot>
     <k-schema
       v-model="config"
       :initial="initial"
       :schema="resolved"
       :disabled="disabled"
     ></k-schema>
-    <slot name="epilog"></slot>
+    <slot name="after"></slot>
   </form>
 </template>
 

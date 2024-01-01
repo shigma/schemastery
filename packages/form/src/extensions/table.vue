@@ -88,7 +88,7 @@
       <template v-for="rect in { hover, focus }">
         <div
           v-if="rect"
-          :class="['outline', { invalid: rect.invalid }]"
+          :class="['cell-outline', { invalid: rect.invalid }]"
           :style="{
             top: rect.top + 'px',
             left: rect.left + 'px',
@@ -211,7 +211,7 @@ if (import.meta.hot) {
 .k-schema-table-container {
   position: relative;
 
-  .outline {
+  .cell-outline {
     position: absolute;
     box-sizing: border-box;
     border: 1px solid var(--k-color-active);

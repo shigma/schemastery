@@ -2,6 +2,7 @@
   "name": "@root/schemastery",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "packageManager": "yarn@4.0.2",
   "workspaces": [
     "docs",
@@ -35,7 +36,7 @@
     "shx": "^0.3.4",
     "typescript": "^5.3.2",
     "vitepress": "1.0.0-rc.32",
-    "yakumo": "^1.0.0-alpha.8",
+    "yakumo": "^1.0.0-alpha.9",
     "yakumo-esbuild": "^1.0.0-alpha.2",
     "yakumo-tsc": "^1.0.0-alpha.2"
   }
