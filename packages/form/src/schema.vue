@@ -18,6 +18,12 @@
     <template #menu>
       <div
         class="k-menu-item"
+        @click="showJson = true">
+        <span class="k-menu-icon"><icon-code></icon-code></span>
+        {{ t('edit.json') }}
+      </div>
+      <div
+        class="k-menu-item"
         :class="{ disabled: disabled || deepEqual(initial, modelValue) }"
         @click="$emit('update:modelValue', clone(initial))">
         <span class="k-menu-icon"><icon-undo></icon-undo></span>
@@ -49,15 +55,43 @@
       ></schema-primitive>
     </template>
   </schema-component>
+
+  <el-dialog
+    v-model="showJson"
+    destroy-on-close
+    class="k-schema-edit-dialog"
+    :title="t('edit.json')"
+    @open="input?.focus()"
+  >
+    <el-input
+      ref="input"
+      type="textarea"
+      :class="{ invalid: jsonError }"
+      :autosize="{ minRows: 2, maxRows: 10 }"
+      v-model="jsonInput"
+    ></el-input>
+    <template #footer>
+      <div></div>
+      <div>
+        <el-button @click="copyToClipboard">{{ t('edit.copy') }}</el-button>
+        <el-button
+          type="primary"
+          :disabled="!!jsonError"
+          @click="saveChanges"
+        >{{ t('edit.save') }}</el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
 
-import { computed, PropType } from 'vue'
+import { computed, PropType, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable } from 'cosmokit'
-import extensions, { Schema, useI18nText } from './utils'
-import { IconUndo, IconReset } from './icons'
+import { ElMessage } from 'element-plus'
+import extensions, { getFallback, Schema, useI18nText } from './utils'
+import { IconCode, IconUndo, IconReset } from './icons'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
 import zhCN from './locales/zh-CN.yml'
@@ -73,7 +107,36 @@ const props = defineProps({
   prefix: { type: String, default: '' },
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const input = ref()
+const showJson = ref(false)
+const jsonInput = ref('')
+const jsonError = ref('')
+
+watch(() => props.modelValue, (value) => {
+  jsonInput.value = JSON.stringify(value ?? getFallback(props.schema), null, 2)
+}, { immediate: true })
+
+watch(jsonInput, (value: string) => {
+  jsonError.value = ''
+  try {
+    const config = JSON.parse(value)
+    Schema(props.schema)(config)
+  } catch (e) {
+    jsonError.value = t('edit.invalid')
+  }
+})
+
+async function copyToClipboard() {
+  await navigator.clipboard.writeText(jsonInput.value)
+  ElMessage.success(t('edit.copied'))
+}
+
+function saveChanges() {
+  emit('update:modelValue', Schema(props.schema).simplify(JSON.parse(jsonInput.value)))
+  showJson.value = false
+}
 
 const tt = useI18nText()
 

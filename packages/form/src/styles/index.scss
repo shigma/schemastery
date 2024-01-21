@@ -39,3 +39,18 @@
     border-top: none;
   }
 }
+
+.el-input.invalid .el-input__wrapper {
+  box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+}
+
+.el-textarea.invalid .el-textarea__inner {
+  box-shadow: 0 0 0 1px var(--el-color-danger) inset;
+}
+
+.k-schema-edit-dialog {
+  .el-dialog__footer {
+    display: flex;
+    justify-content: space-between;
+  }
+}

@@ -3,6 +3,12 @@ initial: Undo
 default: Restore to Default
 collapse: Collapse
 expand: Expand to Edit
+edit:
+  json: Edit JSON
+  invalid: Invalid configuration.
+  save: Save Changes
+  copy: Copy to Clipboard
+  copied: Copied
 badge:
   deprecated: deprecated
   experimental: experimental

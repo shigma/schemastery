@@ -3,6 +3,7 @@ import IconArrowDown from './arrow-down.vue'
 import IconArrowUp from './arrow-up.vue'
 import IconBranch from './branch.vue'
 import IconClose from './close.vue'
+import IconCode from './code.vue'
 import IconCollapse from './collapse.vue'
 import IconDelete from './delete.vue'
 import IconEllipsis from './ellipsis.vue'
@@ -25,6 +26,7 @@ export {
   IconArrowUp,
   IconBranch,
   IconClose,
+  IconCode,
   IconCollapse,
   IconDelete,
   IconEllipsis,

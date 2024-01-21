@@ -3,6 +3,12 @@ initial: 撤销更改
 default: 恢复默认值
 collapse: 折叠子项
 expand: 展开以编辑
+edit:
+  json: 编辑 JSON
+  invalid: 无效的配置。
+  save: 保存更改
+  copy: 复制到剪贴板
+  copied: 已复制
 badge:
   deprecated: 已废弃
   experimental: 实验性
