@@ -1,5 +1,6 @@
 <template>
   <schema-component
+    v-bind="$attrs"
     v-if="!schema?.meta.hidden && (extra?.foldable || (schema && schema.type !== 'const'))"
     :schema="schema"
     :prefix="prefix"
@@ -59,6 +60,7 @@
   <el-dialog
     v-model="showJson"
     destroy-on-close
+    append-to-body
     class="k-schema-edit-dialog"
     :title="t('edit.json')"
     @open="input?.focus()"
@@ -96,6 +98,10 @@ import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
