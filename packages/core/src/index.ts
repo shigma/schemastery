@@ -289,7 +289,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
     for (const key in value) {
       const schema = this.type === 'object' ? this.dict![key] : this.inner
       const item = schema?.simplify(value[key])
-      if (!isNullable(item)) result[key] = item
+      if (this.type === 'dict' || !isNullable(item)) result[key] = item
     }
     return result
   } else if (this.type === 'array' || this.type === 'tuple') {
