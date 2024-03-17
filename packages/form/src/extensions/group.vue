@@ -6,7 +6,11 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="insert(entries.length)" :disabled="disabled">{{ t('entry.add-item') }}</el-button>
+      <el-button
+        v-if="!isFixedLength"
+        @click="insert(entries.length)"
+        :disabled="disabled || isMax"
+      >{{ t('entry.add-item') }}</el-button>
     </template>
     <template #collapse>
       <k-schema
@@ -33,15 +37,15 @@
             <span class="k-menu-icon"><icon-arrow-down></icon-arrow-down></span>
             {{ t('entry.move-down') }}
           </div>
-          <div class="k-menu-item" :class="{ disabled }" @click="del(index)">
+          <div v-if="!isFixedLength" class="k-menu-item" :class="{ disabled: disabled || isMin }" @click="del(index)">
             <span class="k-menu-icon"><icon-delete></icon-delete></span>
             {{ t('entry.del-item') }}
           </div>
-          <div class="k-menu-item" :class="{ disabled }" @click="insert(index)">
+          <div v-if="!isFixedLength" class="k-menu-item" :class="{ disabled: disabled || isMax }" @click="insert(index)">
             <span class="k-menu-icon"><icon-insert-before></icon-insert-before></span>
             {{ t('entry.insert-before') }}
           </div>
-          <div class="k-menu-item" :class="{ disabled }" @click="insert(index + 1)">
+          <div v-if="!isFixedLength" class="k-menu-item" :class="{ disabled: disabled || isMax }" @click="insert(index + 1)">
             <span class="k-menu-icon"><icon-insert-after></icon-insert-after></span>
             {{ t('entry.insert-after') }}
           </div>
@@ -85,7 +89,7 @@ defineProps({
 
 defineEmits(['update:modelValue'])
 
-const { entries, up, down, insert, del } = useEntries()
+const { entries, up, down, insert, del, isMax, isMin, isFixedLength } = useEntries()
 
 const { t, setLocaleMessage } = useI18n({
   messages: {

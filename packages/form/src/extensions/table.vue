@@ -6,7 +6,11 @@
     <template #prefix><slot name="prefix"></slot></template>
     <template #suffix><slot name="suffix"></slot></template>
     <template #control>
-      <el-button @click="insert(entries.length)" :disabled="disabled">{{ t('entry.add-row') }}</el-button>
+      <el-button
+        v-if="!isFixedLength"
+        @click="insert(entries.length)"
+        :disabled="disabled || isMax"
+      >{{ t('entry.add-row') }}</el-button>
     </template>
     <div class="bottom k-schema-table-container" ref="container" v-if="columns && entries.length">
       <table class="k-schema-table">
@@ -62,24 +66,28 @@
           </td>
           <td v-if="!disabled" class="button"
             :class="{ disabled: !i }"
+            @click.stop="up(i)"
             @mouseenter="handleMouseEnter($event, null)"
             @mouseleave="handleMouseLeave($event, null)">
-            <div class="inner" @click.stop="up(i)">
+            <div class="inner">
               <icon-arrow-up></icon-arrow-up>
             </div>
           </td>
           <td v-if="!disabled" class="button"
             :class="{ disabled: i === entries.length - 1 }"
+            @click.stop="down(i)"
             @mouseenter="handleMouseEnter($event, null)"
             @mouseleave="handleMouseLeave($event, null)">
-            <div class="inner" @click.stop="down(i)">
+            <div class="inner">
               <icon-arrow-down></icon-arrow-down>
             </div>
           </td>
-          <td v-if="!disabled" class="button"
+          <td v-if="!disabled && !isFixedLength" class="button"
+            :class="{ disabled: isMin }"
+            @click.stop="del(i)"
             @mouseenter="handleMouseEnter($event, null)"
             @mouseleave="handleMouseLeave($event, null)">
-            <div class="inner" @click.stop="del(i)">
+            <div class="inner">
               <icon-delete></icon-delete>
             </div>
           </td>
@@ -124,7 +132,7 @@ defineEmits(['update:modelValue'])
 
 const columns = computed(() => toColumns(props.schema.inner))
 
-const { entries, insert, del, up, down } = useEntries()
+const { entries, insert, del, up, down, isMax, isMin, isFixedLength } = useEntries()
 
 interface Rect {
   el: HTMLElement
@@ -257,6 +265,7 @@ if (import.meta.hot) {
   td.button {
     width: 2rem;
     color: var(--k-text-light);
+    cursor: pointer;
 
     &:hover {
       color: var(--k-color-active);
@@ -268,7 +277,6 @@ if (import.meta.hot) {
       display: flex;
       justify-content: center;
       align-items: center;
-      cursor: pointer;
     }
 
     .k-icon {

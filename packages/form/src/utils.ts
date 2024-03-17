@@ -130,7 +130,16 @@ export function useEntries() {
 
   const entries = useModel<[string, any][]>({
     strict: true,
-    input: (config) => Object.entries(config),
+    input: (config) => {
+      const result = Object.entries(config)
+      if (props.schema.type === 'array') {
+        const padding = (props.schema.meta.min ?? 0) - result.length
+        for (let i = 0; i < padding; i++) {
+          result.push(['' + result.length, null])
+        }
+      }
+      return result
+    },
     output: (config) => {
       if (props.schema.type === 'array') {
         return config.map(([, value]) => value)
@@ -144,8 +153,18 @@ export function useEntries() {
     },
   })
 
+  const isFixedLength = computed(() => {
+    return props.schema.meta.min && props.schema.meta.min === props.schema.meta.max
+  })
+
+  const isMax = computed(() => entries.value.length >= props.schema.meta.max)
+  const isMin = computed(() => entries.value.length >= props.schema.meta.max)
+
   return {
     entries,
+    isMax,
+    isMin,
+    isFixedLength,
     up(index: number) {
       if (props.schema.type === 'dict') {
         entries.value.splice(index - 1, 0, ...entries.value.splice(index, 1))

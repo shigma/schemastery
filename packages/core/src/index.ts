@@ -1,4 +1,4 @@
-import { clone, deepEqual, Dict, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
+import { clone, deepEqual, Dict, filterKeys, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 const kSchema = Symbol.for('schemastery')
 
@@ -212,7 +212,7 @@ function getInner(value: any) {
 }
 
 function extractKeys(data: any) {
-  return Object.fromEntries(Object.entries(data ?? {}).filter(([key]) => !key.startsWith('$')))
+  return filterKeys(data ?? {}, key => !key.startsWith('$'))
 }
 
 Schema.prototype.i18n = function i18n(messages) {
@@ -421,10 +421,10 @@ Schema.extend('const', (data, { value }) => {
   throw new TypeError(`expected ${value} but got ${data}`)
 })
 
-function checkWithinRange(data: number, meta: Schemastery.Meta<any>, description: string) {
+function checkWithinRange(data: number, meta: Schemastery.Meta<any>, description: string, skipMin = false) {
   const { max = Infinity, min = -Infinity } = meta
   if (data > max) throw new TypeError(`expected ${description} <= ${max} but got ${data}`)
-  if (data < min) throw new TypeError(`expected ${description} >= ${min} but got ${data}`)
+  if (data < min && !skipMin) throw new TypeError(`expected ${description} >= ${min} but got ${data}`)
 }
 
 Schema.extend('string', (data, { meta }) => {
@@ -519,7 +519,8 @@ function property(data: any, key: keyof any, schema: Schema, options?: Schemaste
 
 Schema.extend('array', (data, { inner, meta }, options) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  checkWithinRange(data.length, meta, 'array length')
+  while (data.length && isNullable(data[data.length - 1])) data.pop()
+  checkWithinRange(data.length, meta, 'array length', !isNullable(inner!.meta.default))
   return [data.map((_, index) => property(data, index, inner!, options))]
 })
 
