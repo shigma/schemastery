@@ -1,7 +1,7 @@
 {
   "name": "schemastery-vue",
   "description": "Type driven schema validator",
-  "version": "7.3.2",
+  "version": "7.3.3",
   "main": "src/index.ts",
   "files": [
     "src"
@@ -23,6 +23,6 @@
     "vue": "^3"
   },
   "dependencies": {
-    "schemastery": "^3.14.4"
+    "schemastery": "^3.14.5"
   }
 }

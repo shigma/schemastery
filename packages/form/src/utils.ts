@@ -160,6 +160,13 @@ export function useEntries() {
   const isMax = computed(() => entries.value.length >= props.schema.meta.max)
   const isMin = computed(() => entries.value.length >= props.schema.meta.max)
 
+  const reindex = () => {
+    if (props.schema.type !== 'array') return
+    for (let i = 0; i < entries.value.length; i++) {
+      entries.value[i][0] = '' + i
+    }
+  }
+
   return {
     entries,
     isMax,
@@ -173,6 +180,7 @@ export function useEntries() {
         entries.value[index][1] = entries.value[index - 1][1]
         entries.value[index - 1][1] = temp
       }
+      reindex()
     },
     down(index: number) {
       if (props.schema.type === 'dict') {
@@ -182,12 +190,15 @@ export function useEntries() {
         entries.value[index][1] = entries.value[index + 1][1]
         entries.value[index + 1][1] = temp
       }
+      reindex()
     },
     del(index: number) {
       entries.value.splice(index, 1)
+      reindex()
     },
     insert(index: number) {
       entries.value.splice(index, 0, ['', null])
+      reindex()
     },
   }
 }

@@ -519,7 +519,6 @@ function property(data: any, key: keyof any, schema: Schema, options?: Schemaste
 
 Schema.extend('array', (data, { inner, meta }, options) => {
   if (!Array.isArray(data)) throw new TypeError(`expected array but got ${data}`)
-  while (data.length && isNullable(data[data.length - 1])) data.pop()
   checkWithinRange(data.length, meta, 'array length', !isNullable(inner!.meta.default))
   return [data.map((_, index) => property(data, index, inner!, options))]
 })

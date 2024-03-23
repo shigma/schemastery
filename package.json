@@ -35,9 +35,9 @@
     "serve": "^13.0.4",
     "shx": "^0.3.4",
     "typescript": "^5.3.2",
-    "vitepress": "1.0.0-rc.32",
-    "yakumo": "^1.0.0-alpha.9",
-    "yakumo-esbuild": "^1.0.0-alpha.2",
-    "yakumo-tsc": "^1.0.0-alpha.2"
+    "vitepress": "1.0.0-rc.40",
+    "yakumo": "^1.0.0-beta.12",
+    "yakumo-esbuild": "^1.0.0-beta.5",
+    "yakumo-tsc": "^1.0.0-beta.3"
   }
 }
