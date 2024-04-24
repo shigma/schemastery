@@ -282,7 +282,7 @@ Schema.prototype.pattern = function pattern(regexp) {
 }
 
 Schema.prototype.simplify = function simplify(this: Schema, value) {
-  if (deepEqual(value, this.meta.default)) return null
+  if (deepEqual(value, this.meta.default, this.type === 'dict')) return null
   if (isNullable(value)) return value
   if (this.type === 'object' || this.type === 'dict') {
     const result: Dict = {}
@@ -291,6 +291,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
       const item = schema?.simplify(value[key])
       if (this.type === 'dict' || !isNullable(item)) result[key] = item
     }
+    if (deepEqual(result, this.meta.default, this.type === 'dict')) return null
     return result
   } else if (this.type === 'array' || this.type === 'tuple') {
     const result: any[] = []
