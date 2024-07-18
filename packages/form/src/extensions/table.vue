@@ -26,10 +26,11 @@
           </th>
           <th colspan="3"></th>
         </tr>
+
         <tr v-for="(_, i) in entries">
           <td
             v-if="schema.type === 'dict'"
-            class="key"
+            class="k-schema-table-cell-input"
             @mouseenter="handleMouseEnter($event, i, -1)"
             @mouseleave="handleMouseLeave($event, i, -1)">
             <el-input
@@ -48,10 +49,11 @@
               </template>
             </el-input>
           </td>
+
           <td
             v-for="([key, schema], j) in columns"
             :key="key"
-            :class="'k-schema-column-' + schema.type"
+            :class="['k-schema-table-cell', 'k-schema-table-cell-' + getComponentType(schema)]"
             @mouseenter="handleMouseEnter($event, i, j)"
             @mouseleave="handleMouseLeave($event, i, j)">
             <schema-primitive
@@ -64,6 +66,7 @@
               @blur="handleBlur($event, i, j)"
             ></schema-primitive>
           </td>
+
           <td v-if="!disabled" class="button"
             :class="{ disabled: !i }"
             @click.stop="up(i)"
@@ -93,6 +96,7 @@
           </td>
         </tr>
       </table>
+
       <template v-for="rect in { hover, focus }">
         <div
           v-if="rect"
@@ -194,6 +198,13 @@ function handleBlur(event: MouseEvent, i?: number, j?: number) {
   focus.value = undefined
 }
 
+function getComponentType(schema: Schema) {
+  if (schema.type === 'boolean') return 'checkbox'
+  if (schema.type === 'number') return 'input-number'
+  if (schema.type === 'string') return 'input'
+  return 'select'
+}
+
 const tt = useI18nText()
 
 const { t, setLocaleMessage } = useI18n({
@@ -243,15 +254,6 @@ if (import.meta.hot) {
 
   td {
     padding: 0;
-
-    .el-input .el-input__wrapper {
-      box-shadow: none !important;
-    }
-
-    // override el-select !important rule
-    .el-select .el-input .el-input__wrapper {
-      box-shadow: none !important;
-    }
   }
 
   td {
@@ -286,15 +288,6 @@ if (import.meta.hot) {
     &.disabled {
       color: var(--k-color-disabled);
       pointer-events: none;
-    }
-  }
-
-  .k-schema-column-number {
-    min-width: 8rem;
-    width: 10rem;
-
-    .el-input-number {
-      width: 100%;
     }
   }
 }

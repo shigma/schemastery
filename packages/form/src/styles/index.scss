@@ -17,6 +17,10 @@
   &:hover {
     background-color: var(--el-fill-color);
   }
+
+  .k-schema-right .el-select {
+    width: 12rem;
+  }
 }
 
 .k-schema-header {
@@ -37,6 +41,35 @@
 
   > :first-child {
     border-top: none;
+  }
+}
+
+.k-schema-table {
+  .el-input, .el-input-number {
+    width: 100%;
+  }
+
+  &-cell-input {
+    min-width: 6rem;
+    width: 10rem;
+  }
+
+  &-cell-input-number {
+    min-width: 6rem;
+    width: 10rem;
+  }
+
+  &-cell-select {
+    min-width: 6rem;
+    width: 10rem;
+  }
+
+  .el-input__wrapper {
+    box-shadow: none !important;
+  }
+
+  .el-select__wrapper {
+    box-shadow: none !important;
   }
 }
 
