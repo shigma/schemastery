@@ -1,6 +1,7 @@
 import { clone, deepEqual, Dict, filterKeys, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 const kSchema = Symbol.for('schemastery')
+const kValidationError = Symbol.for('ValidationError')
 
 declare global {
   namespace Schemastery {
@@ -33,6 +34,7 @@ declare global {
     export interface Static {
       <T = any>(options: Partial<Schema<T>>): Schema<T>
       new <T = any>(options: Partial<Schema<T>>): Schema<T>
+      ValidationError: typeof ValidationError
       prototype: Schema
       resolve: Resolve
       from<X = any>(source?: X): From<X>
@@ -60,7 +62,6 @@ declare global {
 
     interface Options {
       autofix?: boolean
-      throws?: typeof ValidationError
       path?: (string | number | symbol)[]
       __schemastery_debug__?: boolean
     }
@@ -137,6 +138,7 @@ globalThis.__schemastery_index__ ??= 0
 type Schema<S = any, T = S> = Schemastery<S, T>
 
 class ValidationError extends TypeError {
+  [kValidationError] = true
   constructor(public errorMessage: string, public trace: (string | number | symbol)[] = []) {
     let message = '';
     for (let elem of trace || []) {
@@ -150,19 +152,19 @@ class ValidationError extends TypeError {
 }
 
 const errorBuilder = (options: Schemastery.Options = {}) => (e: any) => {
-  if (e instanceof (options.throws || ValidationError)) throw e;
-  if (typeof e === 'object' && 'message' in e) throw new (options.throws || ValidationError)(e.message, options.path)
-  throw e
+  if (e instanceof Schema.ValidationError) return e;
+  if (typeof e === 'object' && 'message' in e) return new Schema.ValidationError(e.message, options.path)
+  return e
 }
 
 const Schema = function (options: Schema) {
-  const schema = function (data: any, options?: Schemastery.Options) {
+  const schema = function (data: any, options: Schemastery.Options = {}) {
     if (options?.__schemastery_debug__) return Schema.resolve(data, schema, options)[0]
     try {
       return Schema.resolve(data, schema, options)[0]
     } catch (e) {
-      if (!(e instanceof (options?.throws || ValidationError))) throw e
-      throw new (options?.throws || ValidationError)(e.errorMessage, e.trace)
+      if (!(e instanceof Schema.ValidationError)) throw e
+      throw new Schema.ValidationError(e.errorMessage, e.trace)
     }
   } as Schema
 
@@ -192,6 +194,8 @@ const Schema = function (options: Schema) {
   schema.toString = schema.toString.bind(schema)
   return schema
 } as Schemastery.Static
+
+Schema.ValidationError = ValidationError
 
 Schema.prototype = Object.create(Function.prototype)
 
@@ -373,7 +377,7 @@ Schema.extend = function extend(type, resolve) {
     try {
       return resolve(data, schema, options, strict)
     } catch (e) {
-      errorBuilder(options)(e)
+      throw errorBuilder(options)(e)
     }
   }
 }
@@ -382,7 +386,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (!schema) return [data]
 
   if (isNullable(data)) {
-    if (schema.meta.required) errorBuilder(options)(`missing required value`)
+    if (schema.meta.required) throw errorBuilder(options)(`missing required value`)
     let current = schema
     let fallback = schema.meta.default
     while (current?.type === 'intersect' && isNullable(fallback)) {
@@ -394,7 +398,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   }
 
   const callback = resolvers[schema.type]
-  if (!callback) errorBuilder(options)(`unsupported type "${schema.type}"`)
+  if (!callback) throw errorBuilder(options)(`unsupported type "${schema.type}"`)
 
   try {
     return callback(data, schema, options, strict)
@@ -654,7 +658,7 @@ Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
       return [callback!(result), callback!(adapted)]
     }
   } catch (e) {
-    errorBuilder(options)(e)
+    throw errorBuilder(options)(e)
   }
 })
 
