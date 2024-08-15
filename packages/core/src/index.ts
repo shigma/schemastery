@@ -60,6 +60,9 @@ declare global {
 
     interface Options {
       autofix?: boolean
+      throws?: typeof ValidationError
+      path?: (string | number | symbol)[]
+      __schemastery_debug__?: boolean
     }
 
     export interface Meta<T = any> {
@@ -133,9 +136,34 @@ globalThis.__schemastery_index__ ??= 0
 
 type Schema<S = any, T = S> = Schemastery<S, T>
 
+class ValidationError extends TypeError {
+  constructor(public errorMessage: string, public trace: (string | number | symbol)[] = []) {
+    let message = '';
+    for (let elem of trace || []) {
+      if (typeof elem === 'string') message += '.' + elem
+      else if (typeof elem === 'number') message += '[' + elem + ']'
+      else if (typeof elem === 'symbol') message += elem.description
+    }
+    if (message.startsWith('.')) message = message.slice(1)
+    super((message ? message + ': ' : '') + errorMessage)
+  }
+}
+
+const errorBuilder = (options: Schemastery.Options = {}) => (e: any) => {
+  if (e instanceof (options.throws || ValidationError)) throw e;
+  if (typeof e === 'object' && 'message' in e) throw new (options.throws || ValidationError)(e.message, options.path)
+  throw e
+}
+
 const Schema = function (options: Schema) {
   const schema = function (data: any, options?: Schemastery.Options) {
-    return Schema.resolve(data, schema, options)[0]
+    if (options?.__schemastery_debug__) return Schema.resolve(data, schema, options)[0]
+    try {
+      return Schema.resolve(data, schema, options)[0]
+    } catch (e) {
+      if (!(e instanceof (options?.throws || ValidationError))) throw e
+      throw new (options?.throws || ValidationError)(e.errorMessage, e.trace)
+    }
   } as Schema
 
   if (options.refs) {
@@ -341,14 +369,20 @@ for (const key of ['default', 'link', 'comment', 'description', 'max', 'min', 's
 const resolvers: Dict<Schemastery.Resolve> = {}
 
 Schema.extend = function extend(type, resolve) {
-  resolvers[type] = resolve
+  resolvers[type] = (data: any, schema: Schema, options: Schemastery.Options = {}, strict?: boolean) => {
+    try {
+      return resolve(data, schema, options, strict)
+    } catch (e) {
+      errorBuilder(options)(e)
+    }
+  }
 }
 
 Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (!schema) return [data]
 
   if (isNullable(data)) {
-    if (schema.meta.required) throw new TypeError(`missing required value`)
+    if (schema.meta.required) errorBuilder(options)(`missing required value`)
     let current = schema
     let fallback = schema.meta.default
     while (current?.type === 'intersect' && isNullable(fallback)) {
@@ -360,7 +394,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   }
 
   const callback = resolvers[schema.type]
-  if (!callback) throw new TypeError(`unsupported type "${schema.type}"`)
+  if (!callback) errorBuilder(options)(`unsupported type "${schema.type}"`)
 
   try {
     return callback(data, schema, options, strict)
@@ -460,7 +494,7 @@ function isMultipleOf(data: number, min: number, step: number) {
 }
 
 Schema.extend('number', (data, { meta }) => {
-  if (typeof data !== 'number') throw new TypeError(`expected number but got ${data}`)
+  if (typeof data !== 'number') throw new TypeError(`expected number but got ${typeof data} ${data}`)
   checkWithinRange(data, meta, 'number')
   const { step } = meta
   if (step && !isMultipleOf(data, meta.min ?? 0, step)) {
@@ -506,9 +540,10 @@ Schema.extend('is', (data, { callback }) => {
   throw new TypeError(`expected ${callback!.name} but got ${data}`)
 })
 
-function property(data: any, key: keyof any, schema: Schema, options?: Schemastery.Options) {
+function property(data: any, key: keyof any, schema: Schema, options: Schemastery.Options = {}) {
   try {
-    const [value, adapted] = Schema.resolve(data[key], schema, options)
+    const newOptions: Schemastery.Options = { ...options, path: [...(options.path || []), key] }
+    const [value, adapted] = Schema.resolve(data[key], schema, newOptions)
     if (adapted !== undefined) data[key] = adapted
     return value
   } catch (e) {
@@ -603,19 +638,23 @@ Schema.extend('intersect', (data, { list, toString }, options, strict) => {
 
 Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
   const [result, adapted = data] = Schema.resolve(data, inner!, options, true)
-  if (preserve) {
-    return [callback!(result)]
-  // } else if (isPlainObject(data)) {
-  //   const temp: any = {}
-  //   for (const key in result) {
-  //     if (!(key in data)) continue
-  //     temp[key] = data[key]
-  //     delete data[key]
-  //   }
-  //   Object.assign(data, callback!(temp))
-  //   return [callback!(result)]
-  } else {
-    return [callback!(result), callback!(adapted)]
+  try {
+    if (preserve) {
+      return [callback!(result)]
+    // } else if (isPlainObject(data)) {
+    //   const temp: any = {}
+    //   for (const key in result) {
+    //     if (!(key in data)) continue
+    //     temp[key] = data[key]
+    //     delete data[key]
+    //   }
+    //   Object.assign(data, callback!(temp))
+    //   return [callback!(result)]
+    } else {
+      return [callback!(result), callback!(adapted)]
+    }
+  } catch (e) {
+    errorBuilder(options)(e)
   }
 })
 
