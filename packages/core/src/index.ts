@@ -153,7 +153,7 @@ class ValidationError extends TypeError {
 
 const errorBuilder = (options: Schemastery.Options = {}) => (e: any) => {
   if (e instanceof Schema.ValidationError) return e;
-  if (typeof e === 'object' && 'message' in e) return new Schema.ValidationError(e.message, options.path)
+  if (e instanceof Object && 'message' in e) return new Schema.ValidationError(e.message, options.path)
   return e
 }
 
