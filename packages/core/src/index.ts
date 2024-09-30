@@ -31,8 +31,8 @@ declare global {
     type Constructor<T = any> = new (...args: any[]) => T
 
     export interface Static {
-      <T = any>(options: Partial<Schema<T>>): Schema<T>
-      new <T = any>(options: Partial<Schema<T>>): Schema<T>
+      <S = any, T = S>(options: Partial<Schema<S, T>>): Schema<S, T>
+      new <S = any, T = S>(options: Partial<Schema<S, T>>): Schema<S, T>
       prototype: Schema
       resolve: Resolve
       from<X = any>(source?: X): From<X>
@@ -56,6 +56,7 @@ declare global {
       union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
       intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
       transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
+      lazy<S, T>(builder: () => Schema<S, T>): Schema<S, T>
     }
 
     interface Options {
@@ -94,6 +95,7 @@ declare global {
     list?: Schema[]
     dict?: Dict<Schema>
     bits?: Dict<number>
+    builder?: () => Schema<S, T>
     callback?: Function
     value?: T
     refs?: Dict<Schema>
@@ -619,6 +621,10 @@ Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
   }
 })
 
+Schema.extend('lazy', (data, schema, options, strict) => {
+  return Schema.resolve(data, schema.inner ??= schema.builder!(), options, strict)
+})
+
 type Formatter = (schema: Schema, inline?: boolean) => string
 const formatters: Dict<Formatter> = {}
 
@@ -691,5 +697,7 @@ defineMethod('intersect', ['list'], ({ list }) => {
 })
 
 defineMethod('transform', ['inner', 'callback', 'preserve'], ({ inner }, isInner) => inner!.toString(isInner))
+
+defineMethod('lazy', ['builder'], (schema) => (schema.inner ??= schema.builder!()).toString())
 
 export = Schema
