@@ -621,7 +621,9 @@ Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
   }
 })
 
-Schema.extend('lazy', (data, { builder }, options, strict) => Schema.resolve(data, builder!(), options, strict))
+Schema.extend('lazy', (data, schema, options, strict) => {
+  return Schema.resolve(data, schema.inner ??= schema.builder!(), options, strict)
+})
 
 type Formatter = (schema: Schema, inline?: boolean) => string
 const formatters: Dict<Formatter> = {}
@@ -696,6 +698,6 @@ defineMethod('intersect', ['list'], ({ list }) => {
 
 defineMethod('transform', ['inner', 'callback', 'preserve'], ({ inner }, isInner) => inner!.toString(isInner))
 
-defineMethod('lazy', ['builder'], /* ({ builder }) => builder!().toString() */ () => '[lazy]')
+defineMethod('lazy', ['builder'], (schema) => (schema.inner ??= schema.builder!()).toString())
 
 export = Schema
