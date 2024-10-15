@@ -99,9 +99,13 @@ if (import.meta.hot) {
 
 .k-schema-item {
   p {
-    margin: 0;
+    margin: 0.25rem;
     line-height: 1.7;
     font-size: 0.875rem;
+  }
+
+  .markdown p {
+    margin: 0;
   }
 
   ul {

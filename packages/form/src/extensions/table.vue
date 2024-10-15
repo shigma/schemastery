@@ -67,7 +67,7 @@
             ></schema-primitive>
           </td>
 
-          <td v-if="!disabled" class="button"
+          <td v-if="!disabled" class="k-schema-table-button"
             :class="{ disabled: !i }"
             @click.stop="up(i)"
             @mouseenter="handleMouseEnter($event, null)"
@@ -76,7 +76,7 @@
               <icon-arrow-up></icon-arrow-up>
             </div>
           </td>
-          <td v-if="!disabled" class="button"
+          <td v-if="!disabled" class="k-schema-table-button"
             :class="{ disabled: i === entries.length - 1 }"
             @click.stop="down(i)"
             @mouseenter="handleMouseEnter($event, null)"
@@ -85,7 +85,7 @@
               <icon-arrow-down></icon-arrow-down>
             </div>
           </td>
-          <td v-if="!disabled && !isFixedLength" class="button"
+          <td v-if="!disabled && !isFixedLength" class="k-schema-table-button"
             :class="{ disabled: isMin }"
             @click.stop="del(i)"
             @mouseenter="handleMouseEnter($event, null)"
@@ -264,8 +264,9 @@ if (import.meta.hot) {
     }
   }
 
-  td.button {
+  td.k-schema-table-button {
     width: 2rem;
+    max-width: 2rem;
     color: var(--k-text-light);
     cursor: pointer;
 
