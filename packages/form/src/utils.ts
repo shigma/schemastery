@@ -7,9 +7,6 @@ import form from '.'
 
 export { Schema }
 
-const extensions = new Set<form.Extension>()
-export default extensions
-
 export function useI18nText() {
   const composer = useI18n()
   const context: any = {}

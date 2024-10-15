@@ -1,7 +1,7 @@
 {
   "name": "schemastery-vue",
   "description": "Type driven schema validator",
-  "version": "7.3.4",
+  "version": "7.3.6",
   "main": "src/index.ts",
   "files": [
     "src"

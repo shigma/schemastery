@@ -23,6 +23,11 @@
         <span class="k-menu-icon"><icon-code></icon-code></span>
         {{ t('edit.json') }}
       </div>
+      <component
+        :is="slots.menu"
+        v-bind="{ schema, modelValue, initial, disabled }"
+        @update:modelValue="$emit('update:modelValue', $event)"
+      ></component>
       <div
         class="k-menu-item"
         :class="{ disabled: disabled || deepEqual(initial, modelValue) }"
@@ -37,7 +42,6 @@
         <span class="k-menu-icon"><icon-reset></icon-reset></span>
         {{ t('default') }}
       </div>
-      <slot name="menu"></slot>
     </template>
     <template #desc>
       <slot name="desc">
@@ -88,12 +92,13 @@
 
 <script lang="ts" setup>
 
-import { computed, PropType, ref, watch } from 'vue'
+import { computed, inject, PropType, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable } from 'cosmokit'
 import { ElMessage } from 'element-plus'
-import extensions, { getFallback, Schema, useI18nText } from './utils'
+import { getFallback, Schema, useI18nText } from './utils'
 import { IconCode, IconUndo, IconReset } from './icons'
+import type form from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
 import zhCN from './locales/zh-CN.yml'
@@ -112,6 +117,9 @@ const props = defineProps({
   branch: Boolean,
   prefix: { type: String, default: '' },
 })
+
+const extensions = inject<Set<form.Extension>>('__SCHEMASTERY_EXTENSIONS__')
+const slots = inject<Record<string, Function>>('__SCHEMASTERY_SLOTS__')
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -160,10 +168,10 @@ const SchemaComponent = computed(() => {
     if (ext.type && props.schema?.type !== ext.type) return
     if (ext.role && props.schema?.meta.role !== ext.role) return
     if (ext.validate) {
-      const valid = isNullable(props.modelValue) || ext.validate(props.modelValue, props.schema)
+      const valid = isNullable(props.modelValue) && !ext.important || ext.validate(props.modelValue, props.schema)
       if (!valid) return
     }
-    return [ext.component, +!!ext.type + +!!ext.role] as const
+    return [ext.component, +!!ext.type + +!!ext.role + +ext.important * Infinity] as const
   }).filter(Boolean).sort((a, b) => b[1] - a[1])
   candidates.push([SchemaBase, 0])
   return candidates[0][0]

@@ -16,11 +16,12 @@
 
 <script lang="ts" setup>
 
-import { computed, PropType } from 'vue'
+import { computed, inject, PropType, provide } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChoices, Schema, useI18nText } from './utils'
 import zhCN from './locales/zh-CN.yml'
 import enUS from './locales/en-US.yml'
+import type form from '.'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -28,6 +29,8 @@ const props = defineProps({
   modelValue: {},
   disabled: Boolean,
   showHeader: Boolean,
+  slots: { default: {} },
+  extensions: Array as PropType<form.Extension[]>,
 })
 
 const tt = useI18nText()
@@ -62,6 +65,11 @@ function hasTitle(schema: Schema): [isTitled: boolean, isEmpty: boolean] {
     return [false, false]
   }
 }
+
+const extensions = inject<Set<form.Extension>>('__SCHEMASTERY_EXTENSIONS__')
+
+provide('__SCHEMASTERY_EXTENSIONS__', new Set([...extensions, ...(props.extensions ?? [])]))
+provide('__SCHEMASTERY_SLOTS__', props.slots)
 
 const emit = defineEmits(['update:modelValue'])
 
