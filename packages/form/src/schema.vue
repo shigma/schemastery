@@ -171,7 +171,7 @@ const SchemaComponent = computed(() => {
       const valid = isNullable(props.modelValue) && !ext.important || ext.validate(props.modelValue, props.schema)
       if (!valid) return
     }
-    return [ext.component, +!!ext.type + +!!ext.role + +ext.important * Infinity] as const
+    return [ext.component, +!!ext.type + +!!ext.role + (ext.important ? Infinity : 0)] as const
   }).filter(Boolean).sort((a, b) => b[1] - a[1])
   candidates.push([SchemaBase, 0])
   return candidates[0][0]
