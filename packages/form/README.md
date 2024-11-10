@@ -14,9 +14,9 @@ This section describes how to use schemastery-vue in your project.
 ### Installation
 
 ```shell
-npm i -D schemastery-vue element-plus vue-i18n markdown-vue @vueuse/core @maikolib/vite-plugin-yaml
+npm i -D schemastery-vue element-plus vue-i18n markdown-vue @vueuse/core @maikolib/vite-plugin-yaml sass-embedded
 # or
-yarn add -D schemastery-vue element-plus vue-i18n markdown-vue @vueuse/core @maikolib/vite-plugin-yaml
+yarn add -D schemastery-vue element-plus vue-i18n markdown-vue @vueuse/core @maikolib/vite-plugin-yaml sass-embedded
 ```
 
 ### Usage
