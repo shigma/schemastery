@@ -89,6 +89,13 @@ export default defineConfig({
     vue(),
     yaml(),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
 });
 ```
 
