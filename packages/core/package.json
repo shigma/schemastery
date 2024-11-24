@@ -1,7 +1,7 @@
 {
   "name": "schemastery",
   "description": "Type driven schema validator",
-  "version": "3.14.6",
+  "version": "3.14.7",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "typings": "lib/index.d.ts",
@@ -20,7 +20,11 @@
   "homepage": "https://github.com/shigma/schemastery",
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "^4.3.16",
+    "chai": "^5.1.1"
+  },
   "dependencies": {
-    "cosmokit": "^1.6.2"
+    "cosmokit": "^1.6.3"
   }
 }
