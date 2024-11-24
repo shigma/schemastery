@@ -60,6 +60,7 @@ declare global {
 
     interface Options {
       autofix?: boolean
+      ignore?(data: any, schema: Schema): boolean
     }
 
     export interface Meta<T = any> {
@@ -346,6 +347,7 @@ Schema.extend = function extend(type, resolve) {
 
 Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (!schema) return [data]
+  if (options.ignore?.(data, schema)) return [data]
 
   if (isNullable(data)) {
     if (schema.meta.required) throw new TypeError(`missing required value`)
