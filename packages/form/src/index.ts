@@ -1,5 +1,5 @@
 import { App, Component } from 'vue'
-import extensions, { Schema, toColumns, useDisabled, useEntries, useModel } from './utils'
+import { getFallback, Schema, toColumns, useDisabled, useEntries, useModel } from './utils'
 import SchemaBase from './base.vue'
 import Primitive from './primitive.vue'
 import SchemaCheckbox from './extensions/checkbox.vue'
@@ -18,6 +18,8 @@ import KForm from './form.vue'
 
 import './styles/index.scss'
 
+const extensions = new Set<form.Extension>()
+
 export * from 'cosmokit'
 
 export { Primitive }
@@ -32,8 +34,10 @@ export const form = Object.assign(SchemaBase, {
   useModel,
   useEntries,
   useDisabled,
+  getFallback,
   extensions,
   install(app: App) {
+    app.provide('__SCHEMASTERY_EXTENSIONS__', extensions)
     app.component('k-form', KForm)
     app.component('k-badge', KBadge)
     app.component('k-schema', KSchema)
@@ -45,16 +49,18 @@ export const form = Object.assign(SchemaBase, {
   useModel: typeof useModel
   useEntries: typeof useEntries
   useDisabled: typeof useDisabled
+  getFallback: typeof getFallback
   extensions: Set<form.Extension>
   install: (app: App) => void
 }
 
 export namespace form {
   export interface Extension {
-    type: string
+    type?: string
     role?: string
     validate?: (value: any, schema: Schema) => boolean
     component: Component
+    important?: boolean
   }
 }
 
