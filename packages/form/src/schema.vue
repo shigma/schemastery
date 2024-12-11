@@ -24,7 +24,7 @@
         {{ t('edit.json') }}
       </div>
       <component
-        :is="slots.menu"
+        :is="$slots.menu"
         v-bind="{ schema, modelValue, initial, disabled }"
         @update:modelValue="$emit('update:modelValue', $event)"
       ></component>
