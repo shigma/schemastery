@@ -67,6 +67,7 @@ declare global {
 
     export interface Meta<T = any> {
       default?: T extends {} ? Partial<T> : T
+      defaultFactory?: () => T extends {} ? Partial<T> : T
       required?: boolean
       disabled?: boolean
       collapse?: boolean
@@ -109,6 +110,7 @@ declare global {
     role(text: string, extra?: any): Schema<S, T>
     link(link: string): Schema<S, T>
     default(value: T): Schema<S, T>
+    defaultFactory(factory: () => T): Schema<S, T>
     comment(text: string): Schema<S, T>
     description(text: string): Schema<S, T>
     disabled(value?: boolean): Schema<S, T>
@@ -297,7 +299,7 @@ Schema.prototype.pattern = function pattern(regexp) {
 }
 
 Schema.prototype.simplify = function simplify(this: Schema, value) {
-  if (deepEqual(value, this.meta.default, this.type === 'dict')) return null
+  if (deepEqual(value, this.meta.defaultFactory(), this.type === 'dict')) return null
   if (isNullable(value)) return value
   if (this.type === 'object' || this.type === 'dict') {
     const result: Dict = {}
@@ -306,7 +308,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
       const item = schema?.simplify(value[key])
       if (this.type === 'dict' || !isNullable(item)) result[key] = item
     }
-    if (deepEqual(result, this.meta.default, this.type === 'dict')) return null
+    if (deepEqual(result, this.meta.defaultFactory(), this.type === 'dict')) return null
     return result
   } else if (this.type === 'array' || this.type === 'tuple') {
     const result: any[] = []
@@ -343,7 +345,7 @@ Schema.prototype.role = function role(role, extra) {
   return schema
 }
 
-for (const key of ['default', 'link', 'comment', 'description', 'max', 'min', 'step']) {
+for (const key of ['default', 'defaultFactory', 'link', 'comment', 'description', 'max', 'min', 'step']) {
   Object.assign(Schema.prototype, {
     [key](this: Schema, value: any) {
       const schema = Schema(this)
@@ -366,10 +368,10 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (isNullable(data)) {
     if (schema.meta.required) throw new ValidationError(`missing required value`)
     let current = schema
-    let fallback = schema.meta.default
+    let fallback = schema.meta.defaultFactory()
     while (current?.type === 'intersect' && isNullable(fallback)) {
       current = current.list![0]
-      fallback = current?.meta.default
+      fallback = current?.meta.defaultFactory()
     }
     if (isNullable(fallback)) return [data]
     data = clone(fallback)
@@ -382,7 +384,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
     return callback(data, schema, options, strict)
   } catch (error) {
     if (!schema.meta.loose) throw error
-    return [schema.meta.default]
+    return [schema.meta.defaultFactory()]
   }
 }
 
@@ -530,13 +532,13 @@ function property(data: any, key: keyof any, schema: Schema, options?: Schemaste
   } catch (e) {
     if (!options?.autofix) throw e
     delete data[key]
-    return schema.meta.default
+    return schema.meta.defaultFactory()
   }
 }
 
 Schema.extend('array', (data, { inner, meta }, options) => {
   if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`)
-  checkWithinRange(data.length, meta, 'array length', !isNullable(inner!.meta.default))
+  checkWithinRange(data.length, meta, 'array length', !isNullable(inner!.meta.defaultFactory()))
   return [data.map((_, index) => property(data, index, inner!, options))]
 })
 
@@ -672,6 +674,7 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
       } else if (name === 'bitset') {
         schema.meta.default = 0
       }
+      schema.meta.defaultFactory = () => schema.meta.default
       return schema
     },
   })
