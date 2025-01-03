@@ -674,7 +674,7 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
       } else if (name === 'bitset') {
         schema.meta.default = 0
       }
-      schema.meta.defaultFactory = () => schema.meta.default
+      schema.meta.defaultFactory = () => clone(schema.meta.default)
       return schema
     },
   })
