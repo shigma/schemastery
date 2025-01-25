@@ -20,7 +20,7 @@ declare global {
 
     export type TypeS<X> = TypeS1<From<X>>
     export type TypeT<X> = ReturnType<From<X>>
-    export type Resolve = (data: any, schema: Schema, options?: Options, strict?: boolean) => [any, any?]
+    export type Resolve = (data: any, schema: Schema, options: Options, strict?: boolean) => [any, any?]
 
     export type IntersectS<X> = From<X> extends Schema<infer S, unknown> ? S : never
     export type IntersectT<X> = Inverse<From<X>> extends ((arg: infer T) => void) ? T : never
@@ -56,13 +56,14 @@ declare global {
       object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
       union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
       intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
-      transform<X, T>(inner: X, callback: (value: TypeS<X>) => T, preserve?: boolean): Schema<TypeS<X>, T>
+      transform<X, T>(inner: X, callback: (value: TypeS<X>, options: Schemastery.Options) => T, preserve?: boolean): Schema<TypeS<X>, T>
       ValidationError: typeof ValidationError
     }
 
     interface Options {
       autofix?: boolean
       ignore?(data: any, schema: Schema): boolean
+      path?: (keyof any)[]
     }
 
     export interface Meta<T = any> {
@@ -135,6 +136,23 @@ declare module globalThis {
 globalThis.__schemastery_index__ ??= 0
 
 class ValidationError extends TypeError {
+  name = 'ValidationError'
+
+  constructor(message: string, public options: Schemastery.Options) {
+    let prefix = '$'
+    for (const segment of options.path || []) {
+      if (typeof segment === 'string') {
+        prefix += '.' + segment
+      } else if (typeof segment === 'number') {
+        prefix += '[' + segment + ']'
+      } else if (typeof segment === 'symbol') {
+        prefix += `[Symbol(${segment.toString()})]`
+      }
+    }
+    if (prefix.startsWith('.')) prefix = prefix.slice(1)
+    super((prefix === '$' ? '' : `${prefix} `) + message)
+  }
+
   static is(error: any): error is ValidationError {
     return !!error?.[kValidationError]
   }
@@ -147,7 +165,7 @@ Object.defineProperty(ValidationError.prototype, kValidationError, {
 type Schema<S = any, T = S> = Schemastery<S, T>
 
 const Schema = function (options: Schema) {
-  const schema = function (data: any, options?: Schemastery.Options) {
+  const schema = function (data: any, options: Schemastery.Options = {}) {
     return Schema.resolve(data, schema, options)[0]
   } as Schema
 
@@ -325,7 +343,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
   } else if (this.type === 'union') {
     for (const schema of this.list!) {
       try {
-        Schema.resolve(value, schema)
+        Schema.resolve(value, schema, {})
         return schema.simplify(value)
       } catch {}
     }
@@ -364,7 +382,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (options.ignore?.(data, schema)) return [data]
 
   if (isNullable(data)) {
-    if (schema.meta.required) throw new ValidationError(`missing required value`)
+    if (schema.meta.required) throw new ValidationError(`missing required value`, options)
     let current = schema
     let fallback = schema.meta.default
     while (current?.type === 'intersect' && isNullable(fallback)) {
@@ -376,7 +394,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   }
 
   const callback = resolvers[schema.type]
-  if (!callback) throw new ValidationError(`unsupported type "${schema.type}"`)
+  if (!callback) throw new ValidationError(`unsupported type "${schema.type}"`, options)
 
   try {
     return callback(data, schema, options, strict)
@@ -402,7 +420,7 @@ Schema.from = function from(source: any) {
       default: return Schema.is(source).required()
     }
   } else {
-    throw new ValidationError(`cannot infer schema from ${source}`)
+    throw new TypeError(`cannot infer schema from ${source}`)
   }
 }
 
@@ -417,9 +435,9 @@ Schema.percent = function percent() {
 Schema.date = function date() {
   return Schema.union([
     Schema.is(Date),
-    Schema.transform(Schema.string().role('datetime'), (value) => {
+    Schema.transform(Schema.string().role('datetime'), (value, options) => {
       const date = new Date(value)
-      if (isNaN(+date)) throw new ValidationError(`invalid date "${value}"`)
+      if (isNaN(+date)) throw new ValidationError(`invalid date "${value}"`, options)
       return date
     }, true),
   ])
@@ -429,28 +447,28 @@ Schema.extend('any', (data) => {
   return [data]
 })
 
-Schema.extend('never', (data) => {
-  throw new ValidationError(`expected nullable but got ${data}`)
+Schema.extend('never', (data, _, options) => {
+  throw new ValidationError(`expected nullable but got ${data}`, options)
 })
 
-Schema.extend('const', (data, { value }) => {
+Schema.extend('const', (data, { value }, options) => {
   if (data === value) return [value]
-  throw new ValidationError(`expected ${value} but got ${data}`)
+  throw new ValidationError(`expected ${value} but got ${data}`, options)
 })
 
-function checkWithinRange(data: number, meta: Schemastery.Meta<any>, description: string, skipMin = false) {
+function checkWithinRange(data: number, meta: Schemastery.Meta<any>, description: string, options: Schemastery.Options, skipMin = false) {
   const { max = Infinity, min = -Infinity } = meta
-  if (data > max) throw new ValidationError(`expected ${description} <= ${max} but got ${data}`)
-  if (data < min && !skipMin) throw new ValidationError(`expected ${description} >= ${min} but got ${data}`)
+  if (data > max) throw new ValidationError(`expected ${description} <= ${max} but got ${data}`, options)
+  if (data < min && !skipMin) throw new ValidationError(`expected ${description} >= ${min} but got ${data}`, options)
 }
 
-Schema.extend('string', (data, { meta }) => {
-  if (typeof data !== 'string') throw new ValidationError(`expected string but got ${data}`)
+Schema.extend('string', (data, { meta }, options) => {
+  if (typeof data !== 'string') throw new ValidationError(`expected string but got ${data}`, options)
   if (meta.pattern) {
     const regexp = new RegExp(meta.pattern.source, meta.pattern.flags)
-    if (!regexp.test(data)) throw new ValidationError(`expect string to match regexp ${regexp}`)
+    if (!regexp.test(data)) throw new ValidationError(`expect string to match regexp ${regexp}`, options)
   }
-  checkWithinRange(data.length, meta, 'string length')
+  checkWithinRange(data.length, meta, 'string length', options)
   return [data]
 })
 
@@ -475,22 +493,22 @@ function isMultipleOf(data: number, min: number, step: number) {
   return Math.abs(decimalShift(data, digits) - decimalShift(min, digits)) % decimalShift(step, digits) === 0
 }
 
-Schema.extend('number', (data, { meta }) => {
-  if (typeof data !== 'number') throw new ValidationError(`expected number but got ${data}`)
-  checkWithinRange(data, meta, 'number')
+Schema.extend('number', (data, { meta }, options) => {
+  if (typeof data !== 'number') throw new ValidationError(`expected number but got ${data}`, options)
+  checkWithinRange(data, meta, 'number', options)
   const { step } = meta
   if (step && !isMultipleOf(data, meta.min ?? 0, step)) {
-    throw new ValidationError(`expected number multiple of ${step} but got ${data}`)
+    throw new ValidationError(`expected number multiple of ${step} but got ${data}`, options)
   }
   return [data]
 })
 
-Schema.extend('boolean', (data) => {
+Schema.extend('boolean', (data, _, options) => {
   if (typeof data === 'boolean') return [data]
-  throw new ValidationError(`expected boolean but got ${data}`)
+  throw new ValidationError(`expected boolean but got ${data}`, options)
 })
 
-Schema.extend('bitset', (data, { bits, meta }) => {
+Schema.extend('bitset', (data, { bits, meta }, options) => {
   let value = 0, keys: string[] = []
   if (typeof data === 'number') {
     value = data
@@ -502,29 +520,32 @@ Schema.extend('bitset', (data, { bits, meta }) => {
   } else if (Array.isArray(data)) {
     keys = data
     for (const key of keys) {
-      if (typeof key !== 'string') throw new ValidationError(`expected string but got ${key}`)
+      if (typeof key !== 'string') throw new ValidationError(`expected string but got ${key}`, options)
       if (key in bits!) value |= bits![key]!
     }
   } else {
-    throw new ValidationError(`expected number or array but got ${data}`)
+    throw new ValidationError(`expected number or array but got ${data}`, options)
   }
   if (value === meta.default) return [value]
   return [value, keys]
 })
 
-Schema.extend('function', (data) => {
+Schema.extend('function', (data, _, options) => {
   if (typeof data === 'function') return [data]
-  throw new ValidationError(`expected function but got ${data}`)
+  throw new ValidationError(`expected function but got ${data}`, options)
 })
 
-Schema.extend('is', (data, { callback }) => {
+Schema.extend('is', (data, { callback }, options) => {
   if (data instanceof callback!) return [data]
-  throw new ValidationError(`expected ${callback!.name} but got ${data}`)
+  throw new ValidationError(`expected ${callback!.name} but got ${data}`, options)
 })
 
-function property(data: any, key: keyof any, schema: Schema, options?: Schemastery.Options) {
+function property(data: any, key: keyof any, schema: Schema, options: Schemastery.Options) {
   try {
-    const [value, adapted] = Schema.resolve(data[key], schema, options)
+    const [value, adapted] = Schema.resolve(data[key], schema, {
+      ...options,
+      path: [...options.path || [], key],
+    })
     if (adapted !== undefined) data[key] = adapted
     return value
   } catch (e) {
@@ -535,18 +556,18 @@ function property(data: any, key: keyof any, schema: Schema, options?: Schemaste
 }
 
 Schema.extend('array', (data, { inner, meta }, options) => {
-  if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`)
-  checkWithinRange(data.length, meta, 'array length', !isNullable(inner!.meta.default))
+  if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`, options)
+  checkWithinRange(data.length, meta, 'array length', options, !isNullable(inner!.meta.default))
   return [data.map((_, index) => property(data, index, inner!, options))]
 })
 
 Schema.extend('dict', (data, { inner, sKey }, options, strict) => {
-  if (!isPlainObject(data)) throw new ValidationError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new ValidationError(`expected object but got ${data}`, options)
   const result: any = {}
   for (const key in data) {
     let rKey: string
     try {
-      rKey = Schema.resolve(key, sKey!)[0]
+      rKey = Schema.resolve(key, sKey!, options)[0]
     } catch (error) {
       if (strict) continue
       throw error
@@ -559,7 +580,7 @@ Schema.extend('dict', (data, { inner, sKey }, options, strict) => {
 })
 
 Schema.extend('tuple', (data, { list }, options, strict) => {
-  if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`)
+  if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`, options)
   const result = list!.map((inner, index) => property(data, index, inner, options))
   if (strict) return [result]
   result.push(...data.slice(list!.length))
@@ -574,7 +595,7 @@ function merge(result: any, data: any) {
 }
 
 Schema.extend('object', (data, { dict }, options, strict) => {
-  if (!isPlainObject(data)) throw new ValidationError(`expected object but got ${data}`)
+  if (!isPlainObject(data)) throw new ValidationError(`expected object but got ${data}`, options)
   const result: any = {}
   for (const key in dict) {
     const value = property(data, key, dict![key]!, options)
@@ -595,7 +616,7 @@ Schema.extend('union', (data, { list, toString }, options, strict) => {
       messages.push(error)
     }
   }
-  throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`)
+  throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`, options)
 })
 
 Schema.extend('intersect', (data, { list, toString }, options, strict) => {
@@ -606,11 +627,11 @@ Schema.extend('intersect', (data, { list, toString }, options, strict) => {
     if (isNullable(result)) {
       result = value
     } else if (typeof result !== typeof value) {
-      throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`)
+      throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`, options)
     } else if (typeof value === 'object') {
       merge(result ??= {}, value)
     } else if (result !== value) {
-      throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`)
+      throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`, options)
     }
   }
   if (!strict && isPlainObject(data)) merge(result, data)
