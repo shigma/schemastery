@@ -47,6 +47,7 @@ declare global {
       percent(): Schema<number>
       boolean(): Schema<boolean>
       date(): Schema<string | Date, Date>
+      regExp(flag?: string): Schema<string | RegExp, RegExp>
       bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
       function(): Schema<Function, (...args: any[]) => any>
       is<T>(constructor: Constructor<T>): Schema<T>
@@ -443,6 +444,19 @@ Schema.date = function date() {
   ])
 }
 
+Schema.regExp = function regExp(flag = '') {
+  return Schema.union([
+    Schema.is(RegExp),
+    Schema.transform(Schema.string().role('regexp', { flag }), (value, options) => {
+      try {
+        return new RegExp(value, flag)
+      } catch (e: any) {
+        throw new ValidationError(e.message, options)
+      }
+    }, true),
+  ])
+}
+
 Schema.extend('any', (data) => {
   return [data]
 })
@@ -452,7 +466,7 @@ Schema.extend('never', (data, _, options) => {
 })
 
 Schema.extend('const', (data, { value }, options) => {
-  if (data === value) return [value]
+  if (deepEqual(data, value)) return [value]
   throw new ValidationError(`expected ${value} but got ${data}`, options)
 })
 
