@@ -1,4 +1,4 @@
-import { clone, deepEqual, Dict, filterKeys, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
+import { Binary, clone, deepEqual, Dict, filterKeys, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
 
 const kSchema = Symbol.for('schemastery')
 const kValidationError = Symbol.for('ValidationError')
@@ -38,7 +38,7 @@ declare global {
       resolve: Resolve
       from<X = any>(source?: X): From<X>
       extend(type: string, resolve: Resolve): void
-      any(): Schema<any>
+      any<T = any>(): Schema<T>
       never(): Schema<never>
       const<const T>(value: T): Schema<T>
       string(): Schema<string>
@@ -48,6 +48,8 @@ declare global {
       boolean(): Schema<boolean>
       date(): Schema<string | Date, Date>
       regExp(flag?: string): Schema<string | RegExp, RegExp>
+      arrayBuffer(): Schema<Binary.Source, ArrayBufferLike>
+      arrayBuffer(encoding: 'hex' | 'base64'): Schema<Binary.Source | string, ArrayBufferLike>
       bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
       function(): Schema<Function, (...args: any[]) => any>
       is<T>(constructor: Constructor<T>): Schema<T>
@@ -454,6 +456,26 @@ Schema.regExp = function regExp(flag = '') {
         throw new ValidationError(e.message, options)
       }
     }, true),
+  ])
+}
+
+Schema.arrayBuffer = function arrayBuffer(encoding?: 'hex' | 'base64') {
+  return Schema.union([
+    Schema.is(ArrayBuffer),
+    Schema.is(SharedArrayBuffer),
+    Schema.transform(Schema.any<ArrayBufferView>(), (value, options) => {
+      if (Binary.isSource(value)) return Binary.fromSource(value)
+      throw new ValidationError(`expected ArrayBufferSource but got ${value}`, options)
+    }, true),
+    ...encoding ? [Schema.transform(Schema.string(), (value, options) => {
+      try {
+        return encoding === 'base64'
+          ? Binary.fromBase64(value)
+          : Binary.fromHex(value)
+      } catch (e: any) {
+        throw new ValidationError(e.message, options)
+      }
+    }, true)] as const : [],
   ])
 }
 
