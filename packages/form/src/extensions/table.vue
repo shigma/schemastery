@@ -19,7 +19,7 @@
             {{ tt(schema.sKey?.meta.description) || t('entry.key') }}
           </th>
           <th v-for="([key, schema]) in columns" :key="key">
-            <span>{{ key === null ? t('entry.value') : tt(schema.meta.description) || key }}</span>
+            <span>{{ tt(schema.meta.description) || key || t('entry.value') }}</span>
             <k-badge :type="type" v-for="{ text, type } in schema.meta.badges || []">
               {{ t('badge.' + text) }}
             </k-badge>
