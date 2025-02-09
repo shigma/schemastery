@@ -81,7 +81,9 @@ describe('Schema API', () => {
       bar: Schema.union([1, 2, 3]),
     })
 
+    // @ts-expect-error
     expect(config({ foo: 0, bar: 2 })).to.deep.equal({ foo: 1, bar: 2 })
+    // @ts-expect-error
     expect(() => config({ foo: 2, bar: 0 })).to.throw()
   })
 })

@@ -13,8 +13,14 @@ describe('Miscellaneous', () => {
   })
 
   test('serialization (recursive)', () => {
-    const Node = Schema.object({ id: Number })
-    Node.set('children', Schema.array(Node))
+    interface Node {
+      id: number
+      children: Node[]
+    }
+
+    const Node: Schema<Node> = Schema.lazy(() => {
+      return Schema.object({ id: Number, children: Schema.array(Node) })
+    }).role('node')
     const validate = new Schema(JSON.parse(JSON.stringify(Node)))
 
     expect(validate({ id: 1 })).to.deep.equal({ id: 1, children: [] })

@@ -55,11 +55,12 @@ declare global {
       is<T>(constructor: Constructor<T>): Schema<T>
       array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
       dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
-      tuple<X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
+      tuple<const X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
       object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
       union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
       intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
       transform<X, T>(inner: X, callback: (value: TypeS<X>, options: Schemastery.Options) => T, preserve?: boolean): Schema<TypeS<X>, T>
+      lazy<X extends Schema>(callback: () => X): X
       ValidationError: typeof ValidationError
     }
 
@@ -102,6 +103,7 @@ declare global {
     dict?: Dict<Schema>
     bits?: Dict<number>
     callback?: Function
+    builder?: Function
     value?: T
     refs?: Dict<Schema>
     preserve?: boolean
@@ -384,7 +386,7 @@ Schema.resolve = function resolve(data, schema, options = {}, strict = false) {
   if (!schema) return [data]
   if (options.ignore?.(data, schema)) return [data]
 
-  if (isNullable(data)) {
+  if (isNullable(data) && schema.type !== 'lazy') {
     if (schema.meta.required) throw new ValidationError(`missing required value`, options)
     let current = schema
     let fallback = schema.meta.default
@@ -425,6 +427,18 @@ Schema.from = function from(source: any) {
   } else {
     throw new TypeError(`cannot infer schema from ${source}`)
   }
+}
+
+Schema.lazy = function lazy(builder) {
+  const toJSON = () => {
+    if (!schema.inner![kSchema]) {
+      schema.inner = schema.builder!()
+      schema.inner!.meta = { ...schema.meta, ...schema.inner!.meta }
+    }
+    return schema.inner!.toJSON()
+  }
+  const schema = new Schema({ type: 'lazy', builder, inner: { toJSON } as any })
+  return schema as any
 }
 
 Schema.natural = function natural() {
@@ -478,6 +492,14 @@ Schema.arrayBuffer = function arrayBuffer(encoding?: 'hex' | 'base64') {
     }, true)] as const : [],
   ])
 }
+
+Schema.extend('lazy', (data, schema, options, strict) => {
+  if (!schema.inner![kSchema]) {
+    schema.inner = schema.builder!()
+    schema.inner!.meta = { ...schema.meta, ...schema.inner!.meta }
+  }
+  return Schema.resolve(data, schema.inner!, options, strict)
+})
 
 Schema.extend('any', (data) => {
   return [data]
