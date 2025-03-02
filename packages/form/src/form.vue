@@ -86,10 +86,10 @@ const { t, setLocaleMessage } = useI18n({
 })
 
 if (import.meta.hot) {
-  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
+  import.meta.hot.accept('./locales/zh-CN.yml', (module) => {
     setLocaleMessage('zh-CN', module.default)
   })
-  import.meta.hot.accept('../locales/en-US.yml', (module) => {
+  import.meta.hot.accept('./locales/en-US.yml', (module) => {
     setLocaleMessage('en-US', module.default)
   })
 }
