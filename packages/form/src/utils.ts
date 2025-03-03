@@ -16,6 +16,7 @@ export function useI18nText() {
     for (const locale of locales) {
       if (locale in message) return message[locale]
     }
+    return message['']
   }
 }
 
