@@ -255,7 +255,8 @@ function extractKeys(data: any) {
 
 Schema.prototype.i18n = function i18n(messages) {
   const schema = Schema(this)
-  schema.meta.description = mergeDesc(schema.meta.description, messages)
+  const desc = mergeDesc(schema.meta.description, messages)
+  if (Object.keys(desc).length) schema.meta.description = desc
   if (schema.dict) {
     schema.dict = valueMap(schema.dict, (inner, key) => {
       return inner.i18n(valueMap(messages, (data) => getInner(data)?.[key] ?? data?.[key]))
