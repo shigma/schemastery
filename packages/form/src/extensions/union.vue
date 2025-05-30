@@ -21,10 +21,11 @@
         v-if="choices.length > 1"
         v-model="selectModel"
         filterable
+        filter-method="filter"
         :disabled="disabled"
       >
         <el-option
-          v-for="(item, index) in choices"
+          v-for="([item, index]) in options"
           :key="index"
           :value="index"
           :disabled="item.meta.disabled">
@@ -61,6 +62,7 @@ defineEmits(['update:modelValue'])
 
 const tt = useI18nText()
 
+const options = ref<[Schema, number][]>()
 const choices = ref<Schema[]>()
 const cache = ref<any[]>()
 const active = ref<Schema>()
@@ -72,6 +74,17 @@ watch(() => props.schema, (value) => {
     return getFallback(item, true)
   })
 }, { immediate: true })
+
+const filter = (input: string) => {
+  if (!input) {
+    options.value = choices.value?.map((item, i) => [item, i] as [Schema, number]) || []
+    return
+  }
+  options.value = choices.value!.map((item, i) => [item, i] as [Schema, number]).filter(([item]) => {
+    const description = tt(item.meta.description) || String(item.value)
+    return description.includes(input)
+  })
+}
 
 const config = useModel({
   input(value) {
