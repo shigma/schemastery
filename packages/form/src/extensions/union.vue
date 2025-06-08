@@ -21,7 +21,7 @@
         v-if="choices.length > 1"
         v-model="selectModel"
         filterable
-        filter-method="filter"
+        :filter-method="filter"
         :disabled="disabled"
       >
         <el-option
