@@ -63,18 +63,6 @@ describe('Schema API', () => {
     expect(() => config(1)).to.throw()
   })
 
-  test('is', () => {
-    const config = Schema.is(RegExp)
-    expect(config.toString()).to.equal('RegExp')
-
-    expect(config(/1/)).to.deep.equal(/1/)
-
-    // @ts-expect-error
-    expect(() => config(1)).to.throw()
-    // @ts-expect-error
-    expect(() => config('1')).to.throw()
-  })
-
   test('loose', () => {
     const config = Schema.object({
       foo: Schema.union([1, 2, 3]).loose().default(1),

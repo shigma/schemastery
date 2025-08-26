@@ -52,6 +52,7 @@ declare global {
       arrayBuffer(encoding: 'hex' | 'base64'): Schema<Binary.Source | string, ArrayBufferLike>
       bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
       function(): Schema<Function, (...args: any[]) => any>
+      is(constructor: string): Schema
       is<T>(constructor: Constructor<T>): Schema<T>
       array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
       dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
@@ -103,6 +104,7 @@ declare global {
     dict?: Dict<Schema>
     bits?: Dict<number>
     callback?: Function
+    constructor?: string | Function
     builder?: Function
     value?: T
     refs?: Dict<Schema>
@@ -594,9 +596,21 @@ Schema.extend('function', (data, _, options) => {
   throw new ValidationError(`expected function but got ${data}`, options)
 })
 
-Schema.extend('is', (data, { callback }, options) => {
-  if (data instanceof callback!) return [data]
-  throw new ValidationError(`expected ${callback!.name} but got ${data}`, options)
+Schema.extend('is', (data, { constructor }, options) => {
+  if (typeof constructor === 'function') {
+    if (data instanceof constructor) return [data]
+    throw new ValidationError(`expected ${constructor.name} but got ${data}`, options)
+  } else {
+    if (isNullable(data)) {
+      throw new ValidationError(`expected ${constructor} but got ${data}`, options)
+    }
+    let prototype = Object.getPrototypeOf(data)
+    while (prototype) {
+      if (prototype.constructor?.name === constructor) return [data]
+      prototype = Object.getPrototypeOf(prototype)
+    }
+    throw new ValidationError(`expected ${constructor} but got ${data}`, options)
+  }
 })
 
 function property(data: any, key: keyof any, schema: Schema, options: Schemastery.Options) {
@@ -738,8 +752,15 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
             break
           }
           case 'callback': {
-            schema.callback = args[index]
-            ;(schema.callback as any)['toJSON'] ||= () => schema.callback!.toString()
+            const callback = schema.callback = args[index]
+            ;callback['toJSON'] ||= () => callback.toString()
+            break
+          }
+          case 'constructor': {
+            const constructor = schema.constructor = args[index]
+            if (typeof constructor === 'function') {
+              ;constructor['toJSON'] ||= () => constructor['name']
+            }
             break
           }
           default: schema[key] = args[index] as never
@@ -757,7 +778,14 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
   })
 }
 
-defineMethod('is', ['callback'], ({ callback }) => callback!.name)
+defineMethod('is', ['constructor'], ({ constructor }) => {
+  if (typeof constructor === 'function') {
+    return constructor.name
+  } else {
+    return constructor!
+  }
+})
+
 defineMethod('any', [], () => 'any')
 defineMethod('never', [], () => 'never')
 defineMethod('const', ['value'], ({ value }) => typeof value === 'string' ? JSON.stringify(value) : value)
