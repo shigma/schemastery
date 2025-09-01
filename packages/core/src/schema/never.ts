@@ -1,8 +1,8 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Never {}
+export namespace Never {}
 
-class $Never extends Schema<never> {
+export class Never extends Schema<never> {
   type = 'never'
 
   validate(value: unknown, options: ValidateOptions) {
@@ -10,8 +10,6 @@ class $Never extends Schema<never> {
   }
 }
 
-export { $Never as Never }
-
 export function never() {
-  return new $Never()
+  return new Never()
 }

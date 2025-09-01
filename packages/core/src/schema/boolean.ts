@@ -1,6 +1,6 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-class $Boolean extends Schema<boolean> {
+export class Boolean extends Schema<boolean> {
   type = 'boolean'
 
   validate(value: unknown, options: ValidateOptions) {
@@ -9,8 +9,6 @@ class $Boolean extends Schema<boolean> {
   }
 }
 
-export { $Boolean as Boolean }
-
 export function boolean() {
-  return new $Boolean()
+  return new Boolean()
 }

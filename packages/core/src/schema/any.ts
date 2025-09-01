@@ -1,8 +1,8 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Any {}
+export namespace Any {}
 
-class $Any<T> extends Schema<T> {
+export class Any<T> extends Schema<T> {
   type = 'any'
 
   validate(value: unknown, options: ValidateOptions) {
@@ -10,8 +10,6 @@ class $Any<T> extends Schema<T> {
   }
 }
 
-export { $Any as Any }
-
 export function any<T = any>() {
-  return new $Any<T>()
+  return new Any<T>()
 }

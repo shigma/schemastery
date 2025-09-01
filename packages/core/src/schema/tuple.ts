@@ -2,7 +2,7 @@ import { ValidateOptions, Schema } from '../core.ts'
 
 export namespace Tuple {
   export interface Options {
-    inner: Schema[]
+    inner: readonly Schema[]
     extra?: Schema // TODO
   }
 }
@@ -11,7 +11,7 @@ export class Tuple<S, T extends S = S> extends Schema<S, T> {
   type = 'tuple'
   options: Tuple.Options
 
-  constructor(inner: Schema[]) {
+  constructor(inner: readonly Schema[]) {
     super()
     this.options = { inner }
   }

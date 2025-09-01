@@ -1,15 +1,15 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $String {
+export namespace String {
   export interface Options {
     length?: Schema<number>
     pattern?: RegExp
   }
 }
 
-class $String extends Schema<string> {
+export class String extends Schema<string> {
   type = 'string'
-  options: $String.Options = {}
+  options: String.Options = {}
 
   length(value: Schema<number>) {
     this.options.length = value
@@ -39,8 +39,6 @@ class $String extends Schema<string> {
   }
 }
 
-export { $String as String }
-
 export function string() {
-  return new $String()
+  return new String()
 }

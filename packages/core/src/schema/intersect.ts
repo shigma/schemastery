@@ -1,16 +1,16 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Intersect {
+export namespace Intersect {
   export interface Options {
-    items: Schema[]
+    items: readonly Schema[]
   }
 }
 
-class $Intersect<S, T extends S = S> extends Schema<S, T> {
+export class Intersect<S, T extends S = S> extends Schema<S, T> {
   type = 'intersect'
-  options: $Intersect.Options
+  options: Intersect.Options
 
-  constructor(items: Schema[]) {
+  constructor(items: readonly Schema[]) {
     super()
     this.options = { items }
   }
@@ -19,7 +19,7 @@ class $Intersect<S, T extends S = S> extends Schema<S, T> {
     return this.options.items.map(item => item.format()).join(' & ')
   }
 
-  validate(value: unknown, options: ValidateOptions) {
+  validate(value: unknown, options: ValidateOptions): Schema.Result<T> {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.failure(value, options.path)
     }
@@ -38,8 +38,16 @@ class $Intersect<S, T extends S = S> extends Schema<S, T> {
   }
 }
 
-export { $Intersect as Intersect }
+type IntersectS<X extends readonly Schema[], S = any> =
+  | X extends readonly [Schema<infer L, infer _>, ...infer R extends readonly Schema[]]
+  ? IntersectS<R, S & L>
+  : S
 
-export function intersect(items: Schema[]) {
-  return new $Intersect(items)
+type IntersectT<X extends readonly Schema[], T = any> =
+  | X extends readonly [Schema<infer _, infer L>, ...infer R extends readonly Schema[]]
+  ? IntersectT<R, T & L>
+  : T
+
+export function intersect<const X extends readonly Schema[]>(items: X) {
+  return new Intersect<IntersectS<X>, IntersectT<X>>(items)
 }

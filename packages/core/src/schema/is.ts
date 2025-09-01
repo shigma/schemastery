@@ -1,15 +1,15 @@
 import { isNullable } from 'cosmokit'
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Is {
+export namespace Is {
   export interface Options {
     constructor: { name: string }
   }
 }
 
-class $Is<T> extends Schema<T> {
+export class Is<T> extends Schema<T> {
   type = 'is'
-  options: $Is.Options
+  options: Is.Options
 
   constructor(constructor: { name: string }) {
     super()
@@ -43,8 +43,6 @@ class $Is<T> extends Schema<T> {
   }
 }
 
-export { $Is as Is }
-
 export function is<T>(constructor: { new (...args: any[]): T } | { name: string }) {
-  return new $Is<T>(constructor)
+  return new Is<T>(constructor)
 }

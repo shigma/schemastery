@@ -1,17 +1,17 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Transform {
-  export interface Options<S, T extends S = S> {
-    inner: Schema<S>
-    callback: (value: S) => T
+export namespace Transform {
+  export interface Options<S, T extends S, U extends T> {
+    inner: Schema<S, T>
+    callback: (value: T) => Schema.Result<U>
   }
 }
 
-class $Transform<S, T extends S = S> extends Schema<S, T> {
+export class Transform<S, T extends S = S, U extends T = T> extends Schema<S, U> {
   type = 'transform'
-  options: $Transform.Options<S, T>
+  options: Transform.Options<S, T, U>
 
-  constructor(inner: Schema<S>, callback: (value: S) => T) {
+  constructor(inner: Schema<S, T>, callback: (value: T) => Schema.Result<U>) {
     super()
     this.options = { inner, callback }
   }
@@ -19,12 +19,10 @@ class $Transform<S, T extends S = S> extends Schema<S, T> {
   validate(value: unknown, options: ValidateOptions) {
     const result = this.options.inner.validate(value, options)
     if (result.issues) return result
-    return { value: this.options.callback(result.value) }
+    return this.options.callback(result.value)
   }
 }
 
-export { $Transform as Transform }
-
-export function transform<S, T extends S = S>(inner: Schema<S>, callback: (value: S) => T) {
-  return new $Transform(inner, callback)
+export function transform<const X, U extends Schema.InferT<X>>(inner: X, callback: (value: Schema.InferT<X>) => Schema.Result<U>) {
+  return new Transform(Schema.from(inner), callback)
 }

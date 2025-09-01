@@ -2,7 +2,7 @@ import { ValidateOptions, Schema } from '../core.ts'
 
 namespace _Object {
   export interface Options {
-    items: Record<string, Schema>
+    items: Readonly<Record<string, Schema>>
     extra?: Schema // TODO
   }
 }
@@ -11,7 +11,7 @@ class _Object<S, T extends S = S> extends Schema<S, T> {
   type = 'object'
   options: _Object.Options
 
-  constructor(items: Record<string, Schema>) {
+  constructor(items: Readonly<Record<string, Schema>>) {
     super()
     this.options = { items }
   }

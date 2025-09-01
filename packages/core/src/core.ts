@@ -45,8 +45,8 @@ export namespace Schema {
     : X extends new (...args: any) => infer S ? S
     : never
 
-  export type InferS<X> = X extends Schema<infer S, infer T> ? S : From<X>
-  export type InferT<X> = X extends Schema<infer S, infer T> ? T : From<X>
+  export type InferS<X> = X extends Schema<infer S, infer _> ? S : From<X>
+  export type InferT<X> = X extends Schema<infer _, infer T> ? T : From<X>
 }
 
 export abstract class Schema<S = any, T extends S = S> implements StandardSchemaV1 {

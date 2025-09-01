@@ -1,15 +1,15 @@
 import { deepEqual } from 'cosmokit'
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Const {
+export namespace Const {
   export interface Options<T> {
     value: T
   }
 }
 
-class $Const<T> extends Schema<T> {
+export class Const<T> extends Schema<T> {
   type = 'const'
-  options: $Const.Options<T>
+  options: Const.Options<T>
 
   constructor(value: T) {
     super()
@@ -30,8 +30,8 @@ class $Const<T> extends Schema<T> {
   }
 }
 
-function $const<T>(value: T) {
-  return new $Const(value)
+function _const<const T>(value: T) {
+  return new Const(value)
 }
 
-export { $Const as Const, $const as const }
+export { _const as const }
