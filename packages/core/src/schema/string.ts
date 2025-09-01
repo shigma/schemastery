@@ -32,8 +32,7 @@ export class $String extends Schema<string> {
     if (this.options.length) {
       const result = this.options.length.validate(value.length, options)
       if (result.issues) {
-        // TODO: improve message
-        return this.failure(value, options.path, ` with length ${result.issues[0].message}`)
+        return this.failure(value, options.path, ` with length ${this.options.length.format()}`)
       }
     }
     return { value }

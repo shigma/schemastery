@@ -32,8 +32,7 @@ export class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
     if (this.options.length) {
       const result = this.options.length.validate(value.length, options)
       if (result.issues) {
-        // TODO: improve message
-        return this.failure(value, options.path, ` with length ${result.issues[0].message}`)
+        return this.failure(value, options.path, ` with length ${this.options.length.format()}`)
       }
     }
     const values: T[] = []
@@ -43,12 +42,10 @@ export class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
         ...options,
         path: [...options.path || [], i],
       })
-      if (!result.issues) {
-        values.push(result.value)
-      } else if (options.autofix) {
-        values.push(this.options.inner.default())
-      } else {
+      if (result.issues) {
         issues.push(...result.issues)
+      } else {
+        values.push(result.value)
       }
     }
     if (issues.length) return { issues }

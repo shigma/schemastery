@@ -5,7 +5,7 @@ const kValidationError = Symbol.for('ValidationError')
 
 export interface ParseOptions {
   autofix?: boolean
-  ignore?: (data: any, schema: Schema<any>) => boolean
+  ignore?: (data: any, schema: Schema) => boolean
   path?: PropertyKey[]
 }
 
@@ -27,7 +27,7 @@ export namespace Schema {
   }
 }
 
-export abstract class Schema<S, T extends S = S> implements StandardSchemaV1 {
+export abstract class Schema<S = any, T extends S = S> implements StandardSchemaV1 {
   abstract readonly type: string
 
   readonly '~standard': StandardSchemaV1.Props<S, T> = {
@@ -53,7 +53,7 @@ export abstract class Schema<S, T extends S = S> implements StandardSchemaV1 {
     return { issues: [{ message, path }] }
   }
 
-  static is(schema: any): schema is Schema<any> {
+  static is(schema: any): schema is Schema {
     return !!schema?.[kSchema]
   }
 }
