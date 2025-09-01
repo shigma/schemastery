@@ -21,7 +21,7 @@ function isMultipleOf(data: number, min: number, step: number) {
   return Math.abs(decimalShift(data, digits) - decimalShift(min, digits)) % decimalShift(step, digits) === 0
 }
 
-namespace $Number {
+export namespace Number {
   export interface Options {
     max?: number
     min?: number
@@ -29,9 +29,9 @@ namespace $Number {
   }
 }
 
-class $Number extends Schema<number> {
+export class Number extends Schema<number> {
   type = 'number'
-  options: $Number.Options = {}
+  options: Number.Options = {}
 
   max(value: number) {
     this.options.max = value
@@ -61,8 +61,14 @@ class $Number extends Schema<number> {
   }
 }
 
-export { $Number as Number }
-
 export function number() {
-  return new $Number()
+  return new Number()
+}
+
+export function natural() {
+  return number().step(1).min(0)
+}
+
+export function percent() {
+  return number().step(0.01).min(0).max(1).role('slider')
 }

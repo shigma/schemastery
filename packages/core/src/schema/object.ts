@@ -1,15 +1,15 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Object {
+namespace _Object {
   export interface Options {
     items: Record<string, Schema>
     extra?: Schema // TODO
   }
 }
 
-class $Object<S, T extends S = S> extends Schema<S, T> {
+class _Object<S, T extends S = S> extends Schema<S, T> {
   type = 'object'
-  options: $Object.Options
+  options: _Object.Options
 
   constructor(items: Record<string, Schema>) {
     super()
@@ -26,7 +26,7 @@ class $Object<S, T extends S = S> extends Schema<S, T> {
     return `{ ${defs.join(', ')} }`
   }
 
-  validate(value: unknown, options: ValidateOptions) {
+  validate(value: unknown, options: ValidateOptions): Schema.Result<T> {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.failure(value, options.path)
     }
@@ -50,8 +50,18 @@ class $Object<S, T extends S = S> extends Schema<S, T> {
   }
 }
 
-export { $Object as Object }
+export { _Object as Object }
 
-export function object<S, T extends S = S>(items: Record<string, Schema<S, T>>) {
-  return new $Object(items)
+type ObjectS<X extends Readonly<Record<string, unknown>>> = {
+  [K in keyof X]: Schema.InferS<X[K]>
+}
+
+type ObjectT<X extends Readonly<Record<string, unknown>>> = {
+  [K in keyof X]: Schema.InferT<X[K]>
+}
+
+export function object<const X extends Readonly<Record<string, unknown>>>(items: X) {
+  return new _Object<ObjectS<X>, ObjectT<X>>(Object.fromEntries(
+    Object.entries(items).map(([key, schema]) => [key, Schema.from(schema)]),
+  ))
 }

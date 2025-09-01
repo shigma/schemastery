@@ -1,15 +1,15 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Tuple {
+export namespace Tuple {
   export interface Options {
     inner: Schema[]
     extra?: Schema // TODO
   }
 }
 
-class $Tuple<S, T extends S = S> extends Schema<S, T> {
+export class Tuple<S, T extends S = S> extends Schema<S, T> {
   type = 'tuple'
-  options: $Tuple.Options
+  options: Tuple.Options
 
   constructor(inner: Schema[]) {
     super()
@@ -25,7 +25,7 @@ class $Tuple<S, T extends S = S> extends Schema<S, T> {
     return `[${this.options.inner.map((schema) => schema.format()).join(', ')}]`
   }
 
-  validate(value: unknown, options: ValidateOptions) {
+  validate(value: unknown, options: ValidateOptions): Schema.Result<T> {
     if (!Array.isArray(value)) return this.failure(value, options.path)
     const values: any = []
     const issues: Schema.Issue[] = []
@@ -45,8 +45,16 @@ class $Tuple<S, T extends S = S> extends Schema<S, T> {
   }
 }
 
-export { $Tuple as Tuple }
+type TupleS<X extends readonly any[], A extends any[] = []> =
+  | X extends readonly [infer L, ...infer R]
+  ? TupleS<R, [...A, Schema.InferS<L>]>
+  : A
 
-export function tuple<S, T extends S = S>(inner: Schema[]) {
-  return new $Tuple(inner)
+type TupleT<X extends readonly any[], A extends any[] = []> =
+  | X extends readonly [infer L, ...infer R]
+  ? TupleT<R, [...A, Schema.InferT<L>]>
+  : A
+
+export function tuple<const X extends readonly unknown[]>(inner: X) {
+  return new Tuple<TupleS<X>, TupleT<X>>(inner.map(Schema.from))
 }

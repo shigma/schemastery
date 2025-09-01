@@ -1,17 +1,15 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-const isArray = (value: unknown): value is readonly unknown[] => Array.isArray(value)
-
-namespace $Array {
+export namespace Array {
   export interface Options<S, T extends S = S> {
     inner: Schema<S, T>
     length?: Schema<number>
   }
 }
 
-class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
+export class Array<S, T extends S = S> extends Schema<S[], T[]> {
   type = 'array'
-  options: $Array.Options<S, T>
+  options: Array.Options<S, T>
 
   constructor(inner: Schema<S, T>) {
     super()
@@ -28,7 +26,7 @@ class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
   }
 
   validate(value: unknown, options: ValidateOptions) {
-    if (!isArray(value)) return this.failure(value, options.path)
+    if (!globalThis.Array.isArray(value)) return this.failure(value, options.path)
     if (this.options.length) {
       const result = this.options.length.validate(value.length, options)
       if (result.issues) {
@@ -53,8 +51,6 @@ class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
   }
 }
 
-export { $Array as Array }
-
-export function array<S, T extends S = S>(inner: Schema<S, T>) {
-  return new $Array(inner)
+export function array<const X>(inner: X) {
+  return new Array<Schema.InferS<X>, Schema.InferT<X>>(Schema.from(inner))
 }

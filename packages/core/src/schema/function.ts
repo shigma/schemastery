@@ -1,6 +1,6 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-class $Function extends Schema<Function> {
+export class Function extends Schema<globalThis.Function> {
   type = 'function'
 
   validate(value: unknown, options: ValidateOptions) {
@@ -9,8 +9,8 @@ class $Function extends Schema<Function> {
   }
 }
 
-function $function() {
-  return new $Function()
+function _function() {
+  return new Function()
 }
 
-export { $Function as Function, $function as function }
+export { _function as function }

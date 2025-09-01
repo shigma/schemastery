@@ -1,15 +1,15 @@
 import { ValidateOptions, Schema } from '../core.ts'
 
-namespace $Dict {
+export namespace Dict {
   export interface Options<S, T extends S = S> {
     inner: Schema<S, T>
     key?: Schema<string>
   }
 }
 
-class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>>, Record<string, T>> {
+export class Dict<S, T extends S = S> extends Schema<Record<string, S>, Record<string, T>> {
   type = 'dict'
-  options: $Dict.Options<S, T>
+  options: Dict.Options<S, T>
 
   constructor(inner: Schema<S, T>) {
     super()
@@ -53,8 +53,6 @@ class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>>, Reco
   }
 }
 
-export { $Dict as Dict }
-
-export function dict<S, T extends S = S>(inner: Schema<S, T>) {
-  return new $Dict(inner)
+export function dict<const X>(inner: X) {
+  return new Dict<Schema.InferS<X>, Schema.InferT<X>>(Schema.from(inner))
 }
