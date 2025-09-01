@@ -22,18 +22,18 @@ export class $String extends Schema<string> {
   }
 
   validate(value: unknown, options: ParseOptions) {
-    if (typeof value !== 'string') return this.failure(`expect string but got ${value}`, options.path)
+    if (typeof value !== 'string') return this.failure(value, options.path)
     if (this.options.pattern) {
       const regexp = new RegExp(this.options.pattern.source, this.options.pattern.flags)
       if (!regexp.test(value)) {
-        return this.failure(`expect string to match ${regexp} but got ${value}`, options.path)
+        return this.failure(value, options.path, ` to match ${regexp}`)
       }
     }
     if (this.options.length) {
       const result = this.options.length.validate(value.length, options)
       if (result.issues) {
-        // TODO improve message
-        return this.failure(`expect string length to be ${result.issues[0].message} but got ${value.length}`, options.path)
+        // TODO: improve message
+        return this.failure(value, options.path, ` with length ${result.issues[0].message}`)
       }
     }
     return { value }

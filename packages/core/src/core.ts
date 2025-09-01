@@ -48,7 +48,8 @@ export abstract class Schema<S, T extends S = S> implements StandardSchemaV1 {
     return value
   }
 
-  failure(message: string, path?: PropertyKey[]): Schema.FailureResult {
+  failure(value: unknown, path?: PropertyKey[], suffix = ''): Schema.FailureResult {
+    const message = `expected ${this.format()}${suffix} but got ${value}`
     return { issues: [{ message, path }] }
   }
 

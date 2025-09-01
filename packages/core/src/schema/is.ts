@@ -38,7 +38,7 @@ export class $Is<T> extends Schema<T> {
         prototype = Object.getPrototypeOf(prototype)
       }
     }
-    if (!isValid) return this.failure(`expect ${this.options.constructor.name} but got ${value}`, options.path)
+    if (!isValid) return this.failure(value, options.path)
     return { value: value as T }
   }
 }

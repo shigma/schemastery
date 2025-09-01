@@ -6,6 +6,6 @@ export class $Never<T> extends Schema<T> {
   type = 'never'
 
   validate(value: unknown, options: ParseOptions) {
-    return this.failure(`expect never but got ${value}`, options.path)
+    return this.failure(value, options.path)
   }
 }

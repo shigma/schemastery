@@ -49,13 +49,13 @@ export class $Number extends Schema<number> {
   }
 
   validate(value: unknown, options: ParseOptions) {
-    if (typeof value !== 'number') return this.failure(`expect number but got ${value}`, options.path)
+    if (typeof value !== 'number') return this.failure(value, options.path)
     const { max = Infinity, min = -Infinity } = this.options
-    if (value > max) return this.failure(`expect number <= ${max} but got ${value}`, options.path)
-    if (value < min) return this.failure(`expect number >= ${min} but got ${value}`, options.path)
+    if (value > max) return this.failure(value, options.path, ` greater than ${max}`)
+    if (value < min) return this.failure(value, options.path, ` less than ${min}`)
     const { step } = this.options
     if (step && !isMultipleOf(value, this.options.min ?? 0, step)) {
-      return this.failure(`expect number multiple of ${step} but got ${value}`, options.path)
+      return this.failure(value, options.path, ` multiple of ${step}`)
     }
     return { value }
   }

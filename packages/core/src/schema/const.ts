@@ -24,7 +24,7 @@ export class $Const<T> extends Schema<T> {
 
   validate(value: unknown, options: ParseOptions) {
     if (!deepEqual(value, this.options.value, true)) {
-      return this.failure(`expect ${this.format()} but got ${value}`, options.path)
+      return this.failure(value, options.path)
     }
     return { value: value as T }
   }
