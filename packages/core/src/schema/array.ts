@@ -1,15 +1,15 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
 const isArray = (value: unknown): value is readonly unknown[] => Array.isArray(value)
 
-export namespace $Array {
+namespace $Array {
   export interface Options<S, T extends S = S> {
     inner: Schema<S, T>
     length?: Schema<number>
   }
 }
 
-export class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
+class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
   type = 'array'
   options: $Array.Options<S, T>
 
@@ -27,7 +27,7 @@ export class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
     return `Array<${this.options.inner.format()}>`
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (!isArray(value)) return this.failure(value, options.path)
     if (this.options.length) {
       const result = this.options.length.validate(value.length, options)
@@ -51,4 +51,10 @@ export class $Array<S, T extends S = S> extends Schema<readonly S[], T[]> {
     if (issues.length) return { issues }
     return { value: values }
   }
+}
+
+export { $Array as Array }
+
+export function array<S, T extends S = S>(inner: Schema<S, T>) {
+  return new $Array(inner)
 }

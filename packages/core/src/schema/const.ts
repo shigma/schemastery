@@ -1,13 +1,13 @@
 import { deepEqual } from 'cosmokit'
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
-export namespace $Const {
+namespace $Const {
   export interface Options<T> {
     value: T
   }
 }
 
-export class $Const<T> extends Schema<T> {
+class $Const<T> extends Schema<T> {
   type = 'const'
   options: $Const.Options<T>
 
@@ -22,10 +22,16 @@ export class $Const<T> extends Schema<T> {
       : String(this.options.value)
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (!deepEqual(value, this.options.value, true)) {
       return this.failure(value, options.path)
     }
     return { value: value as T }
   }
 }
+
+function $const<T>(value: T) {
+  return new $Const(value)
+}
+
+export { $Const as Const, $const as const }

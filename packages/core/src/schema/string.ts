@@ -1,13 +1,13 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
-export namespace $String {
+namespace $String {
   export interface Options {
     length?: Schema<number>
     pattern?: RegExp
   }
 }
 
-export class $String extends Schema<string> {
+class $String extends Schema<string> {
   type = 'string'
   options: $String.Options = {}
 
@@ -21,7 +21,7 @@ export class $String extends Schema<string> {
     return this
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (typeof value !== 'string') return this.failure(value, options.path)
     if (this.options.pattern) {
       const regexp = new RegExp(this.options.pattern.source, this.options.pattern.flags)
@@ -37,4 +37,10 @@ export class $String extends Schema<string> {
     }
     return { value }
   }
+}
+
+export { $String as String }
+
+export function string() {
+  return new $String()
 }

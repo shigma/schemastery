@@ -1,13 +1,13 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
-export namespace $Dict {
+namespace $Dict {
   export interface Options<S, T extends S = S> {
     inner: Schema<S, T>
     key?: Schema<string>
   }
 }
 
-export class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>>, Record<string, T>> {
+class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>>, Record<string, T>> {
   type = 'dict'
   options: $Dict.Options<S, T>
 
@@ -25,7 +25,7 @@ export class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>
     return `Record<${this.options.key ? this.options.key.format() : 'string'}, ${this.options.inner.format()}>`
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.failure(value, options.path)
     }
@@ -51,4 +51,10 @@ export class $Dict<S, T extends S = S> extends Schema<Readonly<Record<string, S>
     if (issues.length) return { issues }
     return { value: values }
   }
+}
+
+export { $Dict as Dict }
+
+export function dict<S, T extends S = S>(inner: Schema<S, T>) {
+  return new $Dict(inner)
 }

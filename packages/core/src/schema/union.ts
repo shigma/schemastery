@@ -28,3 +28,7 @@ class $Union<S, T extends S = S> extends Schema<S, T> {
 }
 
 export { $Union as Union }
+
+export function union<S, T extends S = S>(items: Schema[]) {
+  return new $Union(items)
+}

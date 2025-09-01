@@ -1,4 +1,4 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
 function decimalShift(data: number, digits: number) {
   const str = data.toString()
@@ -21,7 +21,7 @@ function isMultipleOf(data: number, min: number, step: number) {
   return Math.abs(decimalShift(data, digits) - decimalShift(min, digits)) % decimalShift(step, digits) === 0
 }
 
-export namespace $Number {
+namespace $Number {
   export interface Options {
     max?: number
     min?: number
@@ -29,7 +29,7 @@ export namespace $Number {
   }
 }
 
-export class $Number extends Schema<number> {
+class $Number extends Schema<number> {
   type = 'number'
   options: $Number.Options = {}
 
@@ -48,7 +48,7 @@ export class $Number extends Schema<number> {
     return this
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (typeof value !== 'number') return this.failure(value, options.path)
     const { max = Infinity, min = -Infinity } = this.options
     if (value > max) return this.failure(value, options.path, ` greater than ${max}`)
@@ -59,4 +59,10 @@ export class $Number extends Schema<number> {
     }
     return { value }
   }
+}
+
+export { $Number as Number }
+
+export function number() {
+  return new $Number()
 }

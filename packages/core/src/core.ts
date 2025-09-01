@@ -1,9 +1,8 @@
 import { StandardSchemaV1 } from '@standard-schema/spec'
 
 const kSchema = Symbol.for('schemastery')
-const kValidationError = Symbol.for('ValidationError')
 
-export interface ParseOptions {
+export interface ValidateOptions {
   autofix?: boolean
   ignore?: (data: any, schema: Schema) => boolean
   path?: PropertyKey[]
@@ -38,7 +37,7 @@ export abstract class Schema<S = any, T extends S = S> implements StandardSchema
     },
   }
 
-  abstract validate(value: unknown, options: ParseOptions): Schema.Result<T>
+  abstract validate(value: unknown, options: ValidateOptions): Schema.Result<T>
 
   format(): string {
     return this.type
@@ -59,32 +58,5 @@ export abstract class Schema<S = any, T extends S = S> implements StandardSchema
 }
 
 Object.defineProperty(Schema.prototype, kSchema, {
-  value: true,
-})
-
-export class ValidationError extends TypeError {
-  name = 'ValidationError'
-
-  constructor(message: string, public options: ParseOptions) {
-    let prefix = '$'
-    for (const segment of options.path || []) {
-      if (typeof segment === 'string') {
-        prefix += '.' + segment
-      } else if (typeof segment === 'number') {
-        prefix += '[' + segment + ']'
-      } else if (typeof segment === 'symbol') {
-        prefix += `[Symbol(${segment.toString()})]`
-      }
-    }
-    if (prefix.startsWith('.')) prefix = prefix.slice(1)
-    super((prefix === '$' ? '' : `${prefix} `) + message)
-  }
-
-  static is(error: any): error is ValidationError {
-    return !!error?.[kValidationError]
-  }
-}
-
-Object.defineProperty(ValidationError.prototype, kValidationError, {
   value: true,
 })

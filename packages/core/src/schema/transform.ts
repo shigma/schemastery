@@ -24,3 +24,7 @@ class $Transform<S, T extends S = S> extends Schema<S, T> {
 }
 
 export { $Transform as Transform }
+
+export function transform<S, T extends S = S>(inner: Schema<S>, callback: (value: S) => T) {
+  return new $Transform(inner, callback)
+}

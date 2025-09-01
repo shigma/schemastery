@@ -1,13 +1,13 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
-export namespace $Tuple {
+namespace $Tuple {
   export interface Options {
     inner: Schema[]
     extra?: Schema // TODO
   }
 }
 
-export class $Tuple<S, T extends S = S> extends Schema<S, T> {
+class $Tuple<S, T extends S = S> extends Schema<S, T> {
   type = 'tuple'
   options: $Tuple.Options
 
@@ -25,7 +25,7 @@ export class $Tuple<S, T extends S = S> extends Schema<S, T> {
     return `[${this.options.inner.map((schema) => schema.format()).join(', ')}]`
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (!Array.isArray(value)) return this.failure(value, options.path)
     const values: any = []
     const issues: Schema.Issue[] = []
@@ -43,4 +43,10 @@ export class $Tuple<S, T extends S = S> extends Schema<S, T> {
     if (issues.length) return { issues }
     return { value: values }
   }
+}
+
+export { $Tuple as Tuple }
+
+export function tuple<S, T extends S = S>(inner: Schema[]) {
+  return new $Tuple(inner)
 }

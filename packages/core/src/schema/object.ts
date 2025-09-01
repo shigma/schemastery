@@ -1,13 +1,13 @@
-import { ParseOptions, Schema } from '../core.ts'
+import { ValidateOptions, Schema } from '../core.ts'
 
-export namespace $Object {
+namespace $Object {
   export interface Options {
     items: Record<string, Schema>
     extra?: Schema // TODO
   }
 }
 
-export class $Object<S, T extends S = S> extends Schema<S, T> {
+class $Object<S, T extends S = S> extends Schema<S, T> {
   type = 'object'
   options: $Object.Options
 
@@ -26,7 +26,7 @@ export class $Object<S, T extends S = S> extends Schema<S, T> {
     return `{ ${defs.join(', ')} }`
   }
 
-  validate(value: unknown, options: ParseOptions) {
+  validate(value: unknown, options: ValidateOptions) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
       return this.failure(value, options.path)
     }
@@ -48,4 +48,10 @@ export class $Object<S, T extends S = S> extends Schema<S, T> {
     if (issues.length) return { issues }
     return { value: target }
   }
+}
+
+export { $Object as Object }
+
+export function object<S, T extends S = S>(items: Record<string, Schema<S, T>>) {
+  return new $Object(items)
 }

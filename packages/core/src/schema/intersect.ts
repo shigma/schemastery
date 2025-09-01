@@ -39,3 +39,7 @@ class $Intersect<S, T extends S = S> extends Schema<S, T> {
 }
 
 export { $Intersect as Intersect }
+
+export function intersect(items: Schema[]) {
+  return new $Intersect(items)
+}
