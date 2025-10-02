@@ -693,6 +693,7 @@ Schema.extend('union', (data, { list, toString }, options, strict) => {
 })
 
 Schema.extend('intersect', (data, { list, toString }, options, strict) => {
+  if (!list!.length) return [data]
   let result
   for (const inner of list!) {
     const value: any = Schema.resolve(data, inner, options, true)[0]
