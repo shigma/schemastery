@@ -61,7 +61,7 @@
               :schema="schema"
               :disabled="disabled || schema.meta.disabled"
               :modelValue="key === null ? entries[i][1] : entries[i][1]?.[key]"
-              @update:modelValue="key === null ? entries[i][1] = $event : (entries[i][1] ||= {})[key] = $event"
+              @update:modelValue="handleUpdate($event, i, key)"
               @focus="handleFocus($event, i, j)"
               @blur="handleBlur($event, i, j)"
             ></schema-primitive>
@@ -196,6 +196,16 @@ function handleFocus(event: MouseEvent, i?: number, j?: number) {
 
 function handleBlur(event: MouseEvent, i?: number, j?: number) {
   focus.value = undefined
+}
+
+function handleUpdate(event: any, index: number, key: string) {
+  if (key === null) {
+    entries.value[index][1] = event
+  } else {
+    const value = props.schema.inner.type === 'tuple' ? [] : {}
+    entries.value[index][1] ||= value
+    entries.value[index][1][key] = event
+ }
 }
 
 function getComponentType(schema: Schema) {
