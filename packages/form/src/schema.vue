@@ -119,7 +119,7 @@ const props = defineProps({
 })
 
 const extensions = inject<Set<form.Extension>>('__SCHEMASTERY_EXTENSIONS__')
-const slots = inject<Record<string, Function>>('__SCHEMASTERY_SLOTS__')
+const slots = inject<Record<string, Function>>('__SCHEMASTERY_SLOTS__', {})
 
 const emit = defineEmits(['update:modelValue'])
 
