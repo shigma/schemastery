@@ -87,7 +87,7 @@
           </td>
           <td v-if="!disabled && !isFixedLength" class="k-schema-table-button"
             :class="{ disabled: isMin }"
-            @click.stop="del(i)"
+            @click.stop="del(i), hover = undefined"
             @mouseenter="handleMouseEnter($event, null)"
             @mouseleave="handleMouseLeave($event, null)">
             <div class="inner">
