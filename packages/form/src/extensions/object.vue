@@ -4,7 +4,7 @@
       v-for="(item, key) in schema.dict"
       :key="key"
       :modelValue="config[key]"
-      @update:modelValue="config[key] = $event ?? undefined"
+      @update:modelValue="isNullable($event) ? delete config[key] : config[key] = $event"
       :schema="item"
       :initial="initial?.[key]"
       :disabled="disabled"
@@ -50,6 +50,7 @@
 import { PropType, computed } from 'vue'
 import { createReusableTemplate } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
+import { isNullable } from 'cosmokit'
 import { Schema, useModel, useI18nText } from '../utils'
 import SchemaBase from '../base.vue'
 import zhCN from '../locales/zh-CN.yml'

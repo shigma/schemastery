@@ -61,7 +61,7 @@
               :schema="schema"
               :disabled="disabled || schema.meta.disabled"
               :modelValue="key === null ? entries[i][1] : entries[i][1]?.[key]"
-              @update:modelValue="key === null ? entries[i][1] = $event : (entries[i][1] ||= {})[key] = $event"
+              @update:modelValue="handleUpdate($event, i, j)"
               @focus="handleFocus($event, i, j)"
               @blur="handleBlur($event, i, j)"
             ></schema-primitive>
@@ -117,6 +117,7 @@
 
 import { computed, ref, PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { isNullable } from 'cosmokit'
 import { IconArrowUp, IconArrowDown, IconDelete, IconInvalid } from '../icons'
 import { Schema, useEntries, useI18nText, explain, toColumns } from '../utils'
 import SchemaBase from '../base.vue'
@@ -196,6 +197,30 @@ function handleFocus(event: MouseEvent, i?: number, j?: number) {
 
 function handleBlur(event: MouseEvent, i?: number, j?: number) {
   focus.value = undefined
+}
+
+function handleUpdate(value: any, i: number, j: number) {
+  const [key] = columns.value[j]
+  if (key === null) {
+    entries.value[i][1] = value
+    return
+  }
+  if (props.schema.inner.type === 'tuple') {
+    const tuple = entries.value[i][1] ||= []
+    tuple[key] = value
+    let length = tuple.length
+    while (length > 0 && isNullable(tuple[length - 1])) {
+      length--
+    }
+    tuple.length = length
+    entries.value[i][1] = tuple
+  } else if (props.schema.inner.type === 'object') {
+    if (isNullable(value)) {
+      delete entries.value[i][1]?.[key]
+    } else {
+      (entries.value[i][1] ||= {})[key] = value
+    }
+  }
 }
 
 function getComponentType(schema: Schema) {

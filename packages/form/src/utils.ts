@@ -3,7 +3,6 @@ import { clone, deepEqual, Dict, difference, isNullable, union, valueMap } from 
 import { computed, getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
 import { fallbackWithLocaleChain } from '@intlify/core-base'
 import { useI18n } from 'vue-i18n'
-import form from '.'
 
 export { Schema }
 

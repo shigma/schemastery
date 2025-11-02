@@ -15,7 +15,8 @@
         :key="index"
         :schema="item"
         :disabled="disabled"
-        v-model="config[index]"
+        :modelValue="config[index]"
+        @update:modelValue="handleUpdate($event, index)"
       ></schema-primitive>
     </template>
   </schema-base>
@@ -24,6 +25,7 @@
 <script lang="ts" setup>
 
 import { computed, PropType } from 'vue'
+import { isNullable } from 'cosmokit'
 import { Schema, useModel } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
@@ -43,5 +45,14 @@ const config = useModel()
 const valid = computed(() => {
   return props.schema.list.every(item => ['string', 'number', 'boolean'].includes(item.type))
 })
+
+function handleUpdate(value: any, index: number) {
+  config.value[index] = value
+  let length = config.value.length
+  while (length > 0 && isNullable(config.value[length - 1])) {
+    length--
+  }
+  config.value = config.value.slice(0, length)
+}
 
 </script>
