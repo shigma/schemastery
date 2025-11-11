@@ -138,9 +138,11 @@ declare global {
 declare module globalThis {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   export let __schemastery_index__: number
+  export let __schemastery_refs__: Record<number, Schema> | undefined
 }
 
 globalThis.__schemastery_index__ ??= 0
+globalThis.__schemastery_refs__ = undefined
 
 class ValidationError extends TypeError {
   name = 'ValidationError'
@@ -209,18 +211,16 @@ Schema.prototype[kSchema] = true
 
 Schema.ValidationError = ValidationError
 
-let refs: Record<number, Schema> | undefined
-
 Schema.prototype.toJSON = function toJSON() {
-  if (refs) {
-    refs[this.uid] ??= JSON.parse(JSON.stringify({ ...this }))
+  if (globalThis.__schemastery_refs__) {
+    globalThis.__schemastery_refs__[this.uid] ??= JSON.parse(JSON.stringify({ ...this }))
     return this.uid as any
   }
 
-  refs = { [this.uid]: { ...this } as Schema }
-  refs[this.uid] = JSON.parse(JSON.stringify({ ...this }))
-  const result = { uid: this.uid, refs }
-  refs = undefined
+  globalThis.__schemastery_refs__ = { [this.uid]: { ...this } as Schema }
+  globalThis.__schemastery_refs__[this.uid] = JSON.parse(JSON.stringify({ ...this }))
+  const result = { uid: this.uid, refs: globalThis.__schemastery_refs__ }
+  globalThis.__schemastery_refs__ = undefined
   return result
 }
 
