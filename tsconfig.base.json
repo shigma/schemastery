@@ -2,7 +2,6 @@
   "compilerOptions": {
     "strict": true,
     "target": "es2022",
-    "module": "commonjs",
     "sourceMap": true,
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -10,6 +9,5 @@
     "incremental": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
   },
 }

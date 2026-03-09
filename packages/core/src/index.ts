@@ -135,7 +135,7 @@ declare global {
   }
 }
 
-declare module globalThis {
+declare namespace globalThis {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   export let __schemastery_index__: number
   export let __schemastery_refs__: Record<number, Schema> | undefined
