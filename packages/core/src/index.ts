@@ -1,4 +1,5 @@
 import { Binary, clone, deepEqual, Dict, filterKeys, isNullable, isPlainObject, pick, valueMap } from 'cosmokit'
+import type { StandardSchemaV1 } from '@standard-schema/spec'
 
 const kSchema = Symbol.for('schemastery')
 const kValidationError = Symbol.for('ValidationError')
@@ -109,6 +110,7 @@ declare global {
     value?: T
     refs?: Dict<Schema>
     preserve?: boolean
+    '~standard': StandardSchemaV1.Props // <S, T>
     toString(inline?: boolean): string
     toJSON(): Schema<S, T>
     required(value?: boolean): Schema<S, T>
@@ -208,6 +210,25 @@ const Schema = function (options: Schema) {
 Schema.prototype = Object.create(Function.prototype)
 
 Schema.prototype[kSchema] = true
+
+Object.defineProperty(Schema.prototype, '~standard', {
+  get(this: Schema) {
+    return {
+      version: 1,
+      vendor: 'schemastery',
+      validate: (value: unknown) => {
+        try {
+          return { value: Schema.resolve(value, this, {})[0] }
+        } catch (error) {
+          if (ValidationError.is(error)) {
+            return { issues: [{ message: error.message, path: error.options.path }] }
+          }
+          throw error
+        }
+      },
+    }
+  },
+})
 
 Schema.ValidationError = ValidationError
 
@@ -476,7 +497,7 @@ Schema.regExp = function regExp(flag = '') {
   ])
 }
 
-Schema.arrayBuffer = function arrayBuffer(encoding?: 'hex' | 'base64') {
+Schema.arrayBuffer = function arrayBuffer(encoding?: 'hex' | 'base64'): any {
   return Schema.union([
     Schema.is(ArrayBuffer),
     Schema.is(SharedArrayBuffer),
