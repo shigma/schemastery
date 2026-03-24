@@ -1,9 +1,8 @@
 {
   "extends": "./tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "schemastery": ["packages/core/src"],
+      "schemastery": ["./packages/core/src"],
     },
   },
   "files": [],

@@ -4,6 +4,7 @@
     "rootDir": "src",
     "jsx": "preserve",
     "module": "esnext",
+    "moduleResolution": "bundler",
     "noImplicitAny": true,
     "strictNullChecks": false,
     "types": [

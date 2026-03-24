@@ -23,6 +23,7 @@
     "vue": "^3"
   },
   "dependencies": {
+    "cosmokit": "^1.8.1",
     "schemastery": "^3.18.0"
   }
 }
