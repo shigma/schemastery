@@ -218,7 +218,7 @@ const Schema = function (options: Schema) {
     try {
       // eslint-disable-next-line no-new-func
       schema.callback = new Function('return ' + schema.callback)()
-    } catch { }
+    } catch {}
   }
   Object.defineProperty(schema, 'uid', { value: globalThis.__schemastery_index__++ })
   Object.setPrototypeOf(schema, Schema.prototype)
@@ -377,11 +377,11 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
     return result
   } else if (this.type === 'array' || this.type === 'tuple') {
     const result: any[] = []
-      ; (value as any[]).forEach((value, index) => {
-        const schema = this.type === 'array' ? this.inner : this.list![index]
-        const item = schema ? schema.simplify(value) : value
-        result.push(item)
-      })
+    ;(value as any[]).forEach((value, index) => {
+      const schema = this.type === 'array' ? this.inner : this.list![index]
+      const item = schema ? schema.simplify(value) : value
+      result.push(item)
+    })
     return result
   } else if (this.type === 'intersect') {
     const result: Dict = {}
@@ -394,7 +394,7 @@ Schema.prototype.simplify = function simplify(this: Schema, value) {
       try {
         Schema.resolve(value, schema, {})
         return schema.simplify(value)
-      } catch { }
+      } catch {}
     }
   }
   return value
@@ -795,13 +795,13 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
           }
           case 'callback': {
             const callback = schema.callback = args[index]
-              ; callback['toJSON'] ||= () => callback.toString()
+            callback.toJSON ||= () => callback.toString()
             break
           }
           case 'constructor': {
             const constructor = schema.constructor = args[index]
             if (typeof constructor === 'function') {
-              ; constructor['toJSON'] ||= () => constructor['name']
+              constructor.toJSON ||= () => constructor.name
             }
             break
           }
