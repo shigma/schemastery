@@ -501,7 +501,7 @@ Schema.date = function date() {
       if (isNaN(+date)) throw new ValidationError(`invalid date "${value}"`, options)
       return date
     }, true),
-  ]) as unknown as Schema<string | Date, Date, 'date'>
+  ])
 }
 
 Schema.regExp = function regExp(flag = '') {
