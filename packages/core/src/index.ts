@@ -757,15 +757,15 @@ Schema.extend('transform', (data, { inner, callback, preserve }, options) => {
   const [result, adapted = data] = Schema.resolve(data, inner!, options, true)
   if (preserve) {
     return [callback!(result)]
-    // } else if (isPlainObject(data)) {
-    //   const temp: any = {}
-    //   for (const key in result) {
-    //     if (!(key in data)) continue
-    //     temp[key] = data[key]
-    //     delete data[key]
-    //   }
-    //   Object.assign(data, callback!(temp))
-    //   return [callback!(result)]
+  // } else if (isPlainObject(data)) {
+  //   const temp: any = {}
+  //   for (const key in result) {
+  //     if (!(key in data)) continue
+  //     temp[key] = data[key]
+  //     delete data[key]
+  //   }
+  //   Object.assign(data, callback!(temp))
+  //   return [callback!(result)]
   } else {
     return [callback!(result), callback!(adapted)]
   }
