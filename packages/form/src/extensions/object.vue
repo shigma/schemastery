@@ -49,12 +49,9 @@
 
 import { PropType, computed } from 'vue'
 import { createReusableTemplate } from '@vueuse/core'
-import { useI18n } from 'vue-i18n'
 import { isNullable } from 'cosmokit'
-import { Schema, useModel, useI18nText } from '../utils'
+import { Schema, useI18n, useI18nText, useModel } from '../utils'
 import SchemaBase from '../base.vue'
-import zhCN from '../locales/zh-CN.yml'
-import enUS from '../locales/en-US.yml'
 
 defineOptions({
   inheritAttrs: false,
@@ -79,20 +76,6 @@ const config = useModel()
 
 const description = computed(() => tt(props.schema.meta.description))
 
-const { t, setLocaleMessage } = useI18n({
-  messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS,
-  },
-})
-
-if (import.meta.hot) {
-  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
-    setLocaleMessage('zh-CN', module.default)
-  })
-  import.meta.hot.accept('../locales/en-US.yml', (module) => {
-    setLocaleMessage('en-US', module.default)
-  })
-}
+const t = useI18n()
 
 </script>

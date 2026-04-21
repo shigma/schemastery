@@ -116,14 +116,11 @@
 <script lang="ts" setup>
 
 import { computed, ref, PropType } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { isNullable } from 'cosmokit'
 import { IconArrowUp, IconArrowDown, IconDelete, IconInvalid } from '../icons'
-import { Schema, useEntries, useI18nText, explain, toColumns } from '../utils'
+import { Schema, useEntries, useI18n, useI18nText, explain, toColumns } from '../utils'
 import SchemaBase from '../base.vue'
 import SchemaPrimitive from '../primitive.vue'
-import zhCN from '../locales/zh-CN.yml'
-import enUS from '../locales/en-US.yml'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -232,21 +229,7 @@ function getComponentType(schema: Schema) {
 
 const tt = useI18nText()
 
-const { t, setLocaleMessage } = useI18n({
-  messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS,
-  },
-})
-
-if (import.meta.hot) {
-  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
-    setLocaleMessage('zh-CN', module.default)
-  })
-  import.meta.hot.accept('../locales/en-US.yml', (module) => {
-    setLocaleMessage('en-US', module.default)
-  })
-}
+const t = useI18n()
 
 </script>
 

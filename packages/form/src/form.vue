@@ -17,10 +17,7 @@
 <script lang="ts" setup>
 
 import { computed, inject, PropType, provide } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { getChoices, Schema, useI18nText } from './utils'
-import zhCN from './locales/zh-CN.yml'
-import enUS from './locales/en-US.yml'
+import { getChoices, Schema, useI18n, useI18nText } from './utils'
 import type form from '.'
 
 const props = defineProps({
@@ -78,21 +75,7 @@ const config = computed({
   set: emit.bind(null, 'update:modelValue'),
 })
 
-const { t, setLocaleMessage } = useI18n({
-  messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS,
-  },
-})
-
-if (import.meta.hot) {
-  import.meta.hot.accept('./locales/zh-CN.yml', (module) => {
-    setLocaleMessage('zh-CN', module.default)
-  })
-  import.meta.hot.accept('./locales/en-US.yml', (module) => {
-    setLocaleMessage('en-US', module.default)
-  })
-}
+const t = useI18n()
 
 </script>
 
