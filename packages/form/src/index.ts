@@ -23,7 +23,8 @@ const extensions = new Set<form.Extension>()
 export * from 'cosmokit'
 
 export { Primitive }
-export { Schema, useI18nText } from './utils'
+export { Schema } from './utils'
+export { locale, useI18n, useI18nText, fallback, translate, LocaleTree } from './i18n'
 
 export * from './icons'
 

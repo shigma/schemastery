@@ -1,23 +1,9 @@
 import Schema from 'schemastery'
-import { clone, deepEqual, Dict, difference, isNullable, union, valueMap } from 'cosmokit'
+import { clone, deepEqual, difference, isNullable, union, valueMap } from 'cosmokit'
 import { computed, getCurrentInstance, ref, watch, WatchStopHandle } from 'vue'
-import { fallbackWithLocaleChain } from '@intlify/core-base'
-import { useI18n } from 'vue-i18n'
 
 export { Schema }
-
-export function useI18nText() {
-  const composer = useI18n()
-  const context: any = {}
-  return (message?: string | Dict<string>) => {
-    if (!message || typeof message === 'string') return message as string
-    const locales = fallbackWithLocaleChain(context, composer.fallbackLocale.value, composer.locale.value)
-    for (const locale of locales) {
-      if (locale in message) return message[locale]
-    }
-    return message['']
-  }
-}
+export { locale, useI18n, useI18nText } from './i18n'
 
 const dynamic = ['function', 'transform', 'is']
 

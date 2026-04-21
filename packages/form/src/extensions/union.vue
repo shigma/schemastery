@@ -44,10 +44,7 @@
 
 import { computed, PropType, ref, watch } from 'vue'
 import { deepEqual, isNullable } from 'cosmokit'
-import { useI18n } from 'vue-i18n'
-import { check, getChoices, getFallback, Schema, useModel, useI18nText } from '../utils'
-import zhCN from '../locales/zh-CN.yml'
-import enUS from '../locales/en-US.yml'
+import { check, getChoices, getFallback, Schema, useI18n, useI18nText, useModel } from '../utils'
 
 const props = defineProps({
   schema: {} as PropType<Schema>,
@@ -129,20 +126,6 @@ const selectModel = computed({
   },
 })
 
-const { t, setLocaleMessage } = useI18n({
-  messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS,
-  },
-})
-
-if (import.meta.hot) {
-  import.meta.hot.accept('../locales/zh-CN.yml', (module) => {
-    setLocaleMessage('zh-CN', module.default)
-  })
-  import.meta.hot.accept('../locales/en-US.yml', (module) => {
-    setLocaleMessage('en-US', module.default)
-  })
-}
+const t = useI18n()
 
 </script>

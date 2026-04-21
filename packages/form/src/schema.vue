@@ -93,16 +93,13 @@
 <script lang="ts" setup>
 
 import { computed, inject, PropType, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { clone, deepEqual, isNullable } from 'cosmokit'
 import { ElMessage } from 'element-plus'
-import { getFallback, Schema, useI18nText } from './utils'
+import { getFallback, Schema, useI18n, useI18nText } from './utils'
 import { IconCode, IconUndo, IconReset } from './icons'
 import type form from '.'
 import SchemaPrimitive from './primitive.vue'
 import SchemaBase from './base.vue'
-import zhCN from './locales/zh-CN.yml'
-import enUS from './locales/en-US.yml'
 
 defineOptions({
   inheritAttrs: false,
@@ -177,20 +174,6 @@ const SchemaComponent = computed(() => {
   return candidates[0][0]
 })
 
-const { t, setLocaleMessage } = useI18n({
-  messages: {
-    'zh-CN': zhCN,
-    'en-US': enUS,
-  },
-})
-
-if (import.meta.hot) {
-  import.meta.hot.accept('./locales/zh-CN.yml', (module) => {
-    setLocaleMessage('zh-CN', module.default)
-  })
-  import.meta.hot.accept('./locales/en-US.yml', (module) => {
-    setLocaleMessage('en-US', module.default)
-  })
-}
+const t = useI18n()
 
 </script>
