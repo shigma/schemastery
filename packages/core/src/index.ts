@@ -38,30 +38,30 @@ declare global {
       prototype: Schema
       resolve: Resolve
       from<X = any>(source?: X): From<X>
-      extend(type: string, resolve: Resolve): void
-      any<T = any>(): Schema<T>
-      never(): Schema<never>
-      const<const T>(value: T): Schema<T>
-      string(): Schema<string>
-      number(): Schema<number>
-      natural(): Schema<number>
-      percent(): Schema<number>
-      boolean(): Schema<boolean>
+      extend(type: keyof Roles, resolve: Resolve): void
+      any<T = any>(): Schema<T, T, 'any'>
+      never(): Schema<never, never, 'never'>
+      const<const T>(value: T): Schema<T, T, 'const'>
+      string(): Schema<string, string, 'string'>
+      number(): Schema<number, number, 'number'>
+      natural(): Schema<number, number, 'number'>
+      percent(): Schema<number, number, 'number'>
+      boolean(): Schema<boolean, boolean, 'boolean'>
       date(): Schema<string | Date, Date>
       regExp(flag?: string): Schema<string | RegExp, RegExp>
       arrayBuffer(): Schema<Binary.Source, ArrayBufferLike>
       arrayBuffer(encoding: 'hex' | 'base64'): Schema<Binary.Source | string, ArrayBufferLike>
-      bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number>
-      function(): Schema<Function, (...args: any[]) => any>
-      is(constructor: string): Schema
-      is<T>(constructor: Constructor<T>): Schema<T>
-      array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[]>
-      dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>>
-      tuple<const X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>>
-      object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>>
-      union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>>
-      intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>>
-      transform<X, T>(inner: X, callback: (value: TypeS<X>, options: Schemastery.Options) => T, preserve?: boolean): Schema<TypeS<X>, T>
+      bitset<K extends string>(bits: Partial<Record<K, number>>): Schema<number | readonly K[], number, 'bitset'>
+      function(): Schema<Function, (...args: any[]) => any, 'function'>
+      is(constructor: string): Schema<any, any, 'is'>
+      is<T>(constructor: Constructor<T>): Schema<T, T, 'is'>
+      array<X>(inner: X): Schema<TypeS<X>[], TypeT<X>[], 'array'>
+      dict<X, Y extends Schema<any, string> = Schema<string>>(inner: X, sKey?: Y): Schema<Dict<TypeS<X>, TypeS<Y>>, Dict<TypeT<X>, TypeT<Y>>, 'dict'>
+      tuple<const X extends readonly any[]>(list: X): Schema<TupleS<X>, TupleT<X>, 'tuple'>
+      object<X extends Dict>(dict: X): Schema<ObjectS<X>, ObjectT<X>, 'object'>
+      union<const X>(list: readonly X[]): Schema<TypeS<X>, TypeT<X>, 'union'>
+      intersect<const X>(list: readonly X[]): Schema<IntersectS<X>, IntersectT<X>, 'intersect'>
+      transform<X, T>(inner: X, callback: (value: TypeS<X>, options: Schemastery.Options) => T, preserve?: boolean): Schema<TypeS<X>, T, 'transform'>
       lazy<X extends Schema>(callback: () => X): X
       ValidationError: typeof ValidationError
     }
@@ -72,7 +72,27 @@ declare global {
       path?: (keyof any)[]
     }
 
-    export interface Meta<T = any> {
+    export interface Roles {
+      lazy: never
+      any: never
+      never: never
+      const: never
+      string: 'datetime' | 'regexp' | 'textarea'
+      number: 'slider'
+      boolean: never
+      bitset: 'select'
+      function: never
+      is: never
+      array: 'select' | 'checkbox' | 'table'
+      dict: 'table'
+      tuple: never
+      object: never
+      union: 'radio'
+      intersect: never
+      transform: never
+    }
+
+    export interface Meta<T = any, Type extends string = string> {
       default?: T extends {} ? Partial<T> : T
       required?: boolean
       disabled?: boolean
@@ -80,7 +100,7 @@ declare global {
       badges?: { text: string; type: string }[]
       hidden?: boolean
       loose?: boolean
-      role?: string
+      role?: Type extends keyof Roles ? Roles[Type] : never
       extra?: any
       link?: string
       description?: string | Dict<string>
@@ -92,13 +112,13 @@ declare global {
     }
   }
 
-  interface Schemastery<S = any, T = S> {
+  interface Schemastery<S = any, T = S, Type extends string = string> {
     (data?: S | null, options?: Schemastery.Options): T
-    new (data?: S | null, options?: Schemastery.Options): T
+    new(data?: S | null, options?: Schemastery.Options): T
     [kSchema]: true
     uid: number
-    meta: Schemastery.Meta<T>
-    type: string
+    meta: Schemastery.Meta<T, Type>
+    type: Type
     sKey?: Schema
     inner?: Schema
     list?: Schema[]
@@ -112,28 +132,28 @@ declare global {
     preserve?: boolean
     '~standard': StandardSchemaV1.Props // <S, T>
     toString(inline?: boolean): string
-    toJSON(): Schema<S, T>
-    required(value?: boolean): Schema<S, T>
-    hidden(value?: boolean): Schema<S, T>
-    loose(value?: boolean): Schema<S, T>
-    role(text: string, extra?: any): Schema<S, T>
-    link(link: string): Schema<S, T>
-    default(value: T): Schema<S, T>
-    comment(text: string): Schema<S, T>
-    description(text: string): Schema<S, T>
-    disabled(value?: boolean): Schema<S, T>
-    collapse(value?: boolean): Schema<S, T>
-    deprecated(): Schema<S, T>
-    experimental(): Schema<S, T>
-    pattern(regexp: RegExp): Schema<S, T>
-    max(value: number): Schema<S, T>
-    min(value: number): Schema<S, T>
-    step(value: number): Schema<S, T>
-    set(key: string, value: Schema): Schema<S, T>
-    push(value: Schema): Schema<S, T>
+    toJSON(): Schema<S, T, Type>
+    required(value?: boolean): Schema<S, T, Type>
+    hidden(value?: boolean): Schema<S, T, Type>
+    loose(value?: boolean): Schema<S, T, Type>
+    role(role: this['meta']['role'], extra?: any): Schema<S, T, Type>
+    link(link: string): Schema<S, T, Type>
+    default(value: T): Schema<S, T, Type>
+    comment(text: string): Schema<S, T, Type>
+    description(text: string): Schema<S, T, Type>
+    disabled(value?: boolean): Schema<S, T, Type>
+    collapse(value?: boolean): Schema<S, T, Type>
+    deprecated(): Schema<S, T, Type>
+    experimental(): Schema<S, T, Type>
+    pattern(regexp: RegExp): Schema<S, T, Type>
+    max(value: number): Schema<S, T, Type>
+    min(value: number): Schema<S, T, Type>
+    step(value: number): Schema<S, T, Type>
+    set(key: string, value: Schema): Schema<S, T, Type>
+    push(value: Schema): Schema<S, T, Type>
     simplify(value?: any): any
-    i18n(messages: Dict): Schema<S, T>
-    extra<K extends keyof Schemastery.Meta>(key: K, value: Schemastery.Meta[K]): Schema<S, T>
+    i18n(messages: Dict): Schema<S, T, Type>
+    extra<K extends keyof Schemastery.Meta>(key: K, value: Schemastery.Meta[K]): Schema<S, T, Type>
   }
 }
 
@@ -173,7 +193,7 @@ Object.defineProperty(ValidationError.prototype, kValidationError, {
   value: true,
 })
 
-type Schema<S = any, T = S> = Schemastery<S, T>
+type Schema<S = any, T = S, Type extends string = string> = Schemastery<S, T, Type>
 
 const Schema = function (options: Schema) {
   const schema = function (data: any, options: Schemastery.Options = {}) {
@@ -384,7 +404,7 @@ Schema.prototype.toString = function toString(inline?: boolean) {
   return formatters[this.type]?.(this, inline) ?? `Schema<${this.type}>`
 }
 
-Schema.prototype.role = function role(role, extra) {
+Schema.prototype.role = function role<This extends Schema>(this: This, role: This['meta']['role'], extra?: any) {
   const schema = Schema(this)
   schema.meta = { ...schema.meta, role, extra }
   return schema
@@ -775,13 +795,13 @@ function defineMethod(name: string, keys: (keyof Schema)[], format: Formatter) {
           }
           case 'callback': {
             const callback = schema.callback = args[index]
-            ;callback['toJSON'] ||= () => callback.toString()
+            callback.toJSON ||= () => callback.toString()
             break
           }
           case 'constructor': {
             const constructor = schema.constructor = args[index]
             if (typeof constructor === 'function') {
-              ;constructor['toJSON'] ||= () => constructor['name']
+              constructor.toJSON ||= () => constructor.name
             }
             break
           }
