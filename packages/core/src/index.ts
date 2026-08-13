@@ -702,15 +702,22 @@ Schema.extend('object', (data, { dict }, options, strict) => {
 })
 
 Schema.extend('union', (data, { list, toString }, options, strict) => {
-  const messages: any[] = []
+  const depth = (options.path || []).length
+  const messages: string[] = []
   for (const inner of list!) {
     try {
       return Schema.resolve(data, inner, options, strict)
     } catch (error) {
-      messages.push(error)
+      // A branch that failed at this very path only restates the mismatch the
+      // message below already reports. A branch that failed deeper names the
+      // offending property, which the caller cannot otherwise recover.
+      if (!ValidationError.is(error)) continue
+      if ((error.options.path || []).length <= depth) continue
+      if (!messages.includes(error.message)) messages.push(error.message)
     }
   }
-  throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`, options)
+  throw new ValidationError(`expected ${toString()} but got ${JSON.stringify(data)}`
+    + messages.map((message) => `\n  - ${message}`).join(''), options)
 })
 
 Schema.extend('intersect', (data, { list, toString }, options, strict) => {
