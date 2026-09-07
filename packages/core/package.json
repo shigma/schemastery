@@ -2,9 +2,24 @@
   "name": "schemastery",
   "description": "Type driven schema validator",
   "version": "3.18.0",
+  "type": "module",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
+  "types": "lib/index.d.cts",
   "typings": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.mts",
+        "default": "./lib/index.mjs"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "lib",
     "src"
