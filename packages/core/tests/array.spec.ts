@@ -26,4 +26,15 @@ describe('Array', () => {
     expect(() => new Config(['dress'])).to.throw()
     expect(() => new Config(['dress', 'skirt', 'socks', 'swimming suit'])).to.throw()
   })
+
+  test('array (length) with a defaulted inner', () => {
+    // the inner schema's default used to disable the length check entirely
+    const Config = Schema.array(Schema.string().default('x')).min(2)
+
+    expect(() => new Config([])).to.throw()
+    expect(() => new Config(['dress'])).to.throw()
+
+    expect(new Config(['dress', 'skirt'])).to.deep.equal(['dress', 'skirt'])
+    expect(new Config(['dress', null])).to.deep.equal(['dress', 'x'])
+  })
 })

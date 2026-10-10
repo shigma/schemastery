@@ -651,7 +651,7 @@ function property(data: any, key: keyof any, schema: Schema, options: Schemaster
 
 Schema.extend('array', (data, { inner, meta }, options) => {
   if (!Array.isArray(data)) throw new ValidationError(`expected array but got ${data}`, options)
-  checkWithinRange(data.length, meta, 'array length', options, !isNullable(inner!.meta.default))
+  checkWithinRange(data.length, meta, 'array length', options)
   return [data.map((_, index) => property(data, index, inner!, options))]
 })
 
