@@ -141,7 +141,7 @@ export function useEntries() {
   })
 
   const isMax = computed(() => entries.value.length >= props.schema.meta.max)
-  const isMin = computed(() => entries.value.length >= props.schema.meta.max)
+  const isMin = computed(() => entries.value.length <= (props.schema.meta.min ?? 0))
 
   const reindex = () => {
     if (props.schema.type !== 'array') return
